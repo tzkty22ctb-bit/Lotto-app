@@ -1,1195 +1,839 @@
-
-
 <!DOCTYPE html>
-
 <html lang="th">
-
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lotto Master Pro Online - ระบบส่งโพยและตรวจรางวัลเรียลไทม์</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Firebase SDK (Compat) -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 
-<meta charset="UTF-8">
-
-<meta name="viewport" content="width=device-width, initial-scale=1">
-
-<title>Green Lotto Manager</title>
-
-<script src="https://cdn.tailwindcss.com"></script>
-
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
-
-<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-
-<style>
-
-*{box-sizing:border-box}
-
-body{font-family:Sarabun,sans-serif;background:#061b14;color:#e8fff2}
-
-.panel{background:#0d2b20;border:1px solid #1d5940;border-radius:18px}
-
-.field{width:100%;background:#061b14;border:1px solid #286347;border-radius:10px;padding:10px 12px;color:#ecfff4;outline:none}
-
-.field:focus{border-color:#4ade80;box-shadow:0 0 0 2px #4ade8030}
-
-.btn{border-radius:10px;padding:10px 14px;font-weight:700}
-
-.btn-main{background:#4ade80;color:#052e1b}
-
-.btn-sub{background:#174b35;color:#d9ffe8;border:1px solid #286347}
-
-.btn-danger{background:#4c1722;color:#fecdd3;border:1px solid #873044}
-
-.muted{color:#9bc7ae}
-
-.hidden{display:none!important}
-
-th,td{padding:9px 7px;border-bottom:1px solid #1d4936;white-space:nowrap}
-
-th{color:#9bc7ae;font-size:12px;font-weight:600}
-
-.stat{background:#082319;border:1px solid #1d5940;border-radius:14px;padding:12px}
-
-.positive{color:#86efac}
-
-.negative{color:#fda4af}
-
-</style>
-
+    <style>
+        body { font-family: 'Sarabun', sans-serif; }
+        input[type="number"]::-webkit-inner-spin-button,
+        input[type="number"]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+    </style>
 </head>
-
-<body class="min-h-screen pb-12">
-
-<header class="sticky top-0 z-20 border-b border-emerald-900 bg-[#082319]/95 backdrop-blur">
-
- <div class="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
-
-  <div>
-
-   <div class="font-extrabold tracking-wide text-green-300">GREEN LOTTO MANAGER</div>
-
-   <div class="text-xs muted">ระบบบันทึกรายการ • รวมยอด • ตรวจผล</div>
-
-  </div>
-
-  <div class="flex gap-2 items-center">
-
-   <span id="connection" class="text-xs muted">กำลังเริ่มระบบ</span>
-
-   <button class="btn btn-sub text-xs" onclick="adminToggle()">
-
-    <span id="adminText">เข้าสู่แอดมิน</span>
-
-   </button>
-
-  </div>
-
- </div>
-
-</header>
-
-<main class="max-w-5xl mx-auto p-4 space-y-4">
-
-<section class="panel p-4 space-y-3">
-
- <div class="font-bold text-green-300">ตั้งค่าห้องและงวด</div>
-
- <div class="grid sm:grid-cols-3 gap-2">
-
-  <div>
-
-   <label class="text-xs muted">รหัสห้อง</label>
-
-   <div class="flex gap-2">
-
-    <input id="room" class="field" value="lotto-main">
-
-    <button class="btn btn-sub" onclick="changeRoom()">เข้า</button>
-
-   </div>
-
-  </div>
-
-  <div>
-
-   <label class="text-xs muted">ประเภท</label>
-
-   <select id="lottoType" class="field" onchange="saveMeta()">
-
-    <option>หวยรัฐบาลไทย</option>
-
-    <option>หวยลาวพัฒนา</option>
-
-    <option>หวยฮานอย</option>
-
-    <option>หวยหุ้น / อื่นๆ</option>
-
-   </select>
-
-  </div>
-
-  <div>
-
-   <label class="text-xs muted">งวดประจำวันที่</label>
-
-   <input id="lottoDate" class="field" placeholder="เช่น 16 พ.ย. 2569" onchange="saveMeta()">
-
-  </div>
-
- </div>
-
- <div class="flex flex-wrap gap-2">
-
-  <button class="btn btn-sub text-sm" onclick="shareLink()">คัดลอกลิงก์ห้อง</button>
-
-  <button class="btn btn-sub text-sm admin hidden" onclick="exportCSV()">ส่งออก CSV</button>
-
-  <button class="btn btn-sub text-sm admin hidden" onclick="backupJSON()">สำรองข้อมูล JSON</button>
-
- </div>
-
-</section>
-
-<section class="panel p-4 space-y-3">
-
- <div class="flex justify-between items-center">
-
-  <h2 class="font-bold text-green-300">บันทึกรายการ</h2>
-
-  <span class="text-xs muted">ผู้ส่งโพย</span>
-
- </div>
-
- <div>
-
-  <label class="text-xs muted">ชื่อลูกค้า / เจ้า</label>
-
-  <input id="customer" class="field" list="customers" placeholder="ระบุชื่อลูกค้า">
-
-  <datalist id="customers"></datalist>
-
- </div>
-
- <div>
-
-  <label class="text-xs muted">เลข (คั่นด้วยจุลภาคหรือเว้นวรรค)</label>
-
-  <input id="numbers" class="field text-lg font-bold tracking-wider" inputmode="numeric" placeholder="เช่น 123, 45, 08">
-
- </div>
-
- <div class="grid grid-cols-3 gap-2">
-
-  <div>
-
-   <label class="text-xs muted">บน / เลขละ (บาท)</label>
-
-   <input id="top" class="field" type="number" min="0" inputmode="decimal" placeholder="0">
-
-  </div>
-
-  <div>
-
-   <label class="text-xs muted">ล่าง / เลขละ</label>
-
-   <input id="bottom" class="field" type="number" min="0" inputmode="decimal" placeholder="0">
-
-  </div>
-
-  <div>
-
-   <label class="text-xs muted">โต๊ด / เลขละ</label>
-
-   <input id="toad" class="field" type="number" min="0" inputmode="decimal" placeholder="0">
-
-  </div>
-
- </div>
-
- <div class="grid grid-cols-3 gap-2">
-
-  <button class="btn btn-sub text-sm" onclick="reverseNums()">กลับเลข</button>
-
-  <button class="btn btn-sub text-sm" onclick="runNums(true)">รูดหน้า</button>
-
-  <button class="btn btn-sub text-sm" onclick="runNums(false)">รูดหลัง</button>
-
- </div>
-
- <button class="btn btn-main w-full" onclick="addEntries()">บันทึกรายการ</button>
-
- <p class="text-xs muted">ระบบคิดเงินตามจำนวนเงินต่อเลขที่กรอก และแยก 2 ตัว / 3 ตัวอัตโนมัติ</p>
-
-</section>
-
-<section class="panel p-4 space-y-3 admin hidden">
-
- <div class="flex flex-wrap justify-between gap-2 items-center">
-
-  <h2 class="font-bold text-green-300">ตรวจผลรางวัลและตั้งค่าอัตราจ่าย</h2>
-
-  <span class="text-xs muted">เฉพาะแอดมิน</span>
-
- </div>
-
- <div class="grid grid-cols-2 gap-2">
-
-  <div>
-
-   <label class="text-xs muted">ผล 3 ตัวบน</label>
-
-   <input id="win3" class="field text-center text-xl font-bold" maxlength="3" inputmode="numeric" placeholder="000" oninput="resultChanged()">
-
-   <div class="text-xs muted text-center mt-1" id="derived2">2 ตัวบน: —</div>
-
-  </div>
-
-  <div>
-
-   <label class="text-xs muted">ผล 2 ตัวล่าง</label>
-
-   <input id="win2" class="field text-center text-xl font-bold" maxlength="2" inputmode="numeric" placeholder="00" oninput="resultChanged()">
-
-  </div>
-
- </div>
-
- <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
-
-  <div>
-
-   <label class="text-xs muted">3 ตัวบน จ่ายบาทละ</label>
-
-   <input id="r3" type="number" class="field" value="900" onchange="saveRates()">
-
-  </div>
-
-  <div>
-
-   <label class="text-xs muted">3 ตัวโต๊ด</label>
-
-   <input id="rt" type="number" class="field" value="150" onchange="saveRates()">
-
-  </div>
-
-  <div>
-
-   <label class="text-xs muted">2 ตัวบน</label>
-
-   <input id="r2t" type="number" class="field" value="90" onchange="saveRates()">
-
-  </div>
-
-  <div>
-
-   <label class="text-xs muted">2 ตัวล่าง</label>
-
-   <input id="r2b" type="number" class="field" value="90" onchange="saveRates()">
-
-  </div>
-
- </div>
-
- <div class="flex justify-end">
-
-  <button class="btn btn-danger text-sm" onclick="clearResults()">ล้างผลรางวัล</button>
-
- </div>
-
-</section>
-
-<section class="panel p-4 space-y-3 admin hidden">
-
- <div class="flex flex-wrap justify-between items-center gap-2">
-
-  <h2 class="font-bold text-green-300">ภาพรวมเจ้ามือ</h2>
-
-  <span class="text-xs muted">คำนวณจากยอดรับแทงลบยอดจ่ายรางวัล</span>
-
- </div>
-
- <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
-
-  <div class="stat">
-
-   <div class="text-xs muted">ยอดรับแทงรวม</div>
-
-   <div id="allSales" class="text-lg font-extrabold">0 ฿</div>
-
-  </div>
-
-  <div class="stat">
-
-   <div class="text-xs muted">ยอดจ่ายรางวัล</div>
-
-   <div id="allPayout" class="text-lg font-extrabold text-rose-300">0 ฿</div>
-
-  </div>
-
-  <div class="stat">
-
-   <div class="text-xs muted">กำไร / ขาดทุน</div>
-
-   <div id="hostNet" class="text-lg font-extrabold">0 ฿</div>
-
-  </div>
-
-  <div class="stat">
-
-   <div class="text-xs muted">จำนวนเจ้า</div>
-
-   <div id="customerCount" class="text-lg font-extrabold">0</div>
-
-  </div>
-
- </div>
-
- <div class="text-xs muted">กำไร/ขาดทุนสุทธิ = ยอดรับแทง − ยอดรางวัลที่ต้องจ่าย ยังไม่หักค่าใช้จ่ายหรือส่วนแบ่งอื่น</div>
-
- <div class="flex flex-wrap gap-2 items-center">
-
-  <input id="filterCustomer" class="field flex-1" placeholder="ค้นหาชื่อลูกค้า..." oninput="render()">
-
-  <select id="sortCustomers" class="field w-auto" onchange="render()">
-
-   <option value="sales">เรียงยอดซื้อสูงสุด</option>
-
-   <option value="net">เรียงกำไรเจ้ามือสูงสุด</option>
-
-   <option value="name">เรียงตามชื่อ</option>
-
-  </select>
-
- </div>
-
- <div id="customerSummary" class="space-y-2"></div>
-
-</section>
-
-<section class="panel p-4 space-y-3">
-
- <div class="flex flex-wrap justify-between items-center gap-2">
-
-  <h2 class="font-bold text-green-300">รายการโพยในห้อง</h2>
-
-  <span id="entryCount" class="text-xs muted">0 รายการ</span>
-
- </div>
-
- <div class="overflow-x-auto">
-
-  <table class="w-full text-sm">
-
-   <thead>
-
-    <tr>
-
-     <th>ลูกค้า</th>
-
-     <th>เลข</th>
-
-     <th>บน</th>
-
-     <th>ล่าง</th>
-
-     <th>โต๊ด</th>
-
-     <th>รางวัล</th>
-
-     <th class="admin hidden">ลบ</th>
-
-    </tr>
-
-   </thead>
-
-   <tbody id="entriesBody"></tbody>
-
-  </table>
-
- </div>
-
- <div class="flex justify-end">
-
-  <button class="btn btn-danger text-sm admin hidden" onclick="clearAll()">ลบรายการทั้งหมดในห้อง</button>
-
- </div>
-
-</section>
-
-<p class="text-xs muted text-center px-2">
-
-โปรดตรวจสอบรายการและอัตราจ่ายก่อนสรุปยอดทุกครั้ง ระบบนี้เป็นเครื่องมือบันทึกและคำนวณ ไม่ได้ยืนยันผลรางวัลจากหน่วยงานทางการ
-
-</p>
-
-</main>
-
-<script>
-
-const firebaseConfig = {
-
- apiKey:"AIzaSyBld7yPcmsp0snWTdCxj5D3hC0TOlYM88g",
-
- authDomain:"lotto-online-eb0cf.firebaseapp.com",
-
- databaseURL:"https://lotto-online-eb0cf-default-rtdb.asia-southeast1.firebasedatabase.app",
-
- projectId:"lotto-online-eb0cf",
-
- storageBucket:"lotto-online-eb0cf.firebasestorage.app",
-
- messagingSenderId:"687853136586",
-
- appId:"1:687853136586:web:79514948f01f527dece233"
-
-};
-
-const ADMIN_PIN="1234";
-
-let db=null, online=false, admin=false, room="lotto-main", listener=null;
-
-let data={
-
- meta:{lottoType:"หวยรัฐบาลไทย",lottoDate:""},
-
- rates:{r3:900,rt:150,r2t:90,r2b:90},
-
- results:{win3:"",win2:""},
-
- entries:[]
-
-};
-
-const $=id=>document.getElementById(id);
-
-const money=n=>(Number(n)||0).toLocaleString("th-TH",{maximumFractionDigits:2});
-
-const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
-
-function init(){
-
- const p=new URLSearchParams(location.search);
-
- room=(p.get("room")||localStorage.getItem("lotto_last_room")||room).replace(/[^a-zA-Z0-9_-]/g,"")||"lotto-main";
-
- $("room").value=room;
-
- if(sessionStorage.getItem("lotto_admin")==="1") setAdmin(true);
-
- try{
-
-  if(!firebase.apps.length)firebase.initializeApp(firebaseConfig);
-
-  db=firebase.database();
-
-  online=true;
-
-  $("connection").textContent="เชื่อมต่อ Firebase";
-
-  connect();
-
- }catch(e){
-
-  offline();
-
-  $("connection").textContent="ออฟไลน์";
-
- }
-
-}
-
-function offline(){
-
- online=false;
-
- const raw=localStorage.getItem("lotto_offline_"+room);
-
- if(raw){
-
-  try{data={...data,...JSON.parse(raw)}}catch(e){}
-
- }
-
- syncInputs();
-
- render();
-
-}
-
-function connect(){
-
- room=$("room").value.trim().replace(/[^a-zA-Z0-9_-]/g,"")||"lotto-main";
-
- $("room").value=room;
-
- localStorage.setItem("lotto_last_room",room);
-
- if(!online||!db){offline();return;}
-
- if(listener)db.ref("rooms/"+room).off("value",listener);
-
- listener=db.ref("rooms/"+room).on("value",s=>{
-
-  const v=s.val()||{};
-
-  data.meta=v.meta||data.meta;
-
-  data.rates=v.rates||data.rates;
-
-  data.results=v.results||data.results;
-
-  data.entries=v.entries
-
-   ?Object.entries(v.entries).map(([key,x])=>({...x,key})).sort((a,b)=>(b.timestamp||0)-(a.timestamp||0))
-
-   :[];
-
-  syncInputs();
-
-  render();
-
-  $("connection").textContent="ออนไลน์ • ซิงค์เรียลไทม์";
-
- },e=>{
-
-  $("connection").textContent="เชื่อมต่อไม่ได้";
-
-  console.error(e);
-
- });
-
-}
-
-function changeRoom(){connect();}
-
-function syncInputs(){
-
- $("lottoType").value=data.meta.lottoType||"หวยรัฐบาลไทย";
-
- $("lottoDate").value=data.meta.lottoDate||"";
-
- $("win3").value=data.results.win3||"";
-
- $("win2").value=data.results.win2||"";
-
- $("r3").value=data.rates.r3??900;
-
- $("rt").value=data.rates.rt??150;
-
- $("r2t").value=data.rates.r2t??90;
-
- $("r2b").value=data.rates.r2b??90;
-
- $("derived2").textContent="2 ตัวบน: "+(data.results.win3.length===3?data.results.win3.slice(1):"—");
-
-}
-
-function persist(path,obj){
-
- if(online&&db)
-
-  return db.ref("rooms/"+room+"/"+path).set(obj).catch(e=>alert("บันทึกไม่สำเร็จ: "+e.message));
-
- localStorage.setItem("lotto_offline_"+room,JSON.stringify(data));
-
-}
-
-function saveMeta(){
-
- data.meta={lottoType:$("lottoType").value,lottoDate:$("lottoDate").value};
-
- persist("meta",data.meta);
-
-}
-
-function saveRates(){
-
- data.rates={
-
-  r3:Math.max(0,+$("r3").value||0),
-
-  rt:Math.max(0,+$("rt").value||0),
-
-  r2t:Math.max(0,+$("r2t").value||0),
-
-  r2b:Math.max(0,+$("r2b").value||0)
-
- };
-
- persist("rates",data.rates);
-
- render();
-
-}
-
-function resultChanged(){
-
- $("win3").value=$("win3").value.replace(/\D/g,"").slice(0,3);
-
- $("win2").value=$("win2").value.replace(/\D/g,"").slice(0,2);
-
- data.results={win3:$("win3").value,win2:$("win2").value};
-
- $("derived2").textContent="2 ตัวบน: "+(data.results.win3.length===3?data.results.win3.slice(1):"—");
-
- persist("results",data.results);
-
- render();
-
-}
-
-function clearResults(){
-
- if(!confirm("ยืนยันล้างผลรางวัล?"))return;
-
- data.results={win3:"",win2:""};
-
- persist("results",data.results);
-
- syncInputs();
-
- render();
-
-}
-
-function parseNums(s){
-
- return [...new Set(
-
-  s.split(/[\s,;]+/)
-
-   .map(x=>x.replace(/\D/g,""))
-
-   .filter(x=>x.length===2||x.length===3)
-
- )];
-
-}
-
-function reverseNums(){
-
- let ns=parseNums($("numbers").value);
-
- if(!ns.length)return alert("กรอกเลข 2 หรือ 3 หลักก่อน");
-
- let out=new Set(ns);
-
- ns.forEach(n=>{
-
-  if(n.length===2)out.add(n[1]+n[0]);
-
-  else perm(n).forEach(x=>out.add(x));
-
- });
-
- $("numbers").value=[...out].join(", ");
-
-}
-
-function perm(s){
-
- if(s.length<2)return[s];
-
- return [...new Set(
-
-  [...s].flatMap((c,i)=>
-
-   perm(s.slice(0,i)+s.slice(i+1)).map(p=>c+p)
-
-  )
-
- )];
-
-}
-
-function runNums(front){
-
- let d=$("numbers").value.replace(/\D/g,"").slice(-1);
-
- if(!d)return alert("พิมพ์เลขโดด 1 ตัวก่อน");
-
- $("numbers").value=Array.from(
-
-  {length:10},
-
-  (_,i)=>front?d+i:i+d
-
- ).join(", ");
-
-}
-
-async function addEntries(){
-
- const customer=$("customer").value.trim();
-
- const nums=parseNums($("numbers").value);
-
- const top=Math.max(0,+$("top").value||0);
-
- const bottom=Math.max(0,+$("bottom").value||0);
-
- const toad=Math.max(0,+$("toad").value||0);
-
- if(!customer)return alert("กรุณาระบุชื่อลูกค้า");
-
- if(!nums.length)return alert("กรุณากรอกเลข 2 หรือ 3 หลัก");
-
- if(!top&&!bottom&&!toad)return alert("กรุณาใส่ยอดเงินอย่างน้อยหนึ่งช่อง");
-
- const entries=nums.map((n,i)=>({
-
-  id:Date.now()+"-"+i+"-"+Math.random().toString(36).slice(2,7),
-
-  timestamp:Date.now()+i,
-
-  customer,
-
-  number:n,
-
-  top,
-
-  bottom,
-
-  toad:n.length===3?toad:0
-
- }));
-
- try{
-
-  if(online&&db){
-
-   const updates={};
-
-   entries.forEach(e=>{
-
-    updates[db.ref("rooms/"+room+"/entries").push().key]=e;
-
-   });
-
-   await db.ref("rooms/"+room+"/entries").update(updates);
-
-  }else{
-
-   data.entries=[...entries,...data.entries];
-
-   localStorage.setItem("lotto_offline_"+room,JSON.stringify(data));
-
-   render();
-
-  }
-
-  localStorage.setItem("lotto_sender_name",customer);
-
-  $("numbers").value="";
-
-  $("top").value="";
-
-  $("bottom").value="";
-
-  $("toad").value="";
-
- }catch(e){
-
-  alert("บันทึกไม่สำเร็จ: "+e.message);
-
- }
-
-}
-
-function calc(e){
-
- let win=0,details=[];
-
- let w3=data.results.win3;
-
- let w2=data.results.win2;
-
- let derived=w3.length===3?w3.slice(1):"";
-
- if(e.number.length===3&&w3.length===3&&e.number===w3&&e.top>0){
-
-  win+=e.top*data.rates.r3;
-
-  details.push("3บน");
-
- }
-
- if(e.number.length===2&&derived.length===2&&e.number===derived&&e.top>0){
-
-  win+=e.top*data.rates.r2t;
-
-  details.push("2บน");
-
- }
-
- if(e.number.length===2&&w2.length===2&&e.number===w2&&e.bottom>0){
-
-  win+=e.bottom*data.rates.r2b;
-
-  details.push("2ล่าง");
-
- }
-
- if(e.number.length===3&&w3.length===3&&e.toad>0&&
-
-    e.number.split("").sort().join("")===w3.split("").sort().join("")){
-
-  win+=e.toad*data.rates.rt;
-
-  details.push("โต๊ด");
-
- }
-
- return{win,details};
-
-}
-
-function totals(){
-
- const map={};
-
- let sales=0,payout=0;
-
- data.entries.forEach(e=>{
-
-  let bet=(+e.top||0)+(+e.bottom||0)+(+e.toad||0);
-
-  let c=calc(e);
-
-  sales+=bet;
-
-  payout+=c.win;
-
-  if(!map[e.customer]){
-
-   map[e.customer]={
-
-    name:e.customer,
-
-    top:0,bottom:0,toad:0,
-
-    sales:0,payout:0,count:0,wins:[]
-
-   };
-
-  }
-
-  let x=map[e.customer];
-
-  x.top+=+e.top||0;
-
-  x.bottom+=+e.bottom||0;
-
-  x.toad+=+e.toad||0;
-
-  x.sales+=bet;
-
-  x.payout+=c.win;
-
-  x.count++;
-
-  if(c.win)x.wins.push(e.number+" ("+c.details.join("/")+")");
-
- });
-
- return{map,sales,payout,net:sales-payout};
-
-}
-
-function render(){
-
- const {map,sales,payout,net}=totals();
-
- $("allSales").textContent=money(sales)+" ฿";
-
- $("allPayout").textContent=money(payout)+" ฿";
-
- $("hostNet").textContent=(net>=0?"+":"")+money(net)+" ฿";
-
- $("hostNet").className="text-lg font-extrabold "+(net>=0?"positive":"negative");
-
- $("customerCount").textContent=Object.keys(map).length;
-
- $("entryCount").textContent=data.entries.length+" รายการ";
-
- const q=$("filterCustomer").value.trim().toLowerCase();
-
- const sort=$("sortCustomers").value;
-
- let customers=Object.values(map).filter(c=>c.name.toLowerCase().includes(q));
-
- customers.sort((a,b)=>
-
-  sort==="name"
-
-   ?a.name.localeCompare(b.name,"th")
-
-   :sort==="net"
-
-    ?(b.sales-b.payout)-(a.sales-a.payout)
-
-    :b.sales-a.sales
-
- );
-
- $("customerSummary").innerHTML=customers.length
-
- ?customers.map(c=>{
-
-  let n=c.sales-c.payout;
-
-  return `<article class="stat space-y-2">
-
-   <div class="flex justify-between gap-2">
-
-    <b class="text-green-200">${esc(c.name)}</b>
-
-    <span class="text-xs muted">${c.count} เลข</span>
-
-   </div>
-
-   <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-sm">
-
-    <div>
-
-     <div class="text-xs muted">ยอดซื้อรวม</div>
-
-     <b>${money(c.sales)} ฿</b>
-
-    </div>
-
-    <div>
-
-     <div class="text-xs muted">ยอดถูกรางวัล</div>
-
-     <b class="text-rose-300">${money(c.payout)} ฿</b>
-
-    </div>
-
-    <div>
-
-     <div class="text-xs muted">เจ้ามือรับสุทธิ</div>
-
-     <b class="${n>=0?"positive":"negative"}">${n>=0?"+":""}${money(n)} ฿</b>
-
-    </div>
-
-    <div>
-
-     <div class="text-xs muted">แยกยอด บน/ล่าง/โต๊ด</div>
-
-     <b>${money(c.top)} / ${money(c.bottom)} / ${money(c.toad)}</b>
-
-    </div>
-
-   </div>
-
-   ${c.wins.length?`<div class="text-xs text-rose-200">เลขถูกรางวัล: ${esc(c.wins.join(", "))}</div>`:""}
-
-   <div class="text-xs ${n>=0?"positive":"negative"}">
-
-    ${n>=0?"เจ้ามือเก็บจากลูกค้า":"เจ้ามือต้องจ่ายเพิ่มให้ลูกค้า"} ${money(Math.abs(n))} บาท
-
-   </div>
-
-  </article>`;
-
- }).join("")
-
- :'<p class="muted text-center py-4 text-sm">ไม่พบข้อมูลลูกค้า</p>';
-
- $("customers").innerHTML=Object.keys(map)
-
-  .map(n=>`<option value="${esc(n)}">`).join("");
-
- $("entriesBody").innerHTML=data.entries.map(e=>{
-
-  let c=calc(e);
-
-  return `<tr>
-
-   <td>${esc(e.customer)}</td>
-
-   <td class="font-bold text-green-200">${esc(e.number)}</td>
-
-   <td class="text-right">${money(e.top)}</td>
-
-   <td class="text-right">${money(e.bottom)}</td>
-
-   <td class="text-right">${money(e.toad)}</td>
-
-   <td class="text-right ${c.win?"positive":""}">${c.win?money(c.win):"—"}</td>
-
-   <td class="admin ${admin?"":"hidden"}">
-
-    <button class="text-rose-300" onclick="deleteEntry('${esc(e.key||"")}','${esc(e.id||"")}')">ลบ</button>
-
-   </td>
-
-  </tr>`;
-
- }).join("")||'<tr><td colspan="7" class="text-center muted py-5">ยังไม่มีรายการ</td></tr>';
-
- document.querySelectorAll(".admin").forEach(el=>{
-
-  el.classList.toggle("hidden",!admin);
-
- });
-
-}
-
-function setAdmin(v){
-
- admin=v;
-
- sessionStorage.setItem("lotto_admin",v?"1":"0");
-
- $("adminText").textContent=v?"ออกจากแอดมิน":"เข้าสู่แอดมิน";
-
- render();
-
-}
-
-function adminToggle(){
-
- if(admin)return setAdmin(false);
-
- let p=prompt("รหัสแอดมิน");
-
- if(p===ADMIN_PIN)setAdmin(true);
-
- else if(p!==null)alert("รหัสไม่ถูกต้อง");
-
-}
-
-async function deleteEntry(key,id){
-
- if(!admin)return;
-
- if(!confirm("ลบรายการนี้?"))return;
-
- if(online&&key){
-
-  await db.ref("rooms/"+room+"/entries/"+key).remove();
-
- }else{
-
-  data.entries=data.entries.filter(e=>e.id!==id);
-
-  localStorage.setItem("lotto_offline_"+room,JSON.stringify(data));
-
-  render();
-
- }
-
-}
-
-async function clearAll(){
-
- if(!admin||!confirm("ยืนยันลบโพยทั้งหมดในห้องนี้?"))return;
-
- if(online){
-
-  await db.ref("rooms/"+room+"/entries").remove();
-
- }else{
-
-  data.entries=[];
-
-  localStorage.setItem("lotto_offline_"+room,JSON.stringify(data));
-
-  render();
-
- }
-
-}
-
-function shareLink(){
-
- let u=location.origin+location.pathname+"?room="+encodeURIComponent(room);
-
- if(navigator.clipboard?.writeText){
-
-  navigator.clipboard.writeText(u)
-
-   .then(()=>alert("คัดลอกลิงก์แล้ว\n"+u))
-
-   .catch(()=>prompt("คัดลอกลิงก์นี้",u));
-
- }else{
-
-  prompt("คัดลอกลิงก์นี้",u);
-
- }
-
-}
-
-function exportCSV(){
-
- let rows=[
-
-  ["ลูกค้า","เลข","บน","ล่าง","โต๊ด","รางวัล"],
-
-  ...data.entries.map(e=>[
-
-   e.customer,e.number,e.top,e.bottom,e.toad,calc(e).win
-
-  ])
-
- ];
-
- let csv="\uFEFF"+rows.map(r=>
-
-  r.map(x=>'"'+String(x??"").replace(/"/g,'""')+'"').join(",")
-
- ).join("\r\n");
-
- download(csv,"lotto-"+room+".csv","text/csv;charset=utf-8");
-
-}
-
-function backupJSON(){
-
- download(
-
-  JSON.stringify(data,null,2),
-
-  "lotto-"+room+"-backup.json",
-
-  "application/json"
-
- );
-
-}
-
-function download(content,name,type){
-
- let a=document.createElement("a");
-
- let u=URL.createObjectURL(new Blob([content],{type}));
-
- a.href=u;
-
- a.download=name;
-
- a.click();
-
- URL.revokeObjectURL(u);
-
-}
-
-window.addEventListener("load",()=>{
-
- let n=localStorage.getItem("lotto_sender_name");
-
- if(n)$("customer").value=n;
-
- init();
-
-});
-
-</script>
-
+<body class="bg-slate-900 text-slate-100 min-h-screen pb-16">
+
+    <!-- Header -->
+    <header class="bg-slate-800 border-b border-slate-700 sticky top-0 z-30 shadow-lg">
+        <div class="max-w-4xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-2">
+            <div class="flex items-center space-x-3">
+                <div class="bg-amber-500 text-slate-900 p-2 rounded-lg font-bold shadow">
+                    <i class="fa-solid fa-satellite-dish text-xl"></i>
+                </div>
+                <div>
+                    <div class="flex items-center gap-2">
+                        <h1 class="text-lg font-bold text-amber-400 leading-tight">LOTTO MASTER ONLINE</h1>
+                        <span id="connectionBadge" class="text-[10px] px-2 py-0.5 rounded-full bg-slate-700 text-slate-300 font-semibold">กำลังเชื่อมต่อ...</span>
+                    </div>
+                    <p class="text-xs text-slate-400">ระบบส่งโพยออนไลน์ & ตรวจหวยเรียลไทม์</p>
+                </div>
+            </div>
+
+            <div class="flex items-center space-x-2">
+                <button id="adminToggleBtn" onclick="toggleAdminMode()" class="bg-slate-700 hover:bg-slate-600 text-xs px-3 py-2 rounded-lg border border-slate-600 flex items-center gap-1.5 transition">
+                    <i class="fa-solid fa-lock text-amber-400"></i> <span id="adminBtnText">โหมดแอดมิน</span>
+                </button>
+                <button onclick="exportData()" class="admin-only hidden bg-slate-700 hover:bg-slate-600 text-xs px-3 py-2 rounded-lg border border-slate-600 flex items-center gap-1.5 transition">
+                    <i class="fa-solid fa-download text-emerald-400"></i> สำรอง
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-4xl mx-auto px-4 pt-5 space-y-5">
+
+        <!-- 1. ห้องออนไลน์ & แชร์ลิงก์ให้คนส่งโพย -->
+        <section class="bg-slate-800 p-4 rounded-xl border border-sky-700/60 shadow-md space-y-3">
+            <div class="flex flex-wrap items-center justify-between gap-2">
+                <h2 class="text-sm font-bold text-sky-400 flex items-center gap-2">
+                    <i class="fa-solid fa-globe"></i> ห้องออนไลน์ (ซิงค์ข้อมูลอัตโนมัติ)
+                </h2>
+                <button onclick="copyShareLink()" class="bg-sky-600 hover:bg-sky-500 active:scale-95 text-white text-xs font-bold px-3 py-1.5 rounded-lg flex items-center gap-1.5 shadow transition">
+                    <i class="fa-solid fa-share-nodes"></i> คัดลอกลิงก์ให้คนส่งโพย
+                </button>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                <div>
+                    <label class="block text-[11px] text-slate-400 mb-1">รหัสห้อง (Room ID)</label>
+                    <div class="flex gap-1.5">
+                        <input type="text" id="roomIdInput" value="lotto-main" placeholder="เช่น lotto16" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm font-bold text-sky-300 focus:outline-none focus:border-sky-500">
+                        <button onclick="changeRoom()" class="bg-slate-700 hover:bg-slate-600 text-xs px-3 rounded-lg border border-slate-600 font-semibold">เข้าห้อง</button>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-[11px] text-slate-400 mb-1">ประเภทหวย</label>
+                    <select id="lottoType" onchange="saveMeta()" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-amber-500">
+                        <option value="หวยรัฐบาลไทย">หวยรัฐบาลไทย</option>
+                        <option value="หวยลาวพัฒนา">หวยลาวพัฒนา</option>
+                        <option value="หวยฮานอย">หวยฮานอย</option>
+                        <option value="หวยหุ้น / อื่นๆ">หวยหุ้น / อื่นๆ</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-[11px] text-slate-400 mb-1">งวดประจำวันที่</label>
+                    <input type="text" id="lottoDate" onchange="saveMeta()" placeholder="เช่น 16 พ.ย. 2026" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-amber-500">
+                </div>
+            </div>
+        </section>
+
+        <!-- 2. บันทึกรายการโพยใหม่ -->
+        <section class="bg-slate-800 p-4 rounded-xl border border-slate-700 shadow-md space-y-4">
+            <div class="flex items-center justify-between">
+                <h2 class="text-base font-bold text-amber-400 flex items-center gap-2">
+                    <i class="fa-solid fa-pen-to-square"></i> ส่งรายการโพยใหม่
+                </h2>
+                <span id="roleBadge" class="text-xs bg-slate-700 text-slate-300 px-2.5 py-1 rounded-full">ผู้ส่งโพย</span>
+            </div>
+
+            <div>
+                <label class="block text-xs text-slate-400 mb-1">ชื่อผู้ส่ง / ชื่อลูกค้า (เจ้า)</label>
+                <input type="text" id="customerName" list="customerList" placeholder="ระบุชื่อของคุณ หรือชื่อลูกค้า" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2.5 text-sm text-white focus:outline-none focus:border-amber-500">
+                <datalist id="customerList"></datalist>
+            </div>
+
+            <div>
+                <label class="block text-xs text-slate-400 mb-1.5">ตัวช่วยสร้างเลขด่วน</label>
+                <div class="grid grid-cols-3 gap-2">
+                    <button type="button" onclick="generateReverse()" class="bg-slate-700 hover:bg-slate-600 active:bg-amber-500 active:text-slate-900 text-xs font-medium py-2 rounded-lg border border-slate-600 transition">
+                        <i class="fa-solid fa-shuffle mr-1 text-amber-400"></i> กลับเลข
+                    </button>
+                    <button type="button" onclick="generateFrontRun()" class="bg-slate-700 hover:bg-slate-600 active:bg-amber-500 active:text-slate-900 text-xs font-medium py-2 rounded-lg border border-slate-600 transition">
+                        <i class="fa-solid fa-arrow-right mr-1 text-emerald-400"></i> รูดหน้า
+                    </button>
+                    <button type="button" onclick="generateBackRun()" class="bg-slate-700 hover:bg-slate-600 active:bg-amber-500 active:text-slate-900 text-xs font-medium py-2 rounded-lg border border-slate-600 transition">
+                        <i class="fa-solid fa-arrow-left mr-1 text-sky-400"></i> รูดหลัง
+                    </button>
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-xs text-slate-400 mb-1">เลขที่ซื้อ (คั่นด้วย , หรือ เว้นวรรค)</label>
+                <input type="text" id="numbersInput" placeholder="เช่น 123, 45, 78 หรือ 88 33" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2.5 text-base font-bold tracking-wider text-amber-300 focus:outline-none focus:border-amber-500">
+            </div>
+
+            <div class="grid grid-cols-3 gap-2.5">
+                <div class="bg-slate-900/80 p-2.5 rounded-lg border border-slate-700">
+                    <label class="block text-xs text-slate-400 mb-1">บน (บาท)</label>
+                    <input type="number" id="amountTop" min="0" placeholder="0" class="w-full bg-slate-800 border border-slate-600 rounded px-2 py-1.5 text-center text-base font-bold text-white focus:outline-none focus:border-amber-500">
+                </div>
+                <div class="bg-slate-900/80 p-2.5 rounded-lg border border-slate-700">
+                    <label class="block text-xs text-slate-400 mb-1">ล่าง (บาท)</label>
+                    <input type="number" id="amountBottom" min="0" placeholder="0" class="w-full bg-slate-800 border border-slate-600 rounded px-2 py-1.5 text-center text-base font-bold text-white focus:outline-none focus:border-amber-500">
+                </div>
+                <div class="bg-slate-900/80 p-2.5 rounded-lg border border-slate-700">
+                    <label class="block text-xs text-slate-400 mb-1">โต๊ด (บาท)</label>
+                    <input type="number" id="amountToad" min="0" placeholder="0" class="w-full bg-slate-800 border border-slate-600 rounded px-2 py-1.5 text-center text-base font-bold text-white focus:outline-none focus:border-amber-500">
+                </div>
+            </div>
+
+            <button type="button" onclick="addEntries()" class="w-full bg-amber-500 hover:bg-amber-400 active:scale-[0.99] text-slate-900 font-bold py-3 rounded-xl shadow-lg flex items-center justify-center gap-2 text-base transition">
+                <i class="fa-solid fa-paper-plane"></i> ส่งโพยเข้าระบบออนไลน์
+            </button>
+        </section>
+
+        <!-- 3. ระบบตรวจผลรางวัล & ตั้งค่าเรทจ่าย (เฉพาะแอดมิน) -->
+        <section class="admin-only hidden bg-slate-800 p-4 rounded-xl border border-emerald-700/60 shadow-md space-y-4">
+            <div class="flex items-center justify-between">
+                <h2 class="text-base font-bold text-emerald-400 flex items-center gap-2">
+                    <i class="fa-solid fa-trophy"></i> กรอกผลรางวัล & ตรวจหวย (แอดมิน)
+                </h2>
+                <button type="button" onclick="toggleRateSettings()" class="text-xs bg-slate-700 hover:bg-slate-600 text-slate-200 px-2.5 py-1.5 rounded-lg border border-slate-600">
+                    <i class="fa-solid fa-gear mr-1"></i> ตั้งค่าเรทจ่าย
+                </button>
+            </div>
+
+            <div id="rateSettingsBox" class="hidden bg-slate-900/90 p-3 rounded-lg border border-slate-700 space-y-2">
+                <p class="text-xs font-semibold text-amber-400">กำหนดอัตราจ่าย (บาทละ)</p>
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
+                    <div>
+                        <label class="text-slate-400 block mb-1">3 ตัวบน</label>
+                        <input type="number" id="rate3Top" value="900" onchange="saveRatesAndSync()" class="w-full bg-slate-800 border border-slate-600 rounded px-2 py-1.5 text-center font-bold text-white">
+                    </div>
+                    <div>
+                        <label class="text-slate-400 block mb-1">3 ตัวโต๊ด</label>
+                        <input type="number" id="rate3Toad" value="150" onchange="saveRatesAndSync()" class="w-full bg-slate-800 border border-slate-600 rounded px-2 py-1.5 text-center font-bold text-white">
+                    </div>
+                    <div>
+                        <label class="text-slate-400 block mb-1">2 ตัวบน</label>
+                        <input type="number" id="rate2Top" value="90" onchange="saveRatesAndSync()" class="w-full bg-slate-800 border border-slate-600 rounded px-2 py-1.5 text-center font-bold text-white">
+                    </div>
+                    <div>
+                        <label class="text-slate-400 block mb-1">2 ตัวล่าง</label>
+                        <input type="number" id="rate2Bottom" value="90" onchange="saveRatesAndSync()" class="w-full bg-slate-800 border border-slate-600 rounded px-2 py-1.5 text-center font-bold text-white">
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+                <div class="bg-slate-900 p-3 rounded-lg border border-slate-700">
+                    <label class="block text-xs text-slate-400 mb-1">ผลรางวัล 3 ตัวบน</label>
+                    <input type="text" id="win3Top" maxlength="3" oninput="onResultChange()" placeholder="เช่น 456" class="w-full bg-slate-800 border border-emerald-500/50 rounded-lg px-3 py-2 text-center text-xl font-bold tracking-widest text-emerald-400 focus:outline-none focus:border-emerald-400">
+                    <p id="auto2TopDisplay" class="text-[11px] text-slate-400 mt-1 text-center">2 ตัวบน: -</p>
+                </div>
+                <div class="bg-slate-900 p-3 rounded-lg border border-slate-700">
+                    <label class="block text-xs text-slate-400 mb-1">ผลรางวัล 2 ตัวล่าง</label>
+                    <input type="text" id="win2Bottom" maxlength="2" oninput="onResultChange()" placeholder="เช่น 88" class="w-full bg-slate-800 border border-emerald-500/50 rounded-lg px-3 py-2 text-center text-xl font-bold tracking-widest text-emerald-400 focus:outline-none focus:border-emerald-400">
+                    <p class="text-[11px] text-slate-400 mt-1 text-center">ตรวจอัตโนมัติทุกคน</p>
+                </div>
+            </div>
+
+            <div class="flex justify-end">
+                <button type="button" onclick="clearResults()" class="text-xs text-slate-400 hover:text-rose-400 underline">
+                    ล้างผลรางวัล
+                </button>
+            </div>
+        </section>
+
+        <!-- 4. สรุปยอดตามรายชื่อลูกค้า & ได้-เสียสุทธิ (เฉพาะแอดมิน) -->
+        <section class="admin-only hidden bg-slate-800 p-4 rounded-xl border border-slate-700 shadow-md space-y-4">
+            <div class="flex items-center justify-between">
+                <h2 class="text-base font-bold text-amber-400 flex items-center gap-2">
+                    <i class="fa-solid fa-users"></i> สรุปยอดลูกค้า & คำนวณได้-เสีย (แอดมิน)
+                </h2>
+                <span id="totalCustomersBadge" class="text-xs bg-slate-700 text-slate-300 px-2.5 py-1 rounded-full">0 เจ้า</span>
+            </div>
+
+            <div class="grid grid-cols-3 gap-2 bg-slate-900 p-3 rounded-xl border border-slate-700 text-center">
+                <div>
+                    <p class="text-[11px] text-slate-400">ยอดขายรวมทั้งหมด</p>
+                    <p id="grandTotalSales" class="text-base sm:text-lg font-bold text-white mt-0.5">0 ฿</p>
+                </div>
+                <div class="border-x border-slate-800">
+                    <p class="text-[11px] text-slate-400">ยอดถูกรางวัลรวม</p>
+                    <p id="grandTotalWin" class="text-base sm:text-lg font-bold text-rose-400 mt-0.5">0 ฿</p>
+                </div>
+                <div>
+                    <p class="text-[11px] text-slate-400">กำไร / ขาดทุนสุทธิ</p>
+                    <p id="grandNetProfit" class="text-base sm:text-lg font-bold text-emerald-400 mt-0.5">0 ฿</p>
+                </div>
+            </div>
+
+            <div id="customerSummaryList" class="space-y-3">
+                <p class="text-center text-sm text-slate-500 py-4">ยังไม่มีรายการบันทึกในห้องนี้</p>
+            </div>
+        </section>
+
+        <!-- 5. รายการโพยทั้งหมดในห้องนี้ -->
+        <section class="bg-slate-800 p-4 rounded-xl border border-slate-700 shadow-md space-y-3">
+            <div class="flex items-center justify-between">
+                <h2 class="text-base font-bold text-amber-400 flex items-center gap-2">
+                    <i class="fa-solid fa-list-ol"></i> รายการโพยที่ส่งเข้ามาล่าสุด
+                </h2>
+                <div class="flex items-center gap-2">
+                    <span id="totalItemsBadge" class="text-xs bg-slate-700 text-slate-300 px-2.5 py-1 rounded-full">0 รายการ</span>
+                    <button onclick="clearAllEntries()" class="admin-only hidden text-xs bg-rose-950/60 hover:bg-rose-900 text-rose-400 px-2.5 py-1 rounded-lg border border-rose-800/50 transition">
+                        ล้างทั้งหมด
+                    </button>
+                </div>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="border-b border-slate-700 text-xs text-slate-400">
+                            <th class="py-2 px-1">ผู้ส่ง</th>
+                            <th class="py-2 px-1">เลข</th>
+                            <th class="py-2 px-1 text-right">บน</th>
+                            <th class="py-2 px-1 text-right">ล่าง</th>
+                            <th class="py-2 px-1 text-right">โต๊ด</th>
+                            <th class="py-2 px-1 text-right">รางวัล</th>
+                            <th class="admin-only hidden py-2 px-1 text-center">ลบ</th>
+                        </tr>
+                    </thead>
+                    <tbody id="entriesTableBody" class="divide-y divide-slate-700/60 text-sm">
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+    </main>
+
+    <script>
+        // =========================================================================
+        // FIREBASE CONFIG (เชื่อมต่อฐานข้อมูลจริงของคุณแล้ว)
+        // =========================================================================
+        const firebaseConfig = {
+            apiKey: "AIzaSyBld7yPcmsp0snWTdCxj5D3hC0TOlYM88g",
+            authDomain: "lotto-online-eb0cf.firebaseapp.com",
+            databaseURL: "https://lotto-online-eb0cf-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "lotto-online-eb0cf",
+            storageBucket: "lotto-online-eb0cf.appspot.com",
+            messagingSenderId: "687853136586",
+            appId: "1:687853136586:web:79514948f01f527dece233",
+            measurementId: "G-F830GMM3ZG"
+        };
+
+        // รหัสผ่านสำหรับปลดล็อกโหมดแอดมิน
+        const ADMIN_PIN = "1234";
+
+        // =========================================================================
+        // ตัวแปรระบบ
+        // =========================================================================
+        let db = null;
+        let isOnlineMode = false;
+        let isAdmin = false;
+        let currentRoom = "lotto-main";
+        let roomListener = null;
+
+        let appData = {
+            meta: {
+                lottoType: 'หวยรัฐบาลไทย',
+                lottoDate: new Date().toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: 'numeric' })
+            },
+            rates: {
+                rate3Top: 900,
+                rate3Toad: 150,
+                rate2Top: 90,
+                rate2Bottom: 90
+            },
+            results: {
+                win3Top: '',
+                win2Bottom: ''
+            },
+            entries: []
+        };
+
+        window.onload = function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const roomParam = urlParams.get('room');
+            if (roomParam) {
+                currentRoom = roomParam.trim();
+            } else {
+                const savedRoom = localStorage.getItem('lotto_last_room');
+                if (savedRoom) currentRoom = savedRoom;
+            }
+            document.getElementById('roomIdInput').value = currentRoom;
+
+            const savedSender = localStorage.getItem('lotto_sender_name');
+            if (savedSender) document.getElementById('customerName').value = savedSender;
+
+            if (sessionStorage.getItem('lotto_is_admin') === 'true') {
+                setAdminState(true);
+            }
+
+            initFirebase();
+        };
+
+        function initFirebase() {
+            const badge = document.getElementById('connectionBadge');
+            if (firebaseConfig.databaseURL && !firebaseConfig.databaseURL.includes("YOUR_PROJECT")) {
+                try {
+                    firebase.initializeApp(firebaseConfig);
+                    db = firebase.database();
+                    isOnlineMode = true;
+                    badge.textContent = "ออนไลน์ (Real-Time)";
+                    badge.className = "text-[10px] px-2 py-0.5 rounded-full bg-emerald-900 text-emerald-300 border border-emerald-600 font-semibold";
+                    connectToRoom(currentRoom);
+                } catch (e) {
+                    console.error("Firebase init error:", e);
+                    fallbackToOffline();
+                }
+            } else {
+                fallbackToOffline();
+            }
+        }
+
+        function fallbackToOffline() {
+            isOnlineMode = false;
+            const badge = document.getElementById('connectionBadge');
+            badge.textContent = "โหมดออฟไลน์";
+            badge.className = "text-[10px] px-2 py-0.5 rounded-full bg-amber-900/80 text-amber-300 border border-amber-600 font-semibold";
+
+            const saved = localStorage.getItem('lotto_offline_' + currentRoom);
+            if (saved) {
+                try { appData = { ...appData, ...JSON.parse(saved) }; } catch (e) {}
+            }
+            syncInputsFromState();
+            renderAll();
+        }
+
+        function connectToRoom(roomId) {
+            currentRoom = roomId.replace(/[^a-zA-Z0-9_-]/g, '') || 'lotto-main';
+            document.getElementById('roomIdInput').value = currentRoom;
+            localStorage.setItem('lotto_last_room', currentRoom);
+
+            if (!isOnlineMode || !db) {
+                fallbackToOffline();
+                return;
+            }
+
+            if (roomListener) {
+                db.ref('rooms/' + currentRoom).off('value', roomListener);
+            }
+
+            const roomRef = db.ref('rooms/' + currentRoom);
+            roomListener = roomRef.on('value', (snapshot) => {
+                const val = snapshot.val();
+                if (val) {
+                    appData.meta = val.meta || appData.meta;
+                    appData.rates = val.rates || appData.rates;
+                    appData.results = val.results || { win3Top: '', win2Bottom: '' };
+                    if (val.entries) {
+                        appData.entries = Object.keys(val.entries).map(key => ({
+                            firebaseKey: key,
+                            ...val.entries[key]
+                        })).sort((a, b) => b.timestamp - a.timestamp);
+                    } else {
+                        appData.entries = [];
+                    }
+                } else {
+                    appData.entries = [];
+                    appData.results = { win3Top: '', win2Bottom: '' };
+                }
+                syncInputsFromState();
+                renderAll();
+            });
+        }
+
+        function changeRoom() {
+            const newRoom = document.getElementById('roomIdInput').value.trim();
+            if (!newRoom) return alert('กรุณากรอกรหัสห้อง');
+            connectToRoom(newRoom);
+            alert(`เข้าสู่ห้อง "${currentRoom}" เรียบร้อยแล้ว`);
+        }
+
+        function copyShareLink() {
+            const baseUrl = window.location.origin + window.location.pathname;
+            const shareUrl = `${baseUrl}?room=${encodeURIComponent(currentRoom)}`;
+            navigator.clipboard.writeText(shareUrl).then(() => {
+                alert(`คัดลอกลิงก์ส่งโพยเรียบร้อยแล้ว!\n\nส่งลิงก์นี้ให้คนส่งโพยได้เลย:\n${shareUrl}`);
+            }).catch(() => {
+                prompt("คัดลอกลิงก์ด้านล่างนี้ส่งให้คนส่งโพย:", shareUrl);
+            });
+        }
+
+        function toggleAdminMode() {
+            if (isAdmin) {
+                setAdminState(false);
+            } else {
+                const pin = prompt("กรุณาใส่รหัสผ่านแอดมิน (ค่าเริ่มต้นคือ 1234):");
+                if (pin === ADMIN_PIN) {
+                    setAdminState(true);
+                } else if (pin !== null) {
+                    alert("รหัสผ่านแอดมินไม่ถูกต้อง!");
+                }
+            }
+        }
+
+        function setAdminState(status) {
+            isAdmin = status;
+            sessionStorage.setItem('lotto_is_admin', status ? 'true' : 'false');
+            const adminElements = document.querySelectorAll('.admin-only');
+            adminElements.forEach(el => {
+                if (status) el.classList.remove('hidden');
+                else el.classList.add('hidden');
+            });
+
+            const btnText = document.getElementById('adminBtnText');
+            const roleBadge = document.getElementById('roleBadge');
+            if (status) {
+                btnText.textContent = "ออกจากแอดมิน";
+                roleBadge.textContent = "แอดมิน (เจ้ามือ)";
+                roleBadge.className = "text-xs bg-amber-500/20 text-amber-300 border border-amber-500/50 px-2.5 py-1 rounded-full font-bold";
+            } else {
+                btnText.textContent = "โหมดแอดมิน";
+                roleBadge.textContent = "ผู้ส่งโพย";
+                roleBadge.className = "text-xs bg-slate-700 text-slate-300 px-2.5 py-1 rounded-full";
+            }
+            renderAll();
+        }
+
+        function syncInputsFromState() {
+            document.getElementById('lottoType').value = appData.meta.lottoType || 'หวยรัฐบาลไทย';
+            document.getElementById('lottoDate').value = appData.meta.lottoDate || '';
+            document.getElementById('rate3Top').value = appData.rates.rate3Top;
+            document.getElementById('rate3Toad').value = appData.rates.rate3Toad;
+            document.getElementById('rate2Top').value = appData.rates.rate2Top;
+            document.getElementById('rate2Bottom').value = appData.rates.rate2Bottom;
+
+            if (document.activeElement.id !== 'win3Top') {
+                document.getElementById('win3Top').value = appData.results.win3Top || '';
+            }
+            if (document.activeElement.id !== 'win2Bottom') {
+                document.getElementById('win2Bottom').value = appData.results.win2Bottom || '';
+            }
+        }
+
+        function persistState() {
+            if (isOnlineMode && db) {
+                db.ref('rooms/' + currentRoom + '/meta').set(appData.meta);
+                db.ref('rooms/' + currentRoom + '/rates').set(appData.rates);
+                db.ref('rooms/' + currentRoom + '/results').set(appData.results);
+            } else {
+                localStorage.setItem('lotto_offline_' + currentRoom, JSON.stringify(appData));
+            }
+        }
+
+        function saveMeta() {
+            appData.meta.lottoType = document.getElementById('lottoType').value;
+            appData.meta.lottoDate = document.getElementById('lottoDate').value;
+            persistState();
+        }
+
+        function toggleRateSettings() {
+            document.getElementById('rateSettingsBox').classList.toggle('hidden');
+        }
+
+        function saveRatesAndSync() {
+            appData.rates.rate3Top = Math.max(0, Number(document.getElementById('rate3Top').value) || 0);
+            appData.rates.rate3Toad = Math.max(0, Number(document.getElementById('rate3Toad').value) || 0);
+            appData.rates.rate2Top = Math.max(0, Number(document.getElementById('rate2Top').value) || 0);
+            appData.rates.rate2Bottom = Math.max(0, Number(document.getElementById('rate2Bottom').value) || 0);
+            persistState();
+            renderAll();
+        }
+
+        function onResultChange() {
+            const w3 = document.getElementById('win3Top').value.replace(/[^0-9]/g, '');
+            const w2 = document.getElementById('win2Bottom').value.replace(/[^0-9]/g, '');
+            document.getElementById('win3Top').value = w3;
+            document.getElementById('win2Bottom').value = w2;
+
+            appData.results.win3Top = w3;
+            appData.results.win2Bottom = w2;
+            persistState();
+            renderAll();
+        }
+
+        function clearResults() {
+            document.getElementById('win3Top').value = '';
+            document.getElementById('win2Bottom').value = '';
+            appData.results.win3Top = '';
+            appData.results.win2Bottom = '';
+            persistState();
+            renderAll();
+        }
+
+        function parseNumbers(raw) {
+            return raw
+                .split(/[\s,]+/)
+                .map(s => s.replace(/[^0-9]/g, ''))
+                .filter(s => s.length === 2 || s.length === 3);
+        }
+
+        function generateReverse() {
+            const input = document.getElementById('numbersInput');
+            const nums = parseNumbers(input.value);
+            if (nums.length === 0) return alert('กรุณาพิมพ์เลข 2 หรือ 3 หลักก่อนกดกลับเลขครับ');
+
+            let resultSet = new Set(nums);
+            nums.forEach(num => {
+                if (num.length === 2) {
+                    resultSet.add(num[1] + num[0]);
+                } else if (num.length === 3) {
+                    getPermutations(num).forEach(p => resultSet.add(p));
+                }
+            });
+            input.value = Array.from(resultSet).join(', ');
+        }
+
+        function getPermutations(str) {
+            if (str.length <= 1) return [str];
+            let perms = [];
+            for (let i = 0; i < str.length; i++) {
+                const char = str[i];
+                const remaining = str.slice(0, i) + str.slice(i + 1);
+                for (let sub of getPermutations(remaining)) {
+                    perms.push(char + sub);
+                }
+            }
+            return [...new Set(perms)];
+        }
+
+        function generateFrontRun() {
+            const input = document.getElementById('numbersInput');
+            const digit = input.value.replace(/[^0-9]/g, '').slice(-1);
+            if (!digit) return alert('กรุณาพิมพ์เลขโดด 1 ตัว (0-9) ก่อนกดรูดหน้าครับ');
+            let list = [];
+            for (let i = 0; i <= 9; i++) list.push(digit + i);
+            input.value = list.join(', ');
+        }
+
+        function generateBackRun() {
+            const input = document.getElementById('numbersInput');
+            const digit = input.value.replace(/[^0-9]/g, '').slice(-1);
+            if (!digit) return alert('กรุณาพิมพ์เลขโดด 1 ตัว (0-9) ก่อนกดรูดหลังครับ');
+            let list = [];
+            for (let i = 0; i <= 9; i++) list.push('' + i + digit);
+            input.value = list.join(', ');
+        }
+
+        function addEntries() {
+            const customer = document.getElementById('customerName').value.trim();
+            if (!customer) {
+                alert('กรุณาระบุชื่อผู้ส่ง หรือชื่อลูกค้าก่อนส่งโพยครับ');
+                document.getElementById('customerName').focus();
+                return;
+            }
+            localStorage.setItem('lotto_sender_name', customer);
+
+            const nums = parseNumbers(document.getElementById('numbersInput').value);
+            const top = Math.max(0, Math.round(Number(document.getElementById('amountTop').value) || 0));
+            const bottom = Math.max(0, Math.round(Number(document.getElementById('amountBottom').value) || 0));
+            const toad = Math.max(0, Math.round(Number(document.getElementById('amountToad').value) || 0));
+
+            if (nums.length === 0) return alert('กรุณากรอกเลข 2 หลัก หรือ 3 หลักให้ถูกต้องครับ');
+            if (top === 0 && bottom === 0 && toad === 0) return alert('กรุณาใส่จำนวนเงินอย่างน้อย 1 ช่องครับ');
+
+            const now = Date.now();
+            nums.forEach((num, idx) => {
+                const validToad = num.length === 3 ? toad : 0;
+                if (top > 0 || bottom > 0 || validToad > 0) {
+                    const entryObj = {
+                        id: now + idx + Math.random(),
+                        timestamp: now + idx,
+                        customer: customer,
+                        number: num,
+                        top: top,
+                        bottom: bottom,
+                        toad: validToad
+                    };
+
+                    if (isOnlineMode && db) {
+                        db.ref('rooms/' + currentRoom + '/entries').push(entryObj);
+                    } else {
+                        appData.entries.unshift(entryObj);
+                    }
+                }
+            });
+
+            if (!isOnlineMode) {
+                persistState();
+                renderAll();
+            }
+
+            document.getElementById('numbersInput').value = '';
+            document.getElementById('amountTop').value = '';
+            document.getElementById('amountBottom').value = '';
+            document.getElementById('amountToad').value = '';
+        }
+
+        function deleteEntry(firebaseKey, id) {
+            if (!isAdmin) return;
+            if (isOnlineMode && db && firebaseKey) {
+                db.ref('rooms/' + currentRoom + '/entries/' + firebaseKey).remove();
+            } else {
+                appData.entries = appData.entries.filter(item => item.id !== id);
+                persistState();
+                renderAll();
+            }
+        }
+
+        function clearAllEntries() {
+            if (!isAdmin || appData.entries.length === 0) return;
+            if (confirm(`ยืนยันการลบรายการโพยทั้งหมดในห้อง "${currentRoom}" ใช่หรือไม่?`)) {
+                if (isOnlineMode && db) {
+                    db.ref('rooms/' + currentRoom + '/entries').remove();
+                } else {
+                    appData.entries = [];
+                    persistState();
+                    renderAll();
+                }
+            }
+        }
+
+        function calculateEntryWin(entry) {
+            const win3Top = appData.results.win3Top;
+            const win2Bottom = appData.results.win2Bottom;
+            const win2Top = win3Top.length === 3 ? win3Top.slice(1) : '';
+            const rates = appData.rates;
+
+            let winAmount = 0;
+            let winDetails = [];
+
+            if (entry.top > 0) {
+                if (entry.number.length === 3 && win3Top.length === 3 && entry.number === win3Top) {
+                    winAmount += entry.top * rates.rate3Top;
+                    winDetails.push('3บน');
+                } else if (entry.number.length === 2 && win2Top.length === 2 && entry.number === win2Top) {
+                    winAmount += entry.top * rates.rate2Top;
+                    winDetails.push('2บน');
+                }
+            }
+
+            if (entry.bottom > 0 && entry.number.length === 2 && win2Bottom.length === 2) {
+                if (entry.number === win2Bottom) {
+                    winAmount += entry.bottom * rates.rate2Bottom;
+                    winDetails.push('2ล่าง');
+                }
+            }
+
+            if (entry.toad > 0 && entry.number.length === 3 && win3Top.length === 3) {
+                const sortedEntry = entry.number.split('').sort().join('');
+                const sortedWin = win3Top.split('').sort().join('');
+                if (sortedEntry === sortedWin) {
+                    winAmount += entry.toad * rates.rate3Toad;
+                    winDetails.push('โต๊ด');
+                }
+            }
+
+            return { winAmount, winDetails };
+        }
+
+        function formatMoney(num) {
+            return Number(num).toLocaleString('th-TH');
+        }
+
+        function renderAll() {
+            const win3Top = appData.results.win3Top;
+            document.getElementById('auto2TopDisplay').textContent = win3Top.length === 3 ? `2 ตัวบน: ${win3Top.slice(1)}` : '2 ตัวบน: -';
+
+            const tbody = document.getElementById('entriesTableBody');
+            tbody.innerHTML = '';
+
+            let customerMap = {};
+            let customerNamesSet = new Set();
+            let grandSales = 0;
+            let grandWin = 0;
+
+            appData.entries.forEach(entry => {
+                customerNamesSet.add(entry.customer);
+                const itemTotalBet = Number(entry.top) + Number(entry.bottom) + Number(entry.toad);
+                const { winAmount, winDetails } = calculateEntryWin(entry);
+
+                grandSales += itemTotalBet;
+                grandWin += winAmount;
+
+                if (!customerMap[entry.customer]) {
+                    customerMap[entry.customer] = {
+                        name: entry.customer,
+                        topSum: 0, bottomSum: 0, toadSum: 0,
+                        totalBet: 0, totalWin: 0, winItems: []
+                    };
+                }
+                customerMap[entry.customer].topSum += Number(entry.top);
+                customerMap[entry.customer].bottomSum += Number(entry.bottom);
+                customerMap[entry.customer].toadSum += Number(entry.toad);
+                customerMap[entry.customer].totalBet += itemTotalBet;
+                customerMap[entry.customer].totalWin += winAmount;
+                if (winAmount > 0) {
+                    customerMap[entry.customer].winItems.push(`${entry.number} (${winDetails.join('+')})`);
+                }
+
+                const isWinner = winAmount > 0;
+                const tr = document.createElement('tr');
+                tr.className = isWinner ? 'bg-emerald-950/50' : 'hover:bg-slate-700/30';
+                tr.innerHTML = `
+                    <td class="py-2.5 px-1 font-medium text-slate-200">${escapeHtml(entry.customer)}</td>
+                    <td class="py-2.5 px-1 font-bold ${isWinner ? 'text-emerald-400' : 'text-amber-400'}">${entry.number}</td>
+                    <td class="py-2.5 px-1 text-right text-slate-300">${entry.top > 0 ? formatMoney(entry.top) : '-'}</td>
+                    <td class="py-2.5 px-1 text-right text-slate-300">${entry.bottom > 0 ? formatMoney(entry.bottom) : '-'}</td>
+                    <td class="py-2.5 px-1 text-right text-slate-300">${entry.toad > 0 ? formatMoney(entry.toad) : '-'}</td>
+                    <td class="py-2.5 px-1 text-right text-xs font-bold">
+                        ${isWinner 
+                            ? `<span class="text-emerald-400">+${formatMoney(winAmount)}</span><br><span class="text-[10px] text-emerald-300">${winDetails.join(',')}</span>` 
+                            : `<span class="text-slate-500">-</span>`}
+                    </td>
+                    <td class="admin-only ${isAdmin ? '' : 'hidden'} py-2.5 px-1 text-center">
+                        <button onclick="deleteEntry('${entry.firebaseKey || ''}', ${entry.id})" class="text-rose-400 hover:text-rose-300 p-1">
+                            <i class="fa-solid fa-trash-can"></i>
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            const dataList = document.getElementById('customerList');
+            dataList.innerHTML = '';
+            customerNamesSet.forEach(name => {
+                const opt = document.createElement('option');
+                opt.value = name;
+                dataList.appendChild(opt);
+            });
+
+            const grandNet = grandSales - grandWin;
+            document.getElementById('grandTotalSales').textContent = `${formatMoney(grandSales)} ฿`;
+            document.getElementById('grandTotalWin').textContent = `${formatMoney(grandWin)} ฿`;
+            const grandNetEl = document.getElementById('grandNetProfit');
+            if (grandNet >= 0) {
+                grandNetEl.textContent = `+${formatMoney(grandNet)} ฿`;
+                grandNetEl.className = 'text-base sm:text-lg font-bold text-emerald-400 mt-0.5';
+            } else {
+                grandNetEl.textContent = `${formatMoney(grandNet)} ฿`;
+                grandNetEl.className = 'text-base sm:text-lg font-bold text-rose-400 mt-0.5';
+            }
+
+            const summaryContainer = document.getElementById('customerSummaryList');
+            const customers = Object.values(customerMap);
+            document.getElementById('totalCustomersBadge').textContent = `${customers.length} เจ้า`;
+            document.getElementById('totalItemsBadge').textContent = `${appData.entries.length} รายการ`;
+
+            if (customers.length === 0) {
+                summaryContainer.innerHTML = '<p class="text-center text-sm text-slate-500 py-4">ยังไม่มีรายการบันทึกในห้องนี้</p>';
+                return;
+            }
+
+            summaryContainer.innerHTML = '';
+            customers.forEach(cust => {
+                const netBalance = cust.totalBet - cust.totalWin;
+                const isHostWin = netBalance >= 0;
+
+                const card = document.createElement('div');
+                card.className = `bg-slate-900/90 p-3.5 rounded-xl border ${cust.totalWin > 0 ? 'border-emerald-600/70' : 'border-slate-700'} space-y-2`;
+                card.innerHTML = `
+                    <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+                        <div class="flex items-center gap-2">
+                            <i class="fa-solid fa-user text-amber-400 text-sm"></i>
+                            <span class="font-bold text-base text-white">${escapeHtml(cust.name)}</span>
+                        </div>
+                        <div class="text-right">
+                            <span class="text-xs text-slate-400">ยอดซื้อรวม: </span>
+                            <span class="font-bold text-amber-400 text-sm">${formatMoney(cust.totalBet)} บาท</span>
+                        </div>
+                    </div>
+
+                    <div class="text-xs text-slate-400 flex flex-wrap gap-x-3 gap-y-1">
+                        <span>บน: <strong class="text-slate-200">${formatMoney(cust.topSum)}</strong></span>
+                        <span>| ล่าง: <strong class="text-slate-200">${formatMoney(cust.bottomSum)}</strong></span>
+                        <span>| โต๊ด: <strong class="text-slate-200">${formatMoney(cust.toadSum)}</strong></span>
+                    </div>
+
+                    ${cust.totalWin > 0 ? `
+                    <div class="bg-emerald-950/60 border border-emerald-800/60 rounded-lg px-2.5 py-1.5 text-xs text-emerald-300 flex justify-between items-center">
+                        <span><i class="fa-solid fa-star text-amber-400 mr-1"></i> เลขที่ถูก: <strong>${cust.winItems.join(', ')}</strong></span>
+                        <span class="font-bold text-emerald-400">ถูก ${formatMoney(cust.totalWin)} บาท</span>
+                    </div>
+                    ` : ''}
+
+                    <div class="pt-1 flex items-center justify-between">
+                        <span class="text-xs font-medium ${isHostWin ? 'text-sky-400' : 'text-rose-400'}">
+                            ${isHostWin ? 'สรุปยอดเก็บเงินลูกค้า:' : 'สรุปยอดเจ้ามือจ่ายคืน:'}
+                        </span>
+                        <span class="text-base font-bold ${isHostWin ? 'text-sky-400' : 'text-rose-400'}">
+                            ${isHostWin ? `รับเงิน ${formatMoney(netBalance)} บาท` : `จ่ายคืน ${formatMoney(Math.abs(netBalance))} บาท`}
+                        </span>
+                    </div>
+                `;
+                summaryContainer.appendChild(card);
+            });
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function exportData() {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(appData, null, 2));
+            const downloadAnchor = document.createElement('a');
+            downloadAnchor.setAttribute("href", dataStr);
+            downloadAnchor.setAttribute("download", `lotto-${currentRoom}-${appData.meta.lottoDate || 'backup'}.json`);
+            document.body.appendChild(downloadAnchor);
+            downloadAnchor.click();
+            downloadAnchor.remove();
+        }
+    </script>
 </body>
-
 </html>
