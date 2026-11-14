@@ -832,7 +832,26 @@
             document.body.appendChild(downloadAnchor);
             downloadAnchor.click();
             downloadAnchor.remove();
-        }
-    </script>
+<!-- Firebase App SDK -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<!-- Firebase Realtime Database SDK -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyBld7yPcmsp0snWTdCxj5D3hC0TOlYM88g",
+    authDomain: "lotto-online-eb0cf.firebaseapp.com",
+    databaseURL: "https://lotto-online-eb0cf-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "lotto-online-eb0cf",
+    storageBucket: "lotto-online-eb0cf.firebasestorage.app",
+    messagingSenderId: "687853136586",
+    appId: "1:687853136586:web:79514948f01f527dece233",
+    measurementId: "G-F830GMM3ZG"
+  };
+
+  // เริ่มต้นเชื่อมต่อฐานข้อมูล Firebase Realtime Database
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.database();
+</script>
 </body>
 </html>
