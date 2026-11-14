@@ -1,517 +1,307 @@
+
 <!DOCTYPE html>
 <html lang="th">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LOTTO MASTER ONLINE - Admin Dashboard & Result Checker</title>
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        body { font-family: 'Prompt', sans-serif; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LOTTO MASTER ONLINE</title>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+body{font-family:'Sarabun',sans-serif;background:#f0fdf4}
+.panel{background:white;border-radius:18px;padding:20px;box-shadow:0 4px 18px #14532d12}
+.btn{background:#15803d;color:white;padding:12px 16px;border-radius:10px;font-weight:600}
+.btn2{background:#dcfce7;color:#166534;padding:10px 14px;border-radius:10px}
+.field{width:100%;padding:12px;border:1px solid #bbf7d0;border-radius:10px;margin:7px 0;outline:none}
+.field:focus{border-color:#16a34a}
+.hidden{display:none}
+</style>
 </head>
-<body class="bg-slate-950 text-slate-100 min-h-screen p-4 pb-20">
+<body class="p-4">
 
-    <div class="max-w-md mx-auto space-y-4">
-        
-        <!-- ส่วนหัวแอปพลิเคชัน -->
-        <div class="bg-slate-900 border border-slate-800 p-4 rounded-xl shadow-lg flex items-center justify-between">
-            <div>
-                <h1 class="font-bold text-amber-400 text-lg flex items-center gap-2">
-                    ⚡ LOTTO MASTER ONLINE
-                </h1>
-                <p class="text-xs text-slate-400">ระบบส่งโพยออนไลน์ & ตรวจหวยเรียลไทม์</p>
-            </div>
-            <span class="bg-emerald-500/20 text-emerald-400 text-xs px-2.5 py-1 rounded-full font-medium border border-emerald-500/30">
-                ● ออนไลน์ (Real-Time)
-            </span>
-        </div>
+<header class="max-w-5xl mx-auto mb-5 flex justify-between items-center">
+  <div>
+    <h1 class="text-2xl font-bold text-green-800">LOTTO MASTER</h1>
+    <p class="text-sm text-green-600">ระบบจัดการสมาชิกออนไลน์</p>
+  </div>
+  <span class="text-2xl">🌿</span>
+</header>
 
-        <!-- 👑 ปุ่มสลับโหมดแอดมินเจ้ามือ (คลิกเพื่อเข้าหน้าแอดมิน) -->
-        <button onclick="toggleAdminMode()" id="admin-toggle-btn" class="w-full bg-slate-900 border border-slate-800 hover:border-amber-400 p-3 rounded-xl shadow-lg flex items-center justify-between text-slate-200 font-medium text-sm transition">
-            <span class="flex items-center gap-2" id="admin-btn-text">🔒 เข้าสู่หน้าแอดมิน (เจ้ามือ)</span>
-            <span id="admin-status" class="text-xs bg-slate-950 px-2.5 py-1 rounded-lg border border-slate-800 text-slate-400">โหมดส่งโพย</span>
-        </button>
+<main class="max-w-5xl mx-auto">
 
-        <!-- 📊 กล่องสรุปยอดรวมภาพรวม -->
-        <div class="bg-slate-900 border border-slate-800 p-4 rounded-xl shadow-lg">
-            <h3 class="text-sm font-semibold text-amber-400 mb-3 flex items-center gap-1.5">
-                📊 สรุปยอดรวมโพยงวดนี้
-            </h3>
-            <div class="grid grid-cols-2 gap-2 text-xs text-slate-300">
-                <div class="bg-slate-950/50 p-2.5 rounded-lg border border-slate-800/60">
-                    จำนวนรายการ: <span id="total-count" class="font-bold text-white">0</span> รายการ
-                </div>
-                <div class="bg-slate-950/50 p-2.5 rounded-lg border border-slate-800/60">
-                    ยอดรวม บน: <span id="total-bon" class="font-bold text-amber-400">0</span> ฿
-                </div>
-                <div class="bg-slate-950/50 p-2.5 rounded-lg border border-slate-800/60">
-                    ยอดรวม ล่าง: <span id="total-lang" class="font-bold text-amber-400">0</span> ฿
-                </div>
-                <div class="bg-slate-950/50 p-2.5 rounded-lg border border-slate-800/60">
-                    ยอดรวม โต๊ด: <span id="total-tod" class="font-bold text-amber-400">0</span> ฿
-                </div>
-            </div>
-            <div class="mt-3 pt-3 border-t border-slate-800 flex justify-between items-center text-sm">
-                <span class="text-slate-400 font-medium">ยอดซื้อสุทธิรวม (รับแทง):</span>
-                <span id="grand-total" class="font-bold text-emerald-400 text-base">0 บาท</span>
-            </div>
-        </div>
+<!-- LOGIN -->
+<section id="authPanel" class="panel max-w-md mx-auto">
+  <h2 class="text-xl font-bold text-green-800 mb-3">เข้าสู่ระบบ</h2>
+  <input id="email" type="email" placeholder="อีเมล" class="field">
+  <input id="password" type="password" placeholder="รหัสผ่าน" class="field">
+  <button onclick="login()" class="btn w-full mt-2">เข้าสู่ระบบ</button>
+  <div class="text-center my-4 text-gray-400">หรือสมัครสมาชิกใหม่</div>
+  <input id="regName" placeholder="ชื่อสมาชิก" class="field">
+  <input id="regEmail" type="email" placeholder="อีเมลสำหรับสมัคร" class="field">
+  <input id="regPassword" type="password" placeholder="รหัสผ่านอย่างน้อย 6 ตัว" class="field">
+  <button onclick="register()" class="btn2 w-full mt-2">สมัครสมาชิก</button>
+  <button onclick="resetPassword()" class="text-green-700 text-sm mt-4 w-full">ลืมรหัสผ่าน?</button>
+  <p id="authMessage" class="text-sm text-red-600 mt-3"></p>
+</section>
 
-        <!-- ================= 📝 ส่วนที่ 1: โหมดส่งโพย (ลูกค้า) ================= -->
-        <div id="customer-view" class="space-y-4">
-            <div class="bg-slate-900 border border-slate-800 p-4 rounded-xl shadow-lg space-y-3">
-                <div>
-                    <label class="block text-xs text-slate-400 mb-1">ประเภทหวย</label>
-                    <select class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-slate-200 focus:outline-none focus:border-amber-400">
-                        <option>หวยรัฐบาลไทย</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="block text-xs text-slate-400 mb-1">งวดประจำวันที่</label>
-                    <input type="text" placeholder="เช่น 16 พ.ย. 2026" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-slate-200 focus:outline-none focus:border-amber-400">
-                </div>
-            </div>
+<!-- DASHBOARD -->
+<section id="dashboard" class="hidden">
+  <div class="panel flex justify-between items-center mb-4">
+    <div>
+      <p class="text-sm text-gray-500">ยินดีต้อนรับ</p>
+      <h2 id="welcome" class="text-xl font-bold text-green-800"></h2>
+      <p id="roleLabel" class="text-sm text-green-600"></p>
+    </div>
+    <button onclick="logout()" class="btn2">ออกจากระบบ</button>
+  </div>
 
-            <form id="lotto-form" onsubmit="addLottoEntry(event)" class="bg-slate-900 border border-slate-800 p-4 rounded-xl shadow-lg space-y-3">
-                <div class="flex items-center justify-between">
-                    <span class="text-sm font-semibold text-slate-200 flex items-center gap-1">📝 ส่งรายการโพยใหม่</span>
-                    <span class="text-xs text-slate-400">ผู้ส่งโพย</span>
-                </div>
+  <!-- MEMBER -->
+  <div id="memberPanel" class="hidden panel">
+    <h2 class="text-xl font-bold text-green-800">หน้าสมาชิก</h2>
+    <p class="text-gray-600 mt-2">คุณเข้าสู่ระบบสมาชิกเรียบร้อยแล้ว</p>
+    <div class="bg-green-50 rounded-xl p-4 mt-4">
+      <p class="text-green-800 font-semibold">สถานะบัญชี</p>
+      <p id="memberStatus" class="text-green-700 mt-1"></p>
+    </div>
+  </div>
 
-                <div>
-                    <label class="block text-xs text-slate-400 mb-1">ชื่อผู้ส่ง / ชื่อลูกค้า (เจ้า)</label>
-                    <input type="text" id="customer-name" required placeholder="เช่น จะ" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-slate-200 focus:outline-none focus:border-amber-400">
-                </div>
-
-                <div class="grid grid-cols-3 gap-2">
-                    <button type="button" class="bg-slate-800 hover:bg-slate-700 text-xs py-2 rounded-lg text-slate-300 font-medium transition">🔀 กลับเลข</button>
-                    <button type="button" class="bg-slate-800 hover:bg-slate-700 text-xs py-2 rounded-lg text-slate-300 font-medium transition">➔ รูดหน้า</button>
-                    <button type="button" class="bg-slate-800 hover:bg-slate-700 text-xs py-2 rounded-lg text-slate-300 font-medium transition">⬅ รูดหลัง</button>
-                </div>
-
-                <div>
-                    <label class="block text-xs text-slate-400 mb-1">เลขที่ซื้อ (คั่นด้วย , หรือ เว้นวรรค)</label>
-                    <input type="text" id="lotto-numbers" required placeholder="เช่น 123, 45, 78" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-slate-200 focus:outline-none focus:border-amber-400">
-                </div>
-
-                <div class="grid grid-cols-3 gap-2">
-                    <div>
-                        <label class="block text-[11px] text-slate-400 mb-1">บน (บาท)</label>
-                        <input type="number" id="amount-bon" value="0" min="0" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2 text-sm text-center text-slate-200 focus:outline-none focus:border-amber-400">
-                    </div>
-                    <div>
-                        <label class="block text-[11px] text-slate-400 mb-1">ล่าง (บาท)</label>
-                        <input type="number" id="amount-lang" value="0" min="0" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2 text-sm text-center text-slate-200 focus:outline-none focus:border-amber-400">
-                    </div>
-                    <div>
-                        <label class="block text-[11px] text-slate-400 mb-1">โต๊ด (บาท)</label>
-                        <input type="number" id="amount-tod" value="0" min="0" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2 text-sm text-center text-slate-200 focus:outline-none focus:border-amber-400">
-                    </div>
-                </div>
-
-                <button type="submit" class="w-full bg-amber-400 hover:bg-amber-500 text-slate-950 font-bold py-3 rounded-lg shadow-lg transition flex items-center justify-center gap-2 mt-2">
-                    ⚡ ส่งโพยเข้าระบบออนไลน์
-                </button>
-            </form>
-
-            <div class="bg-slate-900 border border-slate-800 p-4 rounded-xl shadow-lg space-y-3">
-                <div class="flex items-center justify-between text-sm">
-                    <span class="font-semibold text-slate-200 flex items-center gap-1.5">📋 รายการโพยที่ส่งเข้ามาล่าสุด</span>
-                    <span id="entry-count-badge" class="text-xs bg-slate-800 px-2 py-0.5 rounded-full text-slate-400">0 รายการ</span>
-                </div>
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left text-xs text-slate-300">
-                        <thead class="bg-slate-950 text-slate-400 border-b border-slate-800">
-                            <tr>
-                                <th class="p-2">ผู้ส่ง</th>
-                                <th class="p-2">เลข</th>
-                                <th class="p-2 text-right">บน</th>
-                                <th class="p-2 text-right">ล่าง</th>
-                                <th class="p-2 text-right">โต๊ด</th>
-                            </tr>
-                        </thead>
-                        <tbody id="lotto-table-body" class="divide-y divide-slate-800/50">
-                            <tr>
-                                <td colspan="5" class="p-4 text-center text-slate-500">ยังไม่มีรายการโพยในระบบ</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-
-        <!-- ================= 👑 ส่วนที่ 2: หน้าแอดมินเจ้ามือ & ตรวจผลรางวัล ================= -->
-        <div id="admin-view" class="space-y-4 hidden">
-            <div class="bg-amber-500/10 border border-amber-500/30 p-4 rounded-xl">
-                <h2 class="text-amber-400 font-bold text-sm flex items-center gap-2">👑 แผงควบคุมเจ้ามือ & หน้าตรวจหวย</h2>
-                <p class="text-xs text-slate-400 mt-1">ตรวจผลรางวัลและคำนวณยอดได้เสีย (กำไร/ขาดทุน)</p>
-            </div>
-
-            <!-- ฟอร์มตรวจหวยและคำนวณยอดได้เสีย -->
-            <div class="bg-slate-900 border border-slate-800 p-4 rounded-xl shadow-lg space-y-3">
-                <h3 class="text-sm font-semibold text-amber-400 flex items-center gap-1.5">🎯 ออกผลรางวัลเพื่อตรวจยอดได้เสีย</h3>
-                
-                <div class="grid grid-cols-2 gap-3">
-                    <div>
-                        <label class="block text-xs text-slate-400 mb-1">3 ตัวบน</label>
-                        <input type="text" id="winning-bon" maxlength="3" placeholder="เช่น 123" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-center text-amber-400 font-bold focus:outline-none focus:border-amber-400">
-                    </div>
-                    <div>
-                        <label class="block text-xs text-slate-400 mb-1">2 ตัวล่าง</label>
-                        <input type="text" id="winning-lang" maxlength="2" placeholder="เช่น 45" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-center text-amber-400 font-bold focus:outline-none focus:border-amber-400">
-                    </div>
-                </div>
-
-                <!-- ตั้งค่าอัตราจ่าย -->
-                <div class="grid grid-cols-2 gap-2 text-xs pt-1">
-                    <div class="bg-slate-950 p-2 rounded border border-slate-800">
-                        อัตราจ่าย 3 ตัวบน: <input type="number" id="rate-bon" value="90" class="w-12 bg-slate-900 text-amber-400 text-center font-bold rounded ml-1"> บาท
-                    </div>
-                    <div class="bg-slate-950 p-2 rounded border border-slate-800">
-                        อัตราจ่าย 2 ตัวล่าง: <input type="number" id="rate-lang" value="90" class="w-12 bg-slate-900 text-amber-400 text-center font-bold rounded ml-1"> บาท
-                    </div>
-                    <div class="bg-slate-950 p-2 rounded border border-slate-800 col-span-2">
-                        อัตราจ่าย 3 ตัวโต๊ด: <input type="number" id="rate-tod" value="40" class="w-12 bg-slate-900 text-amber-400 text-center font-bold rounded ml-1"> บาท
-                    </div>
-                </div>
-
-                <button onclick="calculateProfitLoss()" class="w-full bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold py-2.5 rounded-lg shadow-lg transition flex items-center justify-center gap-2 text-sm mt-2">
-                    🔍 ตรวจผลรางวัลและคำนวณยอดได้เสีย
-                </button>
-            </div>
-
-            <!-- ผลสรุปยอดได้เสียของเจ้ามือ -->
-            <div id="result-summary-box" class="bg-slate-900 border border-slate-800 p-4 rounded-xl shadow-lg space-y-3 hidden">
-                <h3 class="text-sm font-semibold text-emerald-400 flex items-center gap-1.5">💵 สรุปยอดได้เสีย (งวดนี้)</h3>
-                <div class="grid grid-cols-1 gap-2 text-xs">
-                    <div class="flex justify-between bg-slate-950/60 p-2.5 rounded border border-slate-800">
-                        <span class="text-slate-400">ยอดรับแทงทั้งหมด:</span>
-                        <span id="res-total-income" class="font-bold text-white">0 ฿</span>
-                    </div>
-                    <div class="flex justify-between bg-slate-950/60 p-2.5 rounded border border-slate-800">
-                        <span class="text-slate-400">ยอดจ่ายรางวัลทั้งหมด:</span>
-                        <span id="res-total-payout" class="font-bold text-red-400">0 ฿</span>
-                    </div>
-                    <div class="flex justify-between bg-slate-950 p-3 rounded border border-slate-800 text-sm font-bold">
-                        <span id="res-profit-label">กำไร / ขาดทุน เจ้ามือ:</span>
-                        <span id="res-net-profit" class="text-base">0 ฿</span>
-                    </div>
-                </div>
-
-                <div class="pt-2">
-                    <p class="text-xs text-slate-400 mb-2">📋 รายการถูกรางวัล:</p>
-                    <div id="winner-list" class="space-y-1 text-xs">
-                        <p class="text-slate-500 italic">ยังไม่มีการตรวจรางวัล หรือไม่มีผู้ถูกรางวัล</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- สรุปยอดซื้อแยกตามเลข (ยอดรับแทง) -->
-            <div class="bg-slate-900 border border-slate-800 p-4 rounded-xl shadow-lg space-y-3">
-                <span class="font-semibold text-amber-400 text-sm flex items-center gap-1.5">📈 สรุปยอดซื้อแยกตามเลข (ยอดรับแทง)</span>
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left text-xs text-slate-300">
-                        <thead class="bg-slate-950 text-slate-400 border-b border-slate-800">
-                            <tr>
-                                <th class="p-2">เลข</th>
-                                <th class="p-2 text-right">บนรวม</th>
-                                <th class="p-2 text-right">ล่างรวม</th>
-                                <th class="p-2 text-right">โต๊ดรวม</th>
-                                <th class="p-2 text-right">รวมทั้งหมด</th>
-                            </tr>
-                        </thead>
-                        <tbody id="admin-summary-table-body" class="divide-y divide-slate-800/50">
-                            <tr>
-                                <td colspan="5" class="p-4 text-center text-slate-500">ยังไม่มีข้อมูลในระบบ</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            <!-- จัดการรายการโพยทั้งหมด -->
-            <div class="bg-slate-900 border border-slate-800 p-4 rounded-xl shadow-lg space-y-3">
-                <span class="font-semibold text-slate-200 text-sm flex items-center gap-1.5">⚙️ จัดการรายการโพยทั้งหมด</span>
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left text-xs text-slate-300">
-                        <thead class="bg-slate-950 text-slate-400 border-b border-slate-800">
-                            <tr>
-                                <th class="p-2">ผู้ส่ง</th>
-                                <th class="p-2">เลข</th>
-                                <th class="p-2 text-right">บน</th>
-                                <th class="p-2 text-right">ล่าง</th>
-                                <th class="p-2 text-right">โต๊ด</th>
-                                <th class="p-2 text-center">จัดการ</th>
-                            </tr>
-                        </thead>
-                        <tbody id="admin-full-table-body" class="divide-y divide-slate-800/50">
-                            <tr>
-                                <td colspan="6" class="p-4 text-center text-slate-500">ยังไม่มีรายการโพยในระบบ</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-
-        <div class="text-center text-[10px] text-slate-600">
-            Powered by Netlify
-        </div>
-
+  <!-- ADMIN -->
+  <div id="adminPanel" class="hidden">
+    <div class="grid grid-cols-2 gap-3 mb-4">
+      <div class="panel">
+        <p class="text-gray-500 text-sm">สมาชิกทั้งหมด</p>
+        <p id="totalMembers" class="text-3xl font-bold text-green-700">0</p>
+      </div>
+      <div class="panel">
+        <p class="text-gray-500 text-sm">สมาชิกใช้งาน</p>
+        <p id="activeMembers" class="text-3xl font-bold text-green-700">0</p>
+      </div>
     </div>
 
-    <!-- JavaScript สำหรับระบบทั้งหมด -->
-    <script>
-        let lottoEntries = [];
-        let isAdminMode = false;
+    <div class="panel">
+      <div class="flex justify-between items-center mb-4">
+        <h2 class="text-xl font-bold text-green-800">จัดการสมาชิก</h2>
+        <button onclick="loadMembers()" class="btn2">รีเฟรช</button>
+      </div>
+      <div id="memberList" class="space-y-3">
+        กำลังโหลดข้อมูล...
+      </div>
+    </div>
+  </div>
+</section>
 
-        function toggleAdminMode() {
-            isAdminMode = !isAdminMode;
-            const customerView = document.getElementById('customer-view');
-            const adminView = document.getElementById('admin-view');
-            const adminToggleBtn = document.getElementById('admin-toggle-btn');
-            const adminBtnText = document.getElementById('admin-btn-text');
-            const adminStatus = document.getElementById('admin-status');
+</main>
 
-            if (isAdminMode) {
-                customerView.classList.add('hidden');
-                adminView.classList.remove('hidden');
-                adminToggleBtn.className = 'w-full bg-slate-900 border border-amber-500 p-3 rounded-xl shadow-lg flex items-center justify-between text-amber-400 font-medium text-sm transition';
-                adminBtnText.innerHTML = '🔓 ออกจากหน้าแอดมิน';
-                adminStatus.innerText = 'โหมดเจ้ามือ (Admin)';
-                adminStatus.className = 'text-xs bg-amber-500/20 text-amber-400 px-2.5 py-1 rounded-lg border border-amber-500/30 font-medium';
-                updateAdminUI();
-            } else {
-                customerView.classList.remove('hidden');
-                adminView.classList.add('hidden');
-                adminToggleBtn.className = 'w-full bg-slate-900 border border-slate-800 hover:border-amber-400 p-3 rounded-xl shadow-lg flex items-center justify-between text-slate-200 font-medium text-sm transition';
-                adminBtnText.innerHTML = '🔒 เข้าสู่หน้าแอดมิน (เจ้ามือ)';
-                adminStatus.innerText = 'โหมดส่งโพย';
-                adminStatus.className = 'text-xs bg-slate-950 px-2.5 py-1 rounded-lg border border-slate-800 text-slate-400';
-            }
-        }
+<footer class="text-center text-xs text-green-700 mt-8 mb-4">
+LOTTO MASTER ONLINE · MEMBER MANAGEMENT
+</footer>
 
-        function addLottoEntry(event) {
-            event.preventDefault();
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyBld7yPcmsp0snWTdCxj5D3hC0TOlYM88g",
+  authDomain: "lotto-online-eb0cf.firebaseapp.com",
+  databaseURL: "https://lotto-online-eb0cf-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "lotto-online-eb0cf",
+  storageBucket: "lotto-online-eb0cf.firebasestorage.app",
+  messagingSenderId: "687853136586",
+  appId: "1:687853136586:web:79514948f01f527dece233",
+  measurementId: "G-F830GMM3ZG"
+};
 
-            const customer = document.getElementById('customer-name').value;
-            const numbers = document.getElementById('lotto-numbers').value;
-            const bon = parseFloat(document.getElementById('amount-bon').value) || 0;
-            const lang = parseFloat(document.getElementById('amount-lang').value) || 0;
-            const tod = parseFloat(document.getElementById('amount-tod').value) || 0;
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.database();
 
-            if (bon === 0 && lang === 0 && tod === 0) {
-                alert('กรุณากรอกจำนวนเงินอย่างน้อย 1 ช่อง (บน, ล่าง หรือ โต๊ด)');
-                return;
-            }
+let currentUser = null;
+let currentProfile = null;
 
-            const newEntry = { id: Date.now(), customer, numbers, bon, lang, tod };
-            lottoEntries.unshift(newEntry);
+function message(text){
+  document.getElementById("authMessage").textContent = text;
+}
 
-            document.getElementById('lotto-numbers').value = '';
-            document.getElementById('amount-bon').value = '0';
-            document.getElementById('amount-lang').value = '0';
-            document.getElementById('amount-tod').value = '0';
+function show(id){
+  document.getElementById(id).classList.remove("hidden");
+}
 
-            updateUI();
-            if (isAdminMode) updateAdminUI();
-        }
+function hide(id){
+  document.getElementById(id).classList.add("hidden");
+}
 
-        function deleteEntry(id) {
-            lottoEntries = lottoEntries.filter(item => item.id !== id);
-            updateUI();
-            if (isAdminMode) updateAdminUI();
-        }
+async function register(){
+  const name = document.getElementById("regName").value.trim();
+  const email = document.getElementById("regEmail").value.trim();
+  const password = document.getElementById("regPassword").value;
 
-        function updateUI() {
-            const tableBody = document.getElementById('lotto-table-body');
-            const totalCountEl = document.getElementById('total-count');
-            const totalBonEl = document.getElementById('total-bon');
-            const totalLangEl = document.getElementById('total-lang');
-            const totalTodEl = document.getElementById('total-tod');
-            const grandTotalEl = document.getElementById('grand-total');
-            const entryCountBadge = document.getElementById('entry-count-badge');
+  if(!name || !email || password.length < 6){
+    message("กรุณากรอกข้อมูลให้ครบ และรหัสผ่านอย่างน้อย 6 ตัว");
+    return;
+  }
 
-            if (lottoEntries.length === 0) {
-                tableBody.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-slate-500">ยังไม่มีรายการโพยในระบบ</td></tr>`;
-                totalCountEl.innerText = '0';
-                totalBonEl.innerText = '0';
-                totalLangEl.innerText = '0';
-                totalTodEl.innerText = '0';
-                grandTotalEl.innerText = '0 บาท';
-                entryCountBadge.innerText = '0 รายการ';
-                return;
-            }
+  try{
+    const result = await auth.createUserWithEmailAndPassword(email,password);
+    await db.ref("users/"+result.user.uid).set({
+      name:name,
+      email:result.user.email,
+      role:"member",
+      status:"active",
+      createdAt:Date.now()
+    });
+    message("สมัครสมาชิกสำเร็จ");
+  }catch(error){
+    message(error.message);
+  }
+}
 
-            let html = '';
-            let sumBon = 0;
-            let sumLang = 0;
-            let sumTod = 0;
+async function login(){
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value;
 
-            lottoEntries.forEach(item => {
-                sumBon += item.bon;
-                sumLang += item.lang;
-                sumTod += item.tod;
+  try{
+    await auth.signInWithEmailAndPassword(email,password);
+    message("");
+  }catch(error){
+    message("เข้าสู่ระบบไม่สำเร็จ: "+error.message);
+  }
+}
 
-                html += `
-                    <tr class="hover:bg-slate-900/60">
-                        <td class="p-2 font-medium text-slate-200">${escapeHtml(item.customer)}</td>
-                        <td class="p-2 text-amber-400 font-semibold">${escapeHtml(item.numbers)}</td>
-                        <td class="p-2 text-right">${item.bon > 0 ? item.bon.toLocaleString() : '-'}</td>
-                        <td class="p-2 text-right">${item.lang > 0 ? item.lang.toLocaleString() : '-'}</td>
-                        <td class="p-2 text-right">${item.tod > 0 ? item.tod.toLocaleString() : '-'}</td>
-                    </tr>
-                `;
-            });
+async function resetPassword(){
+  const email = document.getElementById("email").value.trim();
+  if(!email){
+    message("กรุณากรอกอีเมลก่อน");
+    return;
+  }
+  try{
+    await auth.sendPasswordResetEmail(email);
+    message("ส่งลิงก์รีเซ็ตรหัสผ่านแล้ว");
+  }catch(error){
+    message(error.message);
+  }
+}
 
-            let grandTotal = sumBon + sumLang + sumTod;
+async function logout(){
+  await auth.signOut();
+}
 
-            tableBody.innerHTML = html;
-            totalCountEl.innerText = lottoEntries.length;
-            totalBonEl.innerText = sumBon.toLocaleString();
-            totalLangEl.innerText = sumLang.toLocaleString();
-            totalTodEl.innerText = sumTod.toLocaleString();
-            grandTotalEl.innerText = grandTotal.toLocaleString() + ' บาท';
-            entryCountBadge.innerText = lottoEntries.length + ' รายการ';
-        }
+auth.onAuthStateChanged(async user=>{
+  currentUser = user;
+  if(!user){
+    hide("dashboard");
+    show("authPanel");
+    return;
+  }
 
-        function updateAdminUI() {
-            const adminSummaryBody = document.getElementById('admin-summary-table-body');
-            const adminFullBody = document.getElementById('admin-full-table-body');
+  try{
+    const snap = await db.ref("users/"+user.uid).once("value");
+    if(!snap.exists()){
+      await auth.signOut();
+      message("ไม่พบข้อมูลสมาชิก กรุณาติดต่อผู้ดูแลระบบ");
+      return;
+    }
 
-            if (lottoEntries.length === 0) {
-                adminSummaryBody.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-slate-500">ยังไม่มีข้อมูลในระบบ</td></tr>`;
-                adminFullBody.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-slate-500">ยังไม่มีรายการโพยในระบบ</td></tr>`;
-                return;
-            }
+    currentProfile = snap.val();
 
-            let numberSummary = {};
-            lottoEntries.forEach(item => {
-                let nums = item.numbers.split(/[\s,]+/).filter(n => n.trim() !== '');
-                nums.forEach(num => {
-                    if (!numberSummary[num]) {
-                        numberSummary[num] = { bon: 0, lang: 0, tod: 0 };
-                    }
-                    numberSummary[num].bon += item.bon;
-                    numberSummary[num].lang += item.lang;
-                    numberSummary[num].tod += item.tod;
-                });
-            });
+    if(currentProfile.status !== "active"){
+      await auth.signOut();
+      message("บัญชีนี้ถูกระงับการใช้งาน");
+      return;
+    }
 
-            let summaryHtml = '';
-            for (let num in numberSummary) {
-                let data = numberSummary[num];
-                let totalNumSum = data.bon + data.lang + data.tod;
-                summaryHtml += `
-                    <tr class="hover:bg-slate-900/60">
-                        <td class="p-2 font-bold text-amber-400 text-sm">${escapeHtml(num)}</td>
-                        <td class="p-2 text-right">${data.bon > 0 ? data.bon.toLocaleString() : '-'}</td>
-                        <td class="p-2 text-right">${data.lang > 0 ? data.lang.toLocaleString() : '-'}</td>
-                        <td class="p-2 text-right">${data.tod > 0 ? data.tod.toLocaleString() : '-'}</td>
-                        <td class="p-2 text-right font-semibold text-emerald-400">${totalNumSum.toLocaleString()} ฿</td>
-                    </tr>
-                `;
-            }
-            adminSummaryBody.innerHTML = summaryHtml;
+    hide("authPanel");
+    show("dashboard");
 
-            let fullHtml = '';
-            lottoEntries.forEach(item => {
-                fullHtml += `
-                    <tr class="hover:bg-slate-900/60">
-                        <td class="p-2 font-medium text-slate-200">${escapeHtml(item.customer)}</td>
-                        <td class="p-2 text-amber-400 font-semibold">${escapeHtml(item.numbers)}</td>
-                        <td class="p-2 text-right">${item.bon > 0 ? item.bon.toLocaleString() : '-'}</td>
-                        <td class="p-2 text-right">${item.lang > 0 ? item.lang.toLocaleString() : '-'}</td>
-                        <td class="p-2 text-right">${item.tod > 0 ? item.tod.toLocaleString() : '-'}</td>
-                        <td class="p-2 text-center">
-                            <button onclick="deleteEntry(${item.id})" class="bg-red-500/20 text-red-400 hover:bg-red-500 hover:text-white px-2 py-1 rounded text-[10px] transition">ลบ</button>
-                        </td>
-                    </tr>
-                `;
-            });
-            adminFullBody.innerHTML = fullHtml;
-        }
+    document.getElementById("welcome").textContent =
+      currentProfile.name || user.email;
 
-        function calculateProfitLoss() {
-            const winBon = document.getElementById('winning-bon').value.trim();
-            const winLang = document.getElementById('winning-lang').value.trim();
+    document.getElementById("roleLabel").textContent =
+      currentProfile.role === "admin" ? "ผู้ดูแลระบบ" : "สมาชิก";
 
-            if (!winBon && !winLang) {
-                alert('กรุณากรอกผลรางวัล 3 ตัวบน หรือ 2 ตัวล่างอย่างน้อย 1 อย่าง');
-                return;
-            }
+    if(currentProfile.role === "admin"){
+      show("adminPanel");
+      hide("memberPanel");
+      loadMembers();
+    }else{
+      hide("adminPanel");
+      show("memberPanel");
+      document.getElementById("memberStatus").textContent =
+        "ใช้งานได้ปกติ";
+    }
+  }catch(error){
+    message("โหลดข้อมูลไม่สำเร็จ: "+error.message);
+  }
+});
 
-            const rateBon = parseFloat(document.getElementById('rate-bon').value) || 90;
-            const rateLang = parseFloat(document.getElementById('rate-lang').value) || 90;
-            const rateTod = parseFloat(document.getElementById('rate-tod').value) || 40;
+async function loadMembers(){
+  const list = document.getElementById("memberList");
+  list.innerHTML = "กำลังโหลดข้อมูล...";
 
-            let totalIncome = 0;
-            lottoEntries.forEach(item => {
-                totalIncome += item.bon + item.lang + item.tod;
-            });
+  try{
+    const snap = await db.ref("users").once("value");
+    const data = snap.val() || {};
+    const users = Object.entries(data);
 
-            let totalPayout = 0;
-            let winnerDetails = [];
+    document.getElementById("totalMembers").textContent = users.length;
+    document.getElementById("activeMembers").textContent =
+      users.filter(([uid,u])=>u.status==="active").length;
 
-            function isPermutation(a, b) {
-                if (a.length !== b.length || a.length !== 3) return false;
-                return a.split('').sort().join('') === b.split('').sort().join('') && a !== b;
-            }
+    if(users.length===0){
+      list.innerHTML = "ยังไม่มีสมาชิก";
+      return;
+    }
 
-            lottoEntries.forEach(item => {
-                let nums = item.numbers.split(/[\s,]+/).filter(n => n.trim() !== '');
-                nums.forEach(num => {
-                    if (winBon && num === winBon && item.bon > 0) {
-                        let payout = item.bon * rateBon;
-                        totalPayout += payout;
-                        winnerDetails.push(`<li><b>${escapeHtml(item.customer)}</b> ถูก [บน] เลข <b>${num}</b> (${item.bon}฿) จ่าย <span class="text-red-400 font-bold">-${payout.toLocaleString()} ฿</span></li>`);
-                    }
-                    if (winBon && isPermutation(num, winBon) && item.tod > 0) {
-                        let payout = item.tod * rateTod;
-                        totalPayout += payout;
-                        winnerDetails.push(`<li><b>${escapeHtml(item.customer)}</b> ถูก [โต๊ด] เลข <b>${num}</b> (${item.tod}฿) จ่าย <span class="text-red-400 font-bold">-${payout.toLocaleString()} ฿</span></li>`);
-                    }
-                    if (winLang && num === winLang && item.lang > 0) {
-                        let payout = item.lang * rateLang;
-                        totalPayout += payout;
-                        winnerDetails.push(`<li><b>${escapeHtml(item.customer)}</b> ถูก [ล่าง] เลข <b>${num}</b> (${item.lang}฿) จ่าย <span class="text-red-400 font-bold">-${payout.toLocaleString()} ฿</span></li>`);
-                    }
-                });
-            });
+    list.innerHTML = "";
 
-            let netProfit = totalIncome - totalPayout;
+    users.forEach(([uid,u])=>{
+      const card = document.createElement("div");
+      card.className = "border border-green-100 rounded-xl p-3";
 
-            document.getElementById('result-summary-box').classList.remove('hidden');
-            document.getElementById('res-total-income').innerText = totalIncome.toLocaleString() + ' ฿';
-            document.getElementById('res-total-payout').innerText = totalPayout.toLocaleString() + ' ฿';
+      const info = document.createElement("div");
+      info.className = "font-semibold text-green-900";
+      info.textContent = u.name || "ไม่ระบุชื่อ";
 
-            let netProfitEl = document.getElementById('res-net-profit');
-            let profitLabelEl = document.getElementById('res-profit-label');
+      const email = document.createElement("div");
+      email.className = "text-sm text-gray-500";
+      email.textContent = u.email || "";
 
-            if (netProfit >= 0) {
-                profitLabelEl.innerText = 'กำไรสุทธิเจ้ามือ:';
-                netProfitEl.className = 'text-base text-emerald-400';
-                netProfitEl.innerText = '+' + netProfit.toLocaleString() + ' ฿ (ได้กำไร)';
-            } else {
-                profitLabelEl.innerText = 'ขาดทุนสุทธิเจ้ามือ:';
-                netProfitEl.className = 'text-base text-red-400';
-                netProfitEl.innerText = netProfit.toLocaleString() + ' ฿ (เข้าเนื้อ)';
-            }
+      const status = document.createElement("div");
+      status.className = "text-sm mt-1";
+      status.textContent = "สถานะ: "+(u.status || "ไม่ระบุ");
 
-            let winnerListEl = document.getElementById('winner-list');
-            if (winnerDetails.length > 0) {
-                winnerListEl.innerHTML = `<ul class="list-disc pl-4 space-y-1">${winnerDetails.join('')}</ul>`;
-            } else {
-                winnerListEl.innerHTML = `<p class="text-slate-400 italic">งวดนี้ไม่มีผู้ถูกรางวัล (เจ้ามือรับเต็ม)</p>`;
-            }
-        }
+      card.append(info,email,status);
 
-        function escapeHtml(text) {
-            const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
-            return text.replace(/[&<>"']/g, function(m) { return map[m]; });
-        }
-    </script>
+      if(uid !== currentUser.uid && u.role !== "admin"){
+        const button = document.createElement("button");
+        button.className = "btn2 mt-3 text-sm";
+        button.textContent =
+          u.status === "active" ? "ระงับสมาชิก" : "เปิดใช้งาน";
+
+        button.onclick = ()=>changeStatus(uid,
+          u.status === "active" ? "suspended" : "active");
+
+        card.append(button);
+      }
+
+      list.append(card);
+    });
+  }catch(error){
+    list.textContent = "ไม่สามารถโหลดข้อมูลได้: "+error.message;
+  }
+}
+
+async function changeStatus(uid,status){
+  if(!currentProfile || currentProfile.role !== "admin") return;
+
+  if(!confirm("ยืนยันการเปลี่ยนสถานะสมาชิก?")) return;
+
+  try{
+    await db.ref("users/"+uid+"/status").set(status);
+    loadMembers();
+  }catch(error){
+    alert("แก้ไขไม่สำเร็จ: "+error.message);
+  }
+}
+</script>
 </body>
 </html>
