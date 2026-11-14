@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LOTTO MASTER ONLINE</title>
-    <!-- Tailwind CSS CDN สำหรับจัดสไตล์ -->
+    <title>LOTTO MASTER ONLINE - Admin Dashboard</title>
+    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
@@ -28,13 +28,13 @@
             </span>
         </div>
 
-        <!-- 🔒 ปุ่มสลับโหมดแอดมิน (ที่เพิ่มกลับเข้ามา) -->
-        <button onclick="toggleAdminMode()" class="w-full bg-slate-900 border border-amber-500/40 hover:border-amber-400 p-3 rounded-xl shadow-lg flex items-center justify-between text-amber-400 font-medium text-sm transition">
-            <span class="flex items-center gap-2">🔒 โหมดแอดมิน</span>
-            <span id="admin-status" class="text-xs bg-slate-950 px-2.5 py-1 rounded-lg border border-slate-800 text-slate-400">ปิดอยู่</span>
+        <!-- ปุ่มสลับโหมด (ผู้ส่งโพย vs หน้าแอดมินเจ้ามือ) -->
+        <button onclick="toggleAdminMode()" id="admin-toggle-btn" class="w-full bg-slate-900 border border-slate-800 hover:border-amber-400 p-3 rounded-xl shadow-lg flex items-center justify-between text-slate-200 font-medium text-sm transition">
+            <span class="flex items-center gap-2" id="admin-btn-text">🔒 เข้าสู่หน้าแอดมิน (เจ้ามือ)</span>
+            <span id="admin-status" class="text-xs bg-slate-950 px-2.5 py-1 rounded-lg border border-slate-800 text-slate-400">โหมดส่งโพย</span>
         </button>
 
-        <!-- 📊 กล่องสรุปยอดรวมโพย -->
+        <!-- 📊 กล่องสรุปยอดรวมภาพรวม -->
         <div class="bg-slate-900 border border-slate-800 p-4 rounded-xl shadow-lg">
             <h3 class="text-sm font-semibold text-amber-400 mb-3 flex items-center gap-1.5">
                 📊 สรุปยอดรวมโพยงวดนี้
@@ -59,89 +59,151 @@
             </div>
         </div>
 
-        <!-- ตั้งค่าประเภทหวยและงวด -->
-        <div class="bg-slate-900 border border-slate-800 p-4 rounded-xl shadow-lg space-y-3">
-            <div>
-                <label class="block text-xs text-slate-400 mb-1">ประเภทหวย</label>
-                <select class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-slate-200 focus:outline-none focus:border-amber-400">
-                    <option>หวยรัฐบาลไทย</option>
-                </select>
+        <!-- ================= 🎛️ ส่วนที่ 1: โหมดส่งโพย (แสดงเมื่อไม่ใช่แอดมิน) ================= -->
+        <div id="customer-view" class="space-y-4">
+            <!-- ตั้งค่าประเภทหวยและงวด -->
+            <div class="bg-slate-900 border border-slate-800 p-4 rounded-xl shadow-lg space-y-3">
+                <div>
+                    <label class="block text-xs text-slate-400 mb-1">ประเภทหวย</label>
+                    <select class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-slate-200 focus:outline-none focus:border-amber-400">
+                        <option>หวยรัฐบาลไทย</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs text-slate-400 mb-1">งวดประจำวันที่</label>
+                    <input type="text" placeholder="เช่น 16 พ.ย. 2026" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-slate-200 focus:outline-none focus:border-amber-400">
+                </div>
             </div>
-            <div>
-                <label class="block text-xs text-slate-400 mb-1">งวดประจำวันที่</label>
-                <input type="text" placeholder="เช่น 16 พ.ย. 2026" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-slate-200 focus:outline-none focus:border-amber-400">
+
+            <!-- ฟอร์มส่งรายการโพยใหม่ -->
+            <form id="lotto-form" onsubmit="addLottoEntry(event)" class="bg-slate-900 border border-slate-800 p-4 rounded-xl shadow-lg space-y-3">
+                <div class="flex items-center justify-between">
+                    <span class="text-sm font-semibold text-slate-200 flex items-center gap-1">📝 ส่งรายการโพยใหม่</span>
+                    <span class="text-xs text-slate-400">ผู้ส่งโพย</span>
+                </div>
+
+                <div>
+                    <label class="block text-xs text-slate-400 mb-1">ชื่อผู้ส่ง / ชื่อลูกค้า (เจ้า)</label>
+                    <input type="text" id="customer-name" required placeholder="เช่น จะ" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-slate-200 focus:outline-none focus:border-amber-400">
+                </div>
+
+                <!-- ตัวช่วยสร้างเลขด่วน -->
+                <div class="grid grid-cols-3 gap-2">
+                    <button type="button" class="bg-slate-800 hover:bg-slate-700 text-xs py-2 rounded-lg text-slate-300 font-medium transition">🔀 กลับเลข</button>
+                    <button type="button" class="bg-slate-800 hover:bg-slate-700 text-xs py-2 rounded-lg text-slate-300 font-medium transition">➔ รูดหน้า</button>
+                    <button type="button" class="bg-slate-800 hover:bg-slate-700 text-xs py-2 rounded-lg text-slate-300 font-medium transition">⬅ รูดหลัง</button>
+                </div>
+
+                <div>
+                    <label class="block text-xs text-slate-400 mb-1">เลขที่ซื้อ (คั่นด้วย , หรือ เว้นวรรค)</label>
+                    <input type="text" id="lotto-numbers" required placeholder="เช่น 123, 45, 78" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-slate-200 focus:outline-none focus:border-amber-400">
+                </div>
+
+                <!-- ช่องกรอกจำนวนเงิน -->
+                <div class="grid grid-cols-3 gap-2">
+                    <div>
+                        <label class="block text-[11px] text-slate-400 mb-1">บน (บาท)</label>
+                        <input type="number" id="amount-bon" value="0" min="0" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2 text-sm text-center text-slate-200 focus:outline-none focus:border-amber-400">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] text-slate-400 mb-1">ล่าง (บาท)</label>
+                        <input type="number" id="amount-lang" value="0" min="0" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2 text-sm text-center text-slate-200 focus:outline-none focus:border-amber-400">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] text-slate-400 mb-1">โต๊ด (บาท)</label>
+                        <input type="number" id="amount-tod" value="0" min="0" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2 text-sm text-center text-slate-200 focus:outline-none focus:border-amber-400">
+                    </div>
+                </div>
+
+                <button type="submit" class="w-full bg-amber-400 hover:bg-amber-500 text-slate-950 font-bold py-3 rounded-lg shadow-lg transition flex items-center justify-center gap-2 mt-2">
+                    ⚡ ส่งโพยเข้าระบบออนไลน์
+                </button>
+            </form>
+
+            <!-- รายการโพยที่ส่งเข้ามาล่าสุด -->
+            <div class="bg-slate-900 border border-slate-800 p-4 rounded-xl shadow-lg space-y-3">
+                <div class="flex items-center justify-between text-sm">
+                    <span class="font-semibold text-slate-200 flex items-center gap-1.5">📋 รายการโพยที่ส่งเข้ามาล่าสุด</span>
+                    <span id="entry-count-badge" class="text-xs bg-slate-800 px-2 py-0.5 rounded-full text-slate-400">0 รายการ</span>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs text-slate-300">
+                        <thead class="bg-slate-950 text-slate-400 border-b border-slate-800">
+                            <tr>
+                                <th class="p-2">ผู้ส่ง</th>
+                                <th class="p-2">เลข</th>
+                                <th class="p-2 text-right">บน</th>
+                                <th class="p-2 text-right">ล่าง</th>
+                                <th class="p-2 text-right">โต๊ด</th>
+                            </tr>
+                        </thead>
+                        <tbody id="lotto-table-body" class="divide-y divide-slate-800/50">
+                            <tr>
+                                <td colspan="5" class="p-4 text-center text-slate-500">ยังไม่มีรายการโพยในระบบ</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
 
-        <!-- ฟอร์มส่งรายการโพยใหม่ -->
-        <form id="lotto-form" onsubmit="addLottoEntry(event)" class="bg-slate-900 border border-slate-800 p-4 rounded-xl shadow-lg space-y-3">
-            <div class="flex items-center justify-between">
-                <span class="text-sm font-semibold text-slate-200 flex items-center gap-1">📝 ส่งรายการโพยใหม่</span>
-                <span class="text-xs text-slate-400">ผู้ส่งโพย</span>
+        <!-- ================= 👑 ส่วนที่ 2: หน้าแอดมินเจ้ามือ (แสดงเฉพาะเมื่อเปิดโหมดแอดมิน) ================= -->
+        <div id="admin-view" class="space-y-4 hidden">
+            <div class="bg-amber-500/10 border border-amber-500/30 p-4 rounded-xl">
+                <h2 class="text-amber-400 font-bold text-sm flex items-center gap-2">👑 แผงควบคุมเจ้ามือ (Admin Dashboard)</h2>
+                <p class="text-xs text-slate-400 mt-1">ระบบวิเคราะห์ความเสี่ยงและสรุปยอดรวมแยกตามหมายเลข</p>
             </div>
 
-            <div>
-                <label class="block text-xs text-slate-400 mb-1">ชื่อผู้ส่ง / ชื่อลูกค้า (เจ้า)</label>
-                <input type="text" id="customer-name" required placeholder="เช่น จะ" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-slate-200 focus:outline-none focus:border-amber-400">
-            </div>
-
-            <!-- ตัวช่วยสร้างเลขด่วน -->
-            <div class="grid grid-cols-3 gap-2">
-                <button type="button" class="bg-slate-800 hover:bg-slate-700 text-xs py-2 rounded-lg text-slate-300 font-medium transition">🔀 กลับเลข</button>
-                <button type="button" class="bg-slate-800 hover:bg-slate-700 text-xs py-2 rounded-lg text-slate-300 font-medium transition">➔ รูดหน้า</button>
-                <button type="button" class="bg-slate-800 hover:bg-slate-700 text-xs py-2 rounded-lg text-slate-300 font-medium transition">⬅ รูดหลัง</button>
-            </div>
-
-            <div>
-                <label class="block text-xs text-slate-400 mb-1">เลขที่ซื้อ (คั่นด้วย , หรือ เว้นวรรค)</label>
-                <input type="text" id="lotto-numbers" required placeholder="เช่น 123, 45, 78" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-slate-200 focus:outline-none focus:border-amber-400">
-            </div>
-
-            <!-- ช่องกรอกจำนวนเงิน -->
-            <div class="grid grid-cols-3 gap-2">
-                <div>
-                    <label class="block text-[11px] text-slate-400 mb-1">บน (บาท)</label>
-                    <input type="number" id="amount-bon" value="0" min="0" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2 text-sm text-center text-slate-200 focus:outline-none focus:border-amber-400">
+            <!-- ตารางสรุปยอดแยกตามเลข (ยอดรวมความเสี่ยงเจ้ามือ) -->
+            <div class="bg-slate-900 border border-slate-800 p-4 rounded-xl shadow-lg space-y-3">
+                <div class="flex items-center justify-between text-sm">
+                    <span class="font-semibold text-amber-400 flex items-center gap-1.5">📈 สรุปยอดซื้อแยกตามเลข (ยอดรับแทง)</span>
                 </div>
-                <div>
-                    <label class="block text-[11px] text-slate-400 mb-1">ล่าง (บาท)</label>
-                    <input type="number" id="amount-lang" value="0" min="0" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2 text-sm text-center text-slate-200 focus:outline-none focus:border-amber-400">
-                </div>
-                <div>
-                    <label class="block text-[11px] text-slate-400 mb-1">โต๊ด (บาท)</label>
-                    <input type="number" id="amount-tod" value="0" min="0" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2 text-sm text-center text-slate-200 focus:outline-none focus:border-amber-400">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs text-slate-300">
+                        <thead class="bg-slate-950 text-slate-400 border-b border-slate-800">
+                            <tr>
+                                <th class="p-2">เลข</th>
+                                <th class="p-2 text-right">บนรวม</th>
+                                <th class="p-2 text-right">ล่างรวม</th>
+                                <th class="p-2 text-right">โต๊ดรวม</th>
+                                <th class="p-2 text-right">รวมทั้งหมด</th>
+                            </tr>
+                        </thead>
+                        <tbody id="admin-summary-table-body" class="divide-y divide-slate-800/50">
+                            <tr>
+                                <td colspan="5" class="p-4 text-center text-slate-500">ยังไม่มีข้อมูลในระบบ</td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
 
-            <button type="submit" class="w-full bg-amber-400 hover:bg-amber-500 text-slate-950 font-bold py-3 rounded-lg shadow-lg transition flex items-center justify-center gap-2 mt-2">
-                ⚡ ส่งโพยเข้าระบบออนไลน์
-            </button>
-        </form>
-
-        <!-- รายการโพยที่ส่งเข้ามาล่าสุด -->
-        <div class="bg-slate-900 border border-slate-800 p-4 rounded-xl shadow-lg space-y-3">
-            <div class="flex items-center justify-between text-sm">
-                <span class="font-semibold text-slate-200 flex items-center gap-1.5">📋 รายการโพยที่ส่งเข้ามาล่าสุด</span>
-                <span id="entry-count-badge" class="text-xs bg-slate-800 px-2 py-0.5 rounded-full text-slate-400">0 รายการ</span>
-            </div>
-
-            <div class="overflow-x-auto">
-                <table class="w-full text-left text-xs text-slate-300">
-                    <thead class="bg-slate-950 text-slate-400 border-b border-slate-800">
-                        <tr>
-                            <th class="p-2">ผู้ส่ง</th>
-                            <th class="p-2">เลข</th>
-                            <th class="p-2 text-right">บน</th>
-                            <th class="p-2 text-right">ล่าง</th>
-                            <th class="p-2 text-right">โต๊ด</th>
-                        </tr>
-                    </thead>
-                    <tbody id="lotto-table-body" class="divide-y divide-slate-800/50">
-                        <tr>
-                            <td colspan="5" class="p-4 text-center text-slate-500">ยังไม่มีรายการโพยในระบบ</td>
-                        </tr>
-                    </tbody>
-                </table>
+            <!-- จัดการรายการโพยทั้งหมด (ลบรายการได้) -->
+            <div class="bg-slate-900 border border-slate-800 p-4 rounded-xl shadow-lg space-y-3">
+                <div class="flex items-center justify-between text-sm">
+                    <span class="font-semibold text-slate-200 flex items-center gap-1.5">⚙️ จัดการรายการโพยทั้งหมด</span>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs text-slate-300">
+                        <thead class="bg-slate-950 text-slate-400 border-b border-slate-800">
+                            <tr>
+                                <th class="p-2">ผู้ส่ง</th>
+                                <th class="p-2">เลข</th>
+                                <th class="p-2 text-right">บน</th>
+                                <th class="p-2 text-right">ล่าง</th>
+                                <th class="p-2 text-right">โต๊ด</th>
+                                <th class="p-2 text-center">จัดการ</th>
+                            </tr>
+                        </thead>
+                        <tbody id="admin-full-table-body" class="divide-y divide-slate-800/50">
+                            <tr>
+                                <td colspan="6" class="p-4 text-center text-slate-500">ยังไม่มีรายการโพยในระบบ</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
 
@@ -151,20 +213,34 @@
 
     </div>
 
-    <!-- JavaScript สำหรับจัดการข้อมูลและการคำนวณ -->
+    <!-- JavaScript สำหรับระบบแอดมินและคำนวณ -->
     <script>
         let lottoEntries = [];
         let isAdminMode = false;
 
         function toggleAdminMode() {
             isAdminMode = !isAdminMode;
-            const statusEl = document.getElementById('admin-status');
+            const customerView = document.getElementById('customer-view');
+            const adminView = document.getElementById('admin-view');
+            const adminToggleBtn = document.getElementById('admin-toggle-btn');
+            const adminBtnText = document.getElementById('admin-btn-text');
+            const adminStatus = document.getElementById('admin-status');
+
             if (isAdminMode) {
-                statusEl.innerText = 'เปิดอยู่';
-                statusEl.className = 'text-xs bg-emerald-500/20 text-emerald-400 px-2.5 py-1 rounded-lg border border-emerald-500/30 font-medium';
+                customerView.classList.add('hidden');
+                adminView.classList.remove('hidden');
+                adminToggleBtn.className = 'w-full bg-slate-900 border border-amber-500 p-3 rounded-xl shadow-lg flex items-center justify-between text-amber-400 font-medium text-sm transition';
+                adminBtnText.innerHTML = '🔓 ออกจากหน้าแอดมิน';
+                adminStatus.innerText = 'โหมดเจ้ามือ (Admin)';
+                adminStatus.className = 'text-xs bg-amber-500/20 text-amber-400 px-2.5 py-1 rounded-lg border border-amber-500/30 font-medium';
+                updateAdminUI();
             } else {
-                statusEl.innerText = 'ปิดอยู่';
-                statusEl.className = 'text-xs bg-slate-950 px-2.5 py-1 rounded-lg border border-slate-800 text-slate-400';
+                customerView.classList.remove('hidden');
+                adminView.classList.add('hidden');
+                adminToggleBtn.className = 'w-full bg-slate-900 border border-slate-800 hover:border-amber-400 p-3 rounded-xl shadow-lg flex items-center justify-between text-slate-200 font-medium text-sm transition';
+                adminBtnText.innerHTML = '🔒 เข้าสู่หน้าแอดมิน (เจ้ามือ)';
+                adminStatus.innerText = 'โหมดส่งโพย';
+                adminStatus.className = 'text-xs bg-slate-950 px-2.5 py-1 rounded-lg border border-slate-800 text-slate-400';
             }
         }
 
@@ -182,7 +258,7 @@
                 return;
             }
 
-            const newEntry = { customer, numbers, bon, lang, tod };
+            const newEntry = { id: Date.now(), customer, numbers, bon, lang, tod };
             lottoEntries.unshift(newEntry);
 
             document.getElementById('lotto-numbers').value = '';
@@ -191,6 +267,13 @@
             document.getElementById('amount-tod').value = '0';
 
             updateUI();
+            if (isAdminMode) updateAdminUI();
+        }
+
+        function deleteEntry(id) {
+            lottoEntries = lottoEntries.filter(item => item.id !== id);
+            updateUI();
+            updateAdminUI();
         }
 
         function updateUI() {
@@ -245,8 +328,68 @@
             entryCountBadge.innerText = lottoEntries.length + ' รายการ';
         }
 
+        function updateAdminUI() {
+            const adminSummaryBody = document.getElementById('admin-summary-table-body');
+            const adminFullBody = document.getElementById('admin-full-table-body');
+
+            if (lottoEntries.length === 0) {
+                adminSummaryBody.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-slate-500">ยังไม่มีข้อมูลในระบบ</td></tr>`;
+                adminFullBody.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-slate-500">ยังไม่มีรายการโพยในระบบ</td></tr>`;
+                return;
+            }
+
+            // 1. คำนวณรวมยอดแยกตามหมายเลข (Aggregated by Number)
+            let numberSummary = {};
+            lottoEntries.forEach(item => {
+                // แยกเลขด้วย , หรือ เว้นวรรค
+                let nums = item.numbers.split(/[\s,]+/).filter(n => n.trim() !== '');
+                nums.forEach(num => {
+                    if (!numberSummary[num]) {
+                        numberSummary[num] = { bon: 0, lang: 0, tod: 0 };
+                    }
+                    numberSummary[num].bon += item.bon;
+                    numberSummary[num].lang += item.lang;
+                    numberSummary[num].tod += item.tod;
+                });
+            });
+
+            let summaryHtml = '';
+            for (let num in numberSummary) {
+                let data = numberSummary[num];
+                let totalNumSum = data.bon + data.lang + data.tod;
+                summaryHtml += `
+                    <tr class="hover:bg-slate-900/60">
+                        <td class="p-2 font-bold text-amber-400 text-sm">${escapeHtml(num)}</td>
+                        <td class="p-2 text-right">${data.bon > 0 ? data.bon.toLocaleString() : '-'}</td>
+                        <td class="p-2 text-right">${data.lang > 0 ? data.lang.toLocaleString() : '-'}</td>
+                        <td class="p-2 text-right">${data.tod > 0 ? data.tod.toLocaleString() : '-'}</td>
+                        <td class="p-2 text-right font-semibold text-emerald-400">${totalNumSum.toLocaleString()} ฿</td>
+                    </tr>
+                `;
+            }
+            adminSummaryBody.innerHTML = summaryHtml;
+
+            // 2. ตารางแสดงรายการทั้งหมดพร้อมปุ่มลบสำหรับแอดมิน
+            let fullHtml = '';
+            lottoEntries.forEach(item => {
+                fullHtml += `
+                    <tr class="hover:bg-slate-900/60">
+                        <td class="p-2 font-medium text-slate-200">${escapeHtml(item.customer)}</td>
+                        <td class="p-2 text-amber-400 font-semibold">${escapeHtml(item.numbers)}</td>
+                        <td class="p-2 text-right">${item.bon > 0 ? item.bon.toLocaleString() : '-'}</td>
+                        <td class="p-2 text-right">${item.lang > 0 ? item.lang.toLocaleString() : '-'}</td>
+                        <td class="p-2 text-right">${item.tod > 0 ? item.tod.toLocaleString() : '-'}</td>
+                        <td class="p-2 text-center">
+                            <button onclick="deleteEntry(${item.id})" class="bg-red-500/20 text-red-400 hover:bg-red-500 hover:text-white px-2 py-1 rounded text-[10px] transition">ลบ</button>
+                        </td>
+                    </tr>
+                `;
+            });
+            adminFullBody.innerHTML = fullHtml;
+        }
+
         function escapeHtml(text) {
-            const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
+            const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;"' };
             return text.replace(/[&<>"']/g, function(m) { return map[m]; });
         }
     </script>
