@@ -28,7 +28,13 @@
             </span>
         </div>
 
-        <!-- 📊 กล่องสรุปยอดรวม (ที่เพิ่มเข้ามาใหม่) -->
+        <!-- 🔒 ปุ่มสลับโหมดแอดมิน (ที่เพิ่มกลับเข้ามา) -->
+        <button onclick="toggleAdminMode()" class="w-full bg-slate-900 border border-amber-500/40 hover:border-amber-400 p-3 rounded-xl shadow-lg flex items-center justify-between text-amber-400 font-medium text-sm transition">
+            <span class="flex items-center gap-2">🔒 โหมดแอดมิน</span>
+            <span id="admin-status" class="text-xs bg-slate-950 px-2.5 py-1 rounded-lg border border-slate-800 text-slate-400">ปิดอยู่</span>
+        </button>
+
+        <!-- 📊 กล่องสรุปยอดรวมโพย -->
         <div class="bg-slate-900 border border-slate-800 p-4 rounded-xl shadow-lg">
             <h3 class="text-sm font-semibold text-amber-400 mb-3 flex items-center gap-1.5">
                 📊 สรุปยอดรวมโพยงวดนี้
@@ -148,6 +154,19 @@
     <!-- JavaScript สำหรับจัดการข้อมูลและการคำนวณ -->
     <script>
         let lottoEntries = [];
+        let isAdminMode = false;
+
+        function toggleAdminMode() {
+            isAdminMode = !isAdminMode;
+            const statusEl = document.getElementById('admin-status');
+            if (isAdminMode) {
+                statusEl.innerText = 'เปิดอยู่';
+                statusEl.className = 'text-xs bg-emerald-500/20 text-emerald-400 px-2.5 py-1 rounded-lg border border-emerald-500/30 font-medium';
+            } else {
+                statusEl.innerText = 'ปิดอยู่';
+                statusEl.className = 'text-xs bg-slate-950 px-2.5 py-1 rounded-lg border border-slate-800 text-slate-400';
+            }
+        }
 
         function addLottoEntry(event) {
             event.preventDefault();
@@ -163,17 +182,14 @@
                 return;
             }
 
-            // เพิ่มข้อมูลเข้าไปในอาเรย์
             const newEntry = { customer, numbers, bon, lang, tod };
-            lottoEntries.unshift(newEntry); // นำรายการใหม่ไว้ด้านบนสุด
+            lottoEntries.unshift(newEntry);
 
-            // ล้างช่องกรอกตัวเลขและจำนวนเงิน (คงชื่อผู้ส่งไว้เพื่อความสะดวก)
             document.getElementById('lotto-numbers').value = '';
             document.getElementById('amount-bon').value = '0';
             document.getElementById('amount-lang').value = '0';
             document.getElementById('amount-tod').value = '0';
 
-            // อัปเดตการแสดงผล
             updateUI();
         }
 
@@ -229,7 +245,6 @@
             entryCountBadge.innerText = lottoEntries.length + ' รายการ';
         }
 
-        // ป้องกัน XSS เบื้องต้น
         function escapeHtml(text) {
             const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
             return text.replace(/[&<>"']/g, function(m) { return map[m]; });
