@@ -1,415 +1,1195 @@
 
-<!DOCTYPE html>
-<html lang="th">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-<meta name="theme-color" content="#1e293b">
-<title>LOTTO MASTER ONLINE</title>
-<style>
-:root{
- --bg:#0f172a;
- --panel:#1e293b;
- --input:#0f172a;
- --border:#334155;
- --gold:#fbbf24;
- --gold2:#f59e0b;
- --teal:#2dd4bf;
- --text:#f1f5f9;
- --muted:#94a3b8;
- --red:#fb7185;
-}
-*{box-sizing:border-box}
-body{
- margin:0;background:var(--bg);color:var(--text);
- font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
-}
-header{
- background:var(--panel);padding:25px 18px 18px;
- border-bottom:1px solid var(--border);
- position:sticky;top:0;z-index:5;
-}
-.brand{display:flex;align-items:center;gap:14px}
-.logo{
- width:62px;height:62px;border-radius:15px;
- display:grid;place-items:center;
- background:var(--gold2);color:#111827;
- font-size:30px;font-weight:bold;
-}
-.brand h1{font-size:23px;color:var(--gold);margin:0}
-.brand p{font-size:13px;color:var(--muted);margin:5px 0 0}
-.status{
- margin-top:15px;display:inline-block;
- border:1px solid var(--gold2);color:var(--gold);
- background:#422b1c;padding:7px 12px;border-radius:30px;
- font-size:12px;
-}
-main{max-width:760px;margin:auto;padding:15px}
-.card{
- background:var(--panel);border:1px solid var(--border);
- border-radius:20px;padding:19px;margin-bottom:18px;
- box-shadow:0 5px 18px #0002;
-}
-h2{font-size:19px;margin:0 0 17px;color:var(--gold)}
-h3{font-size:15px;color:var(--teal);margin:0 0 12px}
-label{display:block;color:var(--muted);font-size:14px;margin:13px 0 7px}
-input,select,textarea{
- width:100%;background:var(--input);color:var(--text);
- border:1px solid #475569;border-radius:12px;
- padding:14px;font-size:16px;outline:none;
-}
-input:focus,select:focus,textarea:focus{border-color:var(--teal)}
-button{
- border:0;border-radius:12px;padding:13px 15px;
- font-size:15px;font-weight:650;cursor:pointer;
-}
-.gold{background:var(--gold2);color:#111827}
-.darkbtn{background:#334155;color:white;border:1px solid #475569}
-.tealbtn{background:#134e4a;color:var(--teal);border:1px solid #0f766e}
-.redbtn{background:#4c1d2b;color:#fda4af}
-.full{width:100%;margin-top:14px}
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.stats{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
-.stat{
- background:#0f172a;border:1px solid #334155;
- padding:14px;border-radius:14px;
-}
-.stat small{color:var(--muted)}
-.stat strong{display:block;font-size:23px;color:var(--gold);margin-top:7px}
-.ticket{
- background:#111c30;border:1px solid #334155;
- padding:14px;border-radius:14px;margin:10px 0;
-}
-.ticket-top{display:flex;justify-content:space-between;gap:8px;align-items:center}
-.ticket-number{font-size:27px;font-weight:800;letter-spacing:5px;color:var(--gold)}
-.ticket-meta{font-size:12px;color:var(--muted);margin-top:8px}
-.ticket-actions{display:flex;gap:8px;margin-top:12px}
-.ticket-actions button{flex:1;font-size:13px;padding:10px}
-.empty{text-align:center;color:var(--muted);padding:25px 5px}
-.nav{display:flex;gap:8px;margin-bottom:16px;overflow:auto}
-.nav button{white-space:nowrap;flex:1}
-.nav button.active{background:var(--gold2);color:#111827}
-.notice{
- background:#102e32;color:#99f6e4;border:1px solid #0f766e;
- border-radius:12px;padding:12px;font-size:13px;line-height:1.6;
- margin-bottom:15px;
-}
-.result{padding:12px;border-radius:12px;margin-top:12px;font-size:14px}
-footer{text-align:center;color:#64748b;font-size:12px;padding:20px}
-.hidden{display:none!important}
-@media(max-width:400px){
- .brand h1{font-size:19px}
- .card{padding:15px}
- .ticket-number{font-size:23px}
-}
-</style>
-</head>
-<body>
 
-<header>
- <div class="brand">
-  <div class="logo">◉</div>
+<!DOCTYPE html>
+
+<html lang="th">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<title>Green Lotto Manager</title>
+
+<script src="https://cdn.tailwindcss.com"></script>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+<style>
+
+*{box-sizing:border-box}
+
+body{font-family:Sarabun,sans-serif;background:#061b14;color:#e8fff2}
+
+.panel{background:#0d2b20;border:1px solid #1d5940;border-radius:18px}
+
+.field{width:100%;background:#061b14;border:1px solid #286347;border-radius:10px;padding:10px 12px;color:#ecfff4;outline:none}
+
+.field:focus{border-color:#4ade80;box-shadow:0 0 0 2px #4ade8030}
+
+.btn{border-radius:10px;padding:10px 14px;font-weight:700}
+
+.btn-main{background:#4ade80;color:#052e1b}
+
+.btn-sub{background:#174b35;color:#d9ffe8;border:1px solid #286347}
+
+.btn-danger{background:#4c1722;color:#fecdd3;border:1px solid #873044}
+
+.muted{color:#9bc7ae}
+
+.hidden{display:none!important}
+
+th,td{padding:9px 7px;border-bottom:1px solid #1d4936;white-space:nowrap}
+
+th{color:#9bc7ae;font-size:12px;font-weight:600}
+
+.stat{background:#082319;border:1px solid #1d5940;border-radius:14px;padding:12px}
+
+.positive{color:#86efac}
+
+.negative{color:#fda4af}
+
+</style>
+
+</head>
+
+<body class="min-h-screen pb-12">
+
+<header class="sticky top-0 z-20 border-b border-emerald-900 bg-[#082319]/95 backdrop-blur">
+
+ <div class="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
+
   <div>
-   <h1>LOTTO MASTER ONLINE</h1>
-   <p>ระบบบันทึกสลากส่วนตัว</p>
+
+   <div class="font-extrabold tracking-wide text-green-300">GREEN LOTTO MANAGER</div>
+
+   <div class="text-xs muted">ระบบบันทึกรายการ • รวมยอด • ตรวจผล</div>
+
   </div>
+
+  <div class="flex gap-2 items-center">
+
+   <span id="connection" class="text-xs muted">กำลังเริ่มระบบ</span>
+
+   <button class="btn btn-sub text-xs" onclick="adminToggle()">
+
+    <span id="adminText">เข้าสู่แอดมิน</span>
+
+   </button>
+
+  </div>
+
  </div>
- <div class="status">● โหมดออฟไลน์ (ข้อมูลอยู่ในอุปกรณ์นี้)</div>
+
 </header>
 
-<main>
- <div class="nav">
-  <button class="active" onclick="showPage('home',this)">หน้าหลัก</button>
-  <button onclick="showPage('records',this)">รายการสลาก</button>
-  <button onclick="showPage('check',this)">ตรวจผล</button>
-  <button onclick="showPage('backup',this)">สำรองข้อมูล</button>
+<main class="max-w-5xl mx-auto p-4 space-y-4">
+
+<section class="panel p-4 space-y-3">
+
+ <div class="font-bold text-green-300">ตั้งค่าห้องและงวด</div>
+
+ <div class="grid sm:grid-cols-3 gap-2">
+
+  <div>
+
+   <label class="text-xs muted">รหัสห้อง</label>
+
+   <div class="flex gap-2">
+
+    <input id="room" class="field" value="lotto-main">
+
+    <button class="btn btn-sub" onclick="changeRoom()">เข้า</button>
+
+   </div>
+
+  </div>
+
+  <div>
+
+   <label class="text-xs muted">ประเภท</label>
+
+   <select id="lottoType" class="field" onchange="saveMeta()">
+
+    <option>หวยรัฐบาลไทย</option>
+
+    <option>หวยลาวพัฒนา</option>
+
+    <option>หวยฮานอย</option>
+
+    <option>หวยหุ้น / อื่นๆ</option>
+
+   </select>
+
+  </div>
+
+  <div>
+
+   <label class="text-xs muted">งวดประจำวันที่</label>
+
+   <input id="lottoDate" class="field" placeholder="เช่น 16 พ.ย. 2569" onchange="saveMeta()">
+
+  </div>
+
  </div>
 
- <section id="home">
-  <div class="card">
-   <h2>▣ ข้อมูลสลาก</h2>
-   <label>ประเภทสลาก</label>
-   <select id="ticketType">
-    <option>สลากกินแบ่งรัฐบาลไทย</option>
-    <option>สลากประเภทอื่นที่ซื้ออย่างถูกกฎหมาย</option>
-   </select>
-   <label>งวดประจำวันที่</label>
-   <input type="date" id="drawDate">
+ <div class="flex flex-wrap gap-2">
+
+  <button class="btn btn-sub text-sm" onclick="shareLink()">คัดลอกลิงก์ห้อง</button>
+
+  <button class="btn btn-sub text-sm admin hidden" onclick="exportCSV()">ส่งออก CSV</button>
+
+  <button class="btn btn-sub text-sm admin hidden" onclick="backupJSON()">สำรองข้อมูล JSON</button>
+
+ </div>
+
+</section>
+
+<section class="panel p-4 space-y-3">
+
+ <div class="flex justify-between items-center">
+
+  <h2 class="font-bold text-green-300">บันทึกรายการ</h2>
+
+  <span class="text-xs muted">ผู้ส่งโพย</span>
+
+ </div>
+
+ <div>
+
+  <label class="text-xs muted">ชื่อลูกค้า / เจ้า</label>
+
+  <input id="customer" class="field" list="customers" placeholder="ระบุชื่อลูกค้า">
+
+  <datalist id="customers"></datalist>
+
+ </div>
+
+ <div>
+
+  <label class="text-xs muted">เลข (คั่นด้วยจุลภาคหรือเว้นวรรค)</label>
+
+  <input id="numbers" class="field text-lg font-bold tracking-wider" inputmode="numeric" placeholder="เช่น 123, 45, 08">
+
+ </div>
+
+ <div class="grid grid-cols-3 gap-2">
+
+  <div>
+
+   <label class="text-xs muted">บน / เลขละ (บาท)</label>
+
+   <input id="top" class="field" type="number" min="0" inputmode="decimal" placeholder="0">
+
   </div>
 
-  <div class="card">
-   <h2>✎ บันทึกสลากที่ซื้อ</h2>
-   <div class="notice">
-    บันทึกเฉพาะหมายเลขสลากที่ซื้อจริง เพื่อเก็บประวัติส่วนตัว ไม่มีระบบรับแทงหรือรับชำระเงิน
-   </div>
+  <div>
 
-   <label>เลขสลาก 6 หลัก</label>
-   <input id="ticketNumber" type="text" inputmode="numeric"
-    maxlength="6" placeholder="เช่น 123456">
+   <label class="text-xs muted">ล่าง / เลขละ</label>
 
-   <label>ราคาที่ซื้อจริง (บาท)</label>
-   <input id="ticketPrice" type="number" min="0" step="0.01"
-    placeholder="ระบุราคาที่จ่ายจริง">
+   <input id="bottom" class="field" type="number" min="0" inputmode="decimal" placeholder="0">
 
-   <label>แหล่งที่ซื้อ / หมายเหตุ</label>
-   <input id="ticketNote" placeholder="เช่น ร้านสลาก หรือหมายเหตุ">
-
-   <button class="gold full" onclick="addTicket()">＋ บันทึกสลาก</button>
   </div>
 
-  <div class="card">
-   <h2>▣ ภาพรวมข้อมูลของฉัน</h2>
-   <div class="stats">
-    <div class="stat">
-     <small>จำนวนสลาก</small>
-     <strong id="totalCount">0</strong>
-    </div>
-    <div class="stat">
-     <small>เงินที่ซื้อจริง</small>
-     <strong id="totalCost">0 ฿</strong>
-    </div>
-   </div>
+  <div>
+
+   <label class="text-xs muted">โต๊ด / เลขละ</label>
+
+   <input id="toad" class="field" type="number" min="0" inputmode="decimal" placeholder="0">
+
   </div>
 
-  <div class="card">
-   <h2>รายการล่าสุด</h2>
-   <div id="recentList"></div>
-  </div>
- </section>
+ </div>
 
- <section id="records" class="hidden">
-  <div class="card">
-   <h2>▤ รายการสลากทั้งหมด</h2>
-   <input id="search" placeholder="ค้นหาเลขสลาก..." oninput="render()">
-   <label>กรองตามงวด</label>
-   <input type="date" id="filterDate" onchange="render()">
-   <div id="allList"></div>
-  </div>
- </section>
+ <div class="grid grid-cols-3 gap-2">
 
- <section id="check" class="hidden">
-  <div class="card">
-   <h2>🏆 ตรวจสอบหมายเลขสลาก</h2>
-   <div class="notice">
-    กรอกหมายเลขรางวัลที่ 1 จากประกาศผลอย่างเป็นทางการ
-    ระบบจะเปรียบเทียบเลข 6 หลักกับสลากที่คุณบันทึกไว้เท่านั้น
-   </div>
-   <label>หมายเลขรางวัลที่ 1</label>
-   <input id="winningNumber" inputmode="numeric" maxlength="6"
-    placeholder="กรอกเลข 6 หลัก">
-   <button class="gold full" onclick="checkTickets()">ตรวจสอบรายการ</button>
-   <div id="checkResult"></div>
-  </div>
- </section>
+  <button class="btn btn-sub text-sm" onclick="reverseNums()">กลับเลข</button>
 
- <section id="backup" class="hidden">
-  <div class="card">
-   <h2>⬇ สำรองและกู้คืนข้อมูล</h2>
-   <p style="color:var(--muted);line-height:1.7;font-size:14px">
-    ดาวน์โหลดข้อมูลเก็บไว้ เพื่อป้องกันข้อมูลสูญหายเมื่อล้างประวัติเบราว์เซอร์หรือเปลี่ยนอุปกรณ์
-   </p>
-   <button class="gold full" onclick="downloadBackup()">ดาวน์โหลดข้อมูลสำรอง</button>
-   <label>นำเข้าข้อมูลสำรอง JSON</label>
-   <input type="file" id="importFile" accept=".json,application/json">
-   <button class="tealbtn full" onclick="importBackup()">นำเข้าข้อมูล</button>
-   <button class="redbtn full" onclick="deleteAll()">ลบข้อมูลทั้งหมด</button>
+  <button class="btn btn-sub text-sm" onclick="runNums(true)">รูดหน้า</button>
+
+  <button class="btn btn-sub text-sm" onclick="runNums(false)">รูดหลัง</button>
+
+ </div>
+
+ <button class="btn btn-main w-full" onclick="addEntries()">บันทึกรายการ</button>
+
+ <p class="text-xs muted">ระบบคิดเงินตามจำนวนเงินต่อเลขที่กรอก และแยก 2 ตัว / 3 ตัวอัตโนมัติ</p>
+
+</section>
+
+<section class="panel p-4 space-y-3 admin hidden">
+
+ <div class="flex flex-wrap justify-between gap-2 items-center">
+
+  <h2 class="font-bold text-green-300">ตรวจผลรางวัลและตั้งค่าอัตราจ่าย</h2>
+
+  <span class="text-xs muted">เฉพาะแอดมิน</span>
+
+ </div>
+
+ <div class="grid grid-cols-2 gap-2">
+
+  <div>
+
+   <label class="text-xs muted">ผล 3 ตัวบน</label>
+
+   <input id="win3" class="field text-center text-xl font-bold" maxlength="3" inputmode="numeric" placeholder="000" oninput="resultChanged()">
+
+   <div class="text-xs muted text-center mt-1" id="derived2">2 ตัวบน: —</div>
+
   </div>
- </section>
+
+  <div>
+
+   <label class="text-xs muted">ผล 2 ตัวล่าง</label>
+
+   <input id="win2" class="field text-center text-xl font-bold" maxlength="2" inputmode="numeric" placeholder="00" oninput="resultChanged()">
+
+  </div>
+
+ </div>
+
+ <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+
+  <div>
+
+   <label class="text-xs muted">3 ตัวบน จ่ายบาทละ</label>
+
+   <input id="r3" type="number" class="field" value="900" onchange="saveRates()">
+
+  </div>
+
+  <div>
+
+   <label class="text-xs muted">3 ตัวโต๊ด</label>
+
+   <input id="rt" type="number" class="field" value="150" onchange="saveRates()">
+
+  </div>
+
+  <div>
+
+   <label class="text-xs muted">2 ตัวบน</label>
+
+   <input id="r2t" type="number" class="field" value="90" onchange="saveRates()">
+
+  </div>
+
+  <div>
+
+   <label class="text-xs muted">2 ตัวล่าง</label>
+
+   <input id="r2b" type="number" class="field" value="90" onchange="saveRates()">
+
+  </div>
+
+ </div>
+
+ <div class="flex justify-end">
+
+  <button class="btn btn-danger text-sm" onclick="clearResults()">ล้างผลรางวัล</button>
+
+ </div>
+
+</section>
+
+<section class="panel p-4 space-y-3 admin hidden">
+
+ <div class="flex flex-wrap justify-between items-center gap-2">
+
+  <h2 class="font-bold text-green-300">ภาพรวมเจ้ามือ</h2>
+
+  <span class="text-xs muted">คำนวณจากยอดรับแทงลบยอดจ่ายรางวัล</span>
+
+ </div>
+
+ <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+
+  <div class="stat">
+
+   <div class="text-xs muted">ยอดรับแทงรวม</div>
+
+   <div id="allSales" class="text-lg font-extrabold">0 ฿</div>
+
+  </div>
+
+  <div class="stat">
+
+   <div class="text-xs muted">ยอดจ่ายรางวัล</div>
+
+   <div id="allPayout" class="text-lg font-extrabold text-rose-300">0 ฿</div>
+
+  </div>
+
+  <div class="stat">
+
+   <div class="text-xs muted">กำไร / ขาดทุน</div>
+
+   <div id="hostNet" class="text-lg font-extrabold">0 ฿</div>
+
+  </div>
+
+  <div class="stat">
+
+   <div class="text-xs muted">จำนวนเจ้า</div>
+
+   <div id="customerCount" class="text-lg font-extrabold">0</div>
+
+  </div>
+
+ </div>
+
+ <div class="text-xs muted">กำไร/ขาดทุนสุทธิ = ยอดรับแทง − ยอดรางวัลที่ต้องจ่าย ยังไม่หักค่าใช้จ่ายหรือส่วนแบ่งอื่น</div>
+
+ <div class="flex flex-wrap gap-2 items-center">
+
+  <input id="filterCustomer" class="field flex-1" placeholder="ค้นหาชื่อลูกค้า..." oninput="render()">
+
+  <select id="sortCustomers" class="field w-auto" onchange="render()">
+
+   <option value="sales">เรียงยอดซื้อสูงสุด</option>
+
+   <option value="net">เรียงกำไรเจ้ามือสูงสุด</option>
+
+   <option value="name">เรียงตามชื่อ</option>
+
+  </select>
+
+ </div>
+
+ <div id="customerSummary" class="space-y-2"></div>
+
+</section>
+
+<section class="panel p-4 space-y-3">
+
+ <div class="flex flex-wrap justify-between items-center gap-2">
+
+  <h2 class="font-bold text-green-300">รายการโพยในห้อง</h2>
+
+  <span id="entryCount" class="text-xs muted">0 รายการ</span>
+
+ </div>
+
+ <div class="overflow-x-auto">
+
+  <table class="w-full text-sm">
+
+   <thead>
+
+    <tr>
+
+     <th>ลูกค้า</th>
+
+     <th>เลข</th>
+
+     <th>บน</th>
+
+     <th>ล่าง</th>
+
+     <th>โต๊ด</th>
+
+     <th>รางวัล</th>
+
+     <th class="admin hidden">ลบ</th>
+
+    </tr>
+
+   </thead>
+
+   <tbody id="entriesBody"></tbody>
+
+  </table>
+
+ </div>
+
+ <div class="flex justify-end">
+
+  <button class="btn btn-danger text-sm admin hidden" onclick="clearAll()">ลบรายการทั้งหมดในห้อง</button>
+
+ </div>
+
+</section>
+
+<p class="text-xs muted text-center px-2">
+
+โปรดตรวจสอบรายการและอัตราจ่ายก่อนสรุปยอดทุกครั้ง ระบบนี้เป็นเครื่องมือบันทึกและคำนวณ ไม่ได้ยืนยันผลรางวัลจากหน่วยงานทางการ
+
+</p>
+
 </main>
 
-<footer>
- LOTTO MASTER ONLINE · PERSONAL RECORDS<br>
- ข้อมูลบันทึกในอุปกรณ์นี้เท่านั้น
-</footer>
-
 <script>
-const STORAGE_KEY="lotto_master_personal_v1";
-let tickets=[];
 
-try{
- tickets=JSON.parse(localStorage.getItem(STORAGE_KEY)||"[]");
- if(!Array.isArray(tickets))tickets=[];
-}catch(e){tickets=[];}
+const firebaseConfig = {
+
+ apiKey:"AIzaSyBld7yPcmsp0snWTdCxj5D3hC0TOlYM88g",
+
+ authDomain:"lotto-online-eb0cf.firebaseapp.com",
+
+ databaseURL:"https://lotto-online-eb0cf-default-rtdb.asia-southeast1.firebasedatabase.app",
+
+ projectId:"lotto-online-eb0cf",
+
+ storageBucket:"lotto-online-eb0cf.firebasestorage.app",
+
+ messagingSenderId:"687853136586",
+
+ appId:"1:687853136586:web:79514948f01f527dece233"
+
+};
+
+const ADMIN_PIN="1234";
+
+let db=null, online=false, admin=false, room="lotto-main", listener=null;
+
+let data={
+
+ meta:{lottoType:"หวยรัฐบาลไทย",lottoDate:""},
+
+ rates:{r3:900,rt:150,r2t:90,r2b:90},
+
+ results:{win3:"",win2:""},
+
+ entries:[]
+
+};
 
 const $=id=>document.getElementById(id);
 
-function save(){
- localStorage.setItem(STORAGE_KEY,JSON.stringify(tickets));
+const money=n=>(Number(n)||0).toLocaleString("th-TH",{maximumFractionDigits:2});
+
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+
+function init(){
+
+ const p=new URLSearchParams(location.search);
+
+ room=(p.get("room")||localStorage.getItem("lotto_last_room")||room).replace(/[^a-zA-Z0-9_-]/g,"")||"lotto-main";
+
+ $("room").value=room;
+
+ if(sessionStorage.getItem("lotto_admin")==="1") setAdmin(true);
+
+ try{
+
+  if(!firebase.apps.length)firebase.initializeApp(firebaseConfig);
+
+  db=firebase.database();
+
+  online=true;
+
+  $("connection").textContent="เชื่อมต่อ Firebase";
+
+  connect();
+
+ }catch(e){
+
+  offline();
+
+  $("connection").textContent="ออฟไลน์";
+
+ }
+
+}
+
+function offline(){
+
+ online=false;
+
+ const raw=localStorage.getItem("lotto_offline_"+room);
+
+ if(raw){
+
+  try{data={...data,...JSON.parse(raw)}}catch(e){}
+
+ }
+
+ syncInputs();
+
  render();
+
 }
 
-function showPage(page,button){
- ["home","records","check","backup"].forEach(id=>{
-  $(id).classList.toggle("hidden",id!==page);
+function connect(){
+
+ room=$("room").value.trim().replace(/[^a-zA-Z0-9_-]/g,"")||"lotto-main";
+
+ $("room").value=room;
+
+ localStorage.setItem("lotto_last_room",room);
+
+ if(!online||!db){offline();return;}
+
+ if(listener)db.ref("rooms/"+room).off("value",listener);
+
+ listener=db.ref("rooms/"+room).on("value",s=>{
+
+  const v=s.val()||{};
+
+  data.meta=v.meta||data.meta;
+
+  data.rates=v.rates||data.rates;
+
+  data.results=v.results||data.results;
+
+  data.entries=v.entries
+
+   ?Object.entries(v.entries).map(([key,x])=>({...x,key})).sort((a,b)=>(b.timestamp||0)-(a.timestamp||0))
+
+   :[];
+
+  syncInputs();
+
+  render();
+
+  $("connection").textContent="ออนไลน์ • ซิงค์เรียลไทม์";
+
+ },e=>{
+
+  $("connection").textContent="เชื่อมต่อไม่ได้";
+
+  console.error(e);
+
  });
- document.querySelectorAll(".nav button").forEach(b=>b.classList.remove("active"));
- if(button)button.classList.add("active");
+
+}
+
+function changeRoom(){connect();}
+
+function syncInputs(){
+
+ $("lottoType").value=data.meta.lottoType||"หวยรัฐบาลไทย";
+
+ $("lottoDate").value=data.meta.lottoDate||"";
+
+ $("win3").value=data.results.win3||"";
+
+ $("win2").value=data.results.win2||"";
+
+ $("r3").value=data.rates.r3??900;
+
+ $("rt").value=data.rates.rt??150;
+
+ $("r2t").value=data.rates.r2t??90;
+
+ $("r2b").value=data.rates.r2b??90;
+
+ $("derived2").textContent="2 ตัวบน: "+(data.results.win3.length===3?data.results.win3.slice(1):"—");
+
+}
+
+function persist(path,obj){
+
+ if(online&&db)
+
+  return db.ref("rooms/"+room+"/"+path).set(obj).catch(e=>alert("บันทึกไม่สำเร็จ: "+e.message));
+
+ localStorage.setItem("lotto_offline_"+room,JSON.stringify(data));
+
+}
+
+function saveMeta(){
+
+ data.meta={lottoType:$("lottoType").value,lottoDate:$("lottoDate").value};
+
+ persist("meta",data.meta);
+
+}
+
+function saveRates(){
+
+ data.rates={
+
+  r3:Math.max(0,+$("r3").value||0),
+
+  rt:Math.max(0,+$("rt").value||0),
+
+  r2t:Math.max(0,+$("r2t").value||0),
+
+  r2b:Math.max(0,+$("r2b").value||0)
+
+ };
+
+ persist("rates",data.rates);
+
  render();
+
 }
 
-function addTicket(){
- const number=$("ticketNumber").value.trim();
- const price=Number($("ticketPrice").value);
- const date=$("drawDate").value;
- const type=$("ticketType").value;
- const note=$("ticketNote").value.trim();
+function resultChanged(){
 
- if(!date){alert("กรุณาเลือกวันที่ออกรางวัล");return;}
- if(!/^\d{6}$/.test(number)){alert("กรุณากรอกเลข 6 หลัก");return;}
- if(!Number.isFinite(price)||price<0){alert("กรุณากรอกราคาที่ถูกต้อง");return;}
+ $("win3").value=$("win3").value.replace(/\D/g,"").slice(0,3);
 
- tickets.push({
-  id:Date.now()+"_"+Math.random().toString(36).slice(2),
-  number,price,date,type,note,
-  savedAt:new Date().toISOString()
+ $("win2").value=$("win2").value.replace(/\D/g,"").slice(0,2);
+
+ data.results={win3:$("win3").value,win2:$("win2").value};
+
+ $("derived2").textContent="2 ตัวบน: "+(data.results.win3.length===3?data.results.win3.slice(1):"—");
+
+ persist("results",data.results);
+
+ render();
+
+}
+
+function clearResults(){
+
+ if(!confirm("ยืนยันล้างผลรางวัล?"))return;
+
+ data.results={win3:"",win2:""};
+
+ persist("results",data.results);
+
+ syncInputs();
+
+ render();
+
+}
+
+function parseNums(s){
+
+ return [...new Set(
+
+  s.split(/[\s,;]+/)
+
+   .map(x=>x.replace(/\D/g,""))
+
+   .filter(x=>x.length===2||x.length===3)
+
+ )];
+
+}
+
+function reverseNums(){
+
+ let ns=parseNums($("numbers").value);
+
+ if(!ns.length)return alert("กรอกเลข 2 หรือ 3 หลักก่อน");
+
+ let out=new Set(ns);
+
+ ns.forEach(n=>{
+
+  if(n.length===2)out.add(n[1]+n[0]);
+
+  else perm(n).forEach(x=>out.add(x));
+
  });
 
- $("ticketNumber").value="";
- $("ticketPrice").value="";
- $("ticketNote").value="";
- save();
- alert("บันทึกข้อมูลสลากเรียบร้อย");
+ $("numbers").value=[...out].join(", ");
+
 }
 
-function removeTicket(id){
- if(!confirm("ต้องการลบรายการนี้ใช่หรือไม่?"))return;
- tickets=tickets.filter(t=>t.id!==id);
- save();
+function perm(s){
+
+ if(s.length<2)return[s];
+
+ return [...new Set(
+
+  [...s].flatMap((c,i)=>
+
+   perm(s.slice(0,i)+s.slice(i+1)).map(p=>c+p)
+
+  )
+
+ )];
+
 }
 
-function makeTicket(t){
- const box=document.createElement("div");
- box.className="ticket";
+function runNums(front){
 
- const top=document.createElement("div");
- top.className="ticket-top";
+ let d=$("numbers").value.replace(/\D/g,"").slice(-1);
 
- const number=document.createElement("div");
- number.className="ticket-number";
- number.textContent=t.number;
+ if(!d)return alert("พิมพ์เลขโดด 1 ตัวก่อน");
 
- const del=document.createElement("button");
- del.className="redbtn";
- del.textContent="ลบ";
- del.onclick=()=>removeTicket(t.id);
+ $("numbers").value=Array.from(
 
- top.append(number,del);
+  {length:10},
 
- const meta=document.createElement("div");
- meta.className="ticket-meta";
- meta.textContent=t.date+" · "+t.type;
+  (_,i)=>front?d+i:i+d
 
- const detail=document.createElement("div");
- detail.className="ticket-meta";
- detail.textContent="ราคาซื้อจริง "+Number(t.price).toLocaleString("th-TH")+" บาท"+
-  (t.note?" · "+t.note:"");
+ ).join(", ");
 
- box.append(top,meta,detail);
- return box;
+}
+
+async function addEntries(){
+
+ const customer=$("customer").value.trim();
+
+ const nums=parseNums($("numbers").value);
+
+ const top=Math.max(0,+$("top").value||0);
+
+ const bottom=Math.max(0,+$("bottom").value||0);
+
+ const toad=Math.max(0,+$("toad").value||0);
+
+ if(!customer)return alert("กรุณาระบุชื่อลูกค้า");
+
+ if(!nums.length)return alert("กรุณากรอกเลข 2 หรือ 3 หลัก");
+
+ if(!top&&!bottom&&!toad)return alert("กรุณาใส่ยอดเงินอย่างน้อยหนึ่งช่อง");
+
+ const entries=nums.map((n,i)=>({
+
+  id:Date.now()+"-"+i+"-"+Math.random().toString(36).slice(2,7),
+
+  timestamp:Date.now()+i,
+
+  customer,
+
+  number:n,
+
+  top,
+
+  bottom,
+
+  toad:n.length===3?toad:0
+
+ }));
+
+ try{
+
+  if(online&&db){
+
+   const updates={};
+
+   entries.forEach(e=>{
+
+    updates[db.ref("rooms/"+room+"/entries").push().key]=e;
+
+   });
+
+   await db.ref("rooms/"+room+"/entries").update(updates);
+
+  }else{
+
+   data.entries=[...entries,...data.entries];
+
+   localStorage.setItem("lotto_offline_"+room,JSON.stringify(data));
+
+   render();
+
+  }
+
+  localStorage.setItem("lotto_sender_name",customer);
+
+  $("numbers").value="";
+
+  $("top").value="";
+
+  $("bottom").value="";
+
+  $("toad").value="";
+
+ }catch(e){
+
+  alert("บันทึกไม่สำเร็จ: "+e.message);
+
+ }
+
+}
+
+function calc(e){
+
+ let win=0,details=[];
+
+ let w3=data.results.win3;
+
+ let w2=data.results.win2;
+
+ let derived=w3.length===3?w3.slice(1):"";
+
+ if(e.number.length===3&&w3.length===3&&e.number===w3&&e.top>0){
+
+  win+=e.top*data.rates.r3;
+
+  details.push("3บน");
+
+ }
+
+ if(e.number.length===2&&derived.length===2&&e.number===derived&&e.top>0){
+
+  win+=e.top*data.rates.r2t;
+
+  details.push("2บน");
+
+ }
+
+ if(e.number.length===2&&w2.length===2&&e.number===w2&&e.bottom>0){
+
+  win+=e.bottom*data.rates.r2b;
+
+  details.push("2ล่าง");
+
+ }
+
+ if(e.number.length===3&&w3.length===3&&e.toad>0&&
+
+    e.number.split("").sort().join("")===w3.split("").sort().join("")){
+
+  win+=e.toad*data.rates.rt;
+
+  details.push("โต๊ด");
+
+ }
+
+ return{win,details};
+
+}
+
+function totals(){
+
+ const map={};
+
+ let sales=0,payout=0;
+
+ data.entries.forEach(e=>{
+
+  let bet=(+e.top||0)+(+e.bottom||0)+(+e.toad||0);
+
+  let c=calc(e);
+
+  sales+=bet;
+
+  payout+=c.win;
+
+  if(!map[e.customer]){
+
+   map[e.customer]={
+
+    name:e.customer,
+
+    top:0,bottom:0,toad:0,
+
+    sales:0,payout:0,count:0,wins:[]
+
+   };
+
+  }
+
+  let x=map[e.customer];
+
+  x.top+=+e.top||0;
+
+  x.bottom+=+e.bottom||0;
+
+  x.toad+=+e.toad||0;
+
+  x.sales+=bet;
+
+  x.payout+=c.win;
+
+  x.count++;
+
+  if(c.win)x.wins.push(e.number+" ("+c.details.join("/")+")");
+
+ });
+
+ return{map,sales,payout,net:sales-payout};
+
 }
 
 function render(){
- const total=tickets.reduce((s,t)=>s+(Number(t.price)||0),0);
- $("totalCount").textContent=tickets.length.toLocaleString("th-TH");
- $("totalCost").textContent=total.toLocaleString("th-TH")+" ฿";
 
- $("recentList").innerHTML="";
- $("allList").innerHTML="";
+ const {map,sales,payout,net}=totals();
 
- if(!tickets.length){
-  $("recentList").innerHTML='<div class="empty">ยังไม่มีรายการสลาก</div>';
-  $("allList").innerHTML='<div class="empty">ยังไม่มีรายการสลาก</div>';
-  return;
- }
+ $("allSales").textContent=money(sales)+" ฿";
 
- tickets.slice(-5).reverse().forEach(t=>{
-  $("recentList").append(makeTicket(t));
+ $("allPayout").textContent=money(payout)+" ฿";
+
+ $("hostNet").textContent=(net>=0?"+":"")+money(net)+" ฿";
+
+ $("hostNet").className="text-lg font-extrabold "+(net>=0?"positive":"negative");
+
+ $("customerCount").textContent=Object.keys(map).length;
+
+ $("entryCount").textContent=data.entries.length+" รายการ";
+
+ const q=$("filterCustomer").value.trim().toLowerCase();
+
+ const sort=$("sortCustomers").value;
+
+ let customers=Object.values(map).filter(c=>c.name.toLowerCase().includes(q));
+
+ customers.sort((a,b)=>
+
+  sort==="name"
+
+   ?a.name.localeCompare(b.name,"th")
+
+   :sort==="net"
+
+    ?(b.sales-b.payout)-(a.sales-a.payout)
+
+    :b.sales-a.sales
+
+ );
+
+ $("customerSummary").innerHTML=customers.length
+
+ ?customers.map(c=>{
+
+  let n=c.sales-c.payout;
+
+  return `<article class="stat space-y-2">
+
+   <div class="flex justify-between gap-2">
+
+    <b class="text-green-200">${esc(c.name)}</b>
+
+    <span class="text-xs muted">${c.count} เลข</span>
+
+   </div>
+
+   <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-sm">
+
+    <div>
+
+     <div class="text-xs muted">ยอดซื้อรวม</div>
+
+     <b>${money(c.sales)} ฿</b>
+
+    </div>
+
+    <div>
+
+     <div class="text-xs muted">ยอดถูกรางวัล</div>
+
+     <b class="text-rose-300">${money(c.payout)} ฿</b>
+
+    </div>
+
+    <div>
+
+     <div class="text-xs muted">เจ้ามือรับสุทธิ</div>
+
+     <b class="${n>=0?"positive":"negative"}">${n>=0?"+":""}${money(n)} ฿</b>
+
+    </div>
+
+    <div>
+
+     <div class="text-xs muted">แยกยอด บน/ล่าง/โต๊ด</div>
+
+     <b>${money(c.top)} / ${money(c.bottom)} / ${money(c.toad)}</b>
+
+    </div>
+
+   </div>
+
+   ${c.wins.length?`<div class="text-xs text-rose-200">เลขถูกรางวัล: ${esc(c.wins.join(", "))}</div>`:""}
+
+   <div class="text-xs ${n>=0?"positive":"negative"}">
+
+    ${n>=0?"เจ้ามือเก็บจากลูกค้า":"เจ้ามือต้องจ่ายเพิ่มให้ลูกค้า"} ${money(Math.abs(n))} บาท
+
+   </div>
+
+  </article>`;
+
+ }).join("")
+
+ :'<p class="muted text-center py-4 text-sm">ไม่พบข้อมูลลูกค้า</p>';
+
+ $("customers").innerHTML=Object.keys(map)
+
+  .map(n=>`<option value="${esc(n)}">`).join("");
+
+ $("entriesBody").innerHTML=data.entries.map(e=>{
+
+  let c=calc(e);
+
+  return `<tr>
+
+   <td>${esc(e.customer)}</td>
+
+   <td class="font-bold text-green-200">${esc(e.number)}</td>
+
+   <td class="text-right">${money(e.top)}</td>
+
+   <td class="text-right">${money(e.bottom)}</td>
+
+   <td class="text-right">${money(e.toad)}</td>
+
+   <td class="text-right ${c.win?"positive":""}">${c.win?money(c.win):"—"}</td>
+
+   <td class="admin ${admin?"":"hidden"}">
+
+    <button class="text-rose-300" onclick="deleteEntry('${esc(e.key||"")}','${esc(e.id||"")}')">ลบ</button>
+
+   </td>
+
+  </tr>`;
+
+ }).join("")||'<tr><td colspan="7" class="text-center muted py-5">ยังไม่มีรายการ</td></tr>';
+
+ document.querySelectorAll(".admin").forEach(el=>{
+
+  el.classList.toggle("hidden",!admin);
+
  });
 
- const q=$("search").value.trim();
- const date=$("filterDate").value;
+}
 
- const filtered=tickets.filter(t=>
-  t.number.includes(q)&&(!date||t.date===date)
- );
+function setAdmin(v){
 
- if(!filtered.length){
-  $("allList").innerHTML='<div class="empty">ไม่พบรายการ</div>';
+ admin=v;
+
+ sessionStorage.setItem("lotto_admin",v?"1":"0");
+
+ $("adminText").textContent=v?"ออกจากแอดมิน":"เข้าสู่แอดมิน";
+
+ render();
+
+}
+
+function adminToggle(){
+
+ if(admin)return setAdmin(false);
+
+ let p=prompt("รหัสแอดมิน");
+
+ if(p===ADMIN_PIN)setAdmin(true);
+
+ else if(p!==null)alert("รหัสไม่ถูกต้อง");
+
+}
+
+async function deleteEntry(key,id){
+
+ if(!admin)return;
+
+ if(!confirm("ลบรายการนี้?"))return;
+
+ if(online&&key){
+
+  await db.ref("rooms/"+room+"/entries/"+key).remove();
+
  }else{
-  filtered.slice().reverse().forEach(t=>{
-   $("allList").append(makeTicket(t));
-  });
- }
-}
 
-function checkTickets(){
- const winning=$("winningNumber").value.trim();
- const result=$("checkResult");
- result.innerHTML="";
+  data.entries=data.entries.filter(e=>e.id!==id);
 
- if(!/^\d{6}$/.test(winning)){
-  result.textContent="กรุณากรอกเลข 6 หลัก";
-  return;
+  localStorage.setItem("lotto_offline_"+room,JSON.stringify(data));
+
+  render();
+
  }
 
- const matches=tickets.filter(t=>t.number===winning);
- const box=document.createElement("div");
- box.className="result";
- box.style.background=matches.length?"#134e4a":"#334155";
- box.style.color="white";
-
- box.textContent=matches.length
-  ?"พบเลขตรงกับหมายเลขที่กรอก "+matches.length+" รายการ โปรดตรวจสอบผลรางวัลจากประกาศทางการ"
-  :"ไม่พบเลขที่ตรงกันในรายการที่บันทึก";
-
- result.append(box);
-
- matches.forEach(t=>result.append(makeTicket(t)));
 }
 
-function downloadBackup(){
- const blob=new Blob(
-  [JSON.stringify(tickets,null,2)],
-  {type:"application/json"}
+async function clearAll(){
+
+ if(!admin||!confirm("ยืนยันลบโพยทั้งหมดในห้องนี้?"))return;
+
+ if(online){
+
+  await db.ref("rooms/"+room+"/entries").remove();
+
+ }else{
+
+  data.entries=[];
+
+  localStorage.setItem("lotto_offline_"+room,JSON.stringify(data));
+
+  render();
+
+ }
+
+}
+
+function shareLink(){
+
+ let u=location.origin+location.pathname+"?room="+encodeURIComponent(room);
+
+ if(navigator.clipboard?.writeText){
+
+  navigator.clipboard.writeText(u)
+
+   .then(()=>alert("คัดลอกลิงก์แล้ว\n"+u))
+
+   .catch(()=>prompt("คัดลอกลิงก์นี้",u));
+
+ }else{
+
+  prompt("คัดลอกลิงก์นี้",u);
+
+ }
+
+}
+
+function exportCSV(){
+
+ let rows=[
+
+  ["ลูกค้า","เลข","บน","ล่าง","โต๊ด","รางวัล"],
+
+  ...data.entries.map(e=>[
+
+   e.customer,e.number,e.top,e.bottom,e.toad,calc(e).win
+
+  ])
+
+ ];
+
+ let csv="\uFEFF"+rows.map(r=>
+
+  r.map(x=>'"'+String(x??"").replace(/"/g,'""')+'"').join(",")
+
+ ).join("\r\n");
+
+ download(csv,"lotto-"+room+".csv","text/csv;charset=utf-8");
+
+}
+
+function backupJSON(){
+
+ download(
+
+  JSON.stringify(data,null,2),
+
+  "lotto-"+room+"-backup.json",
+
+  "application/json"
+
  );
- const url=URL.createObjectURL(blob);
- const a=document.createElement("a");
- a.href=url;
- a.download="lotto-master-backup.json";
+
+}
+
+function download(content,name,type){
+
+ let a=document.createElement("a");
+
+ let u=URL.createObjectURL(new Blob([content],{type}));
+
+ a.href=u;
+
+ a.download=name;
+
  a.click();
- setTimeout(()=>URL.revokeObjectURL(url),1000);
+
+ URL.revokeObjectURL(u);
+
 }
 
-function importBackup(){
- const file=$("importFile").files[0];
- if(!file){alert("กรุณาเลือกไฟล์สำรอง");return;}
+window.addEventListener("load",()=>{
 
- const reader=new FileReader();
- reader.onload=()=>{
-  try{
-   const data=JSON.parse(reader.result);
-   if(!Array.isArray(data)||!data.every(t=>
-    t&&typeof t.number==="string"&&/^\d{6}$/.test(t.number)&&
-    typeof t.date==="string"&&Number.isFinite(Number(t.price))
-   ))throw new Error("รูปแบบข้อมูลไม่ถูกต้อง");
+ let n=localStorage.getItem("lotto_sender_name");
 
-   if(!confirm("นำเข้าข้อมูลและแทนที่รายการเดิมทั้งหมดหรือไม่?"))return;
-   tickets=data;
-   save();
-   alert("นำเข้าข้อมูลสำเร็จ");
-  }catch(e){alert("ไฟล์ไม่ถูกต้องหรือเสียหาย");}
- };
- reader.readAsText(file);
-}
+ if(n)$("customer").value=n;
 
-function deleteAll(){
- if(!confirm("ยืนยันลบรายการทั้งหมด? การลบนี้ไม่สามารถย้อนกลับได้"))return;
- tickets=[];
- save();
-}
+ init();
 
-$("drawDate").value=new Date().toISOString().slice(0,10);
-render();
+});
+
 </script>
+
 </body>
+
 </html>
