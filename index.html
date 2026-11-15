@@ -19,9 +19,9 @@
             <div>
                 <h1 class="text-xl font-bold flex items-center gap-2">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
-                    ระบบจดหวย Pro (Smart Lottery)
+                    ระบบจดหวย Pro (Smart Lottery & Admin)
                 </h1>
-                <p class="text-xs text-indigo-200">คำนวณตัวกลับอัตโนมัติ แยกยอดชัดเจน ตรวจผลงวดวันที่</p>
+                <p class="text-xs text-indigo-200">ระบบคีย์ด่วนอัจฉริยะ แยกบน-โต๊ด-ล่าง เช็คอั้น และตรวจผลรางวัลอัตโนมัติ</p>
             </div>
             <!-- Draw Date Selector -->
             <div class="flex items-center gap-2 bg-indigo-800/60 px-3 py-1.5 rounded-lg border border-indigo-500/30">
@@ -47,44 +47,52 @@
 
         <!-- ==================== 1. SENDER VIEW ==================== -->
         <section id="senderView" class="space-y-4">
-            <div class="bg-white rounded-2xl shadow-sm p-5 border border-slate-200">
-                <label class="block text-sm font-semibold text-slate-700 mb-1">ชื่อผู้ส่งโพย / ลูกค้า:</label>
-                <input type="text" id="senderName" placeholder="เช่น คุณสมชาย หรือ โพยชุดที่ 1" class="w-full px-4 py-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:outline-none text-sm">
+            <div class="bg-white rounded-2xl shadow-sm p-5 border border-slate-200 flex flex-col sm:flex-row gap-4 items-center justify-between">
+                <div class="w-full sm:w-2/3">
+                    <label class="block text-sm font-semibold text-slate-700 mb-1">ชื่อผู้ส่งโพย / ลูกค้า:</label>
+                    <input type="text" id="senderName" placeholder="เช่น คุณสมชาย หรือ โพยชุดที่ 1" class="w-full px-4 py-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:outline-none text-sm">
+                </div>
+                <div class="w-full sm:w-1/3 flex flex-col justify-end">
+                    <label class="block text-xs font-medium text-slate-500 mb-1">เรทส่วนลดลูกทีม (%)</label>
+                    <input type="number" id="senderDiscountRate" value="0" min="0" max="100" class="w-full px-3 py-2 border border-slate-300 rounded-xl text-sm bg-slate-50" placeholder="เช่น 10">
+                </div>
             </div>
 
-            <!-- Single Item Entry -->
+            <!-- Smart Single Item Entry -->
             <div class="bg-white rounded-2xl shadow-sm p-5 border border-slate-200 space-y-4">
                 <h2 class="text-sm font-bold text-slate-700 flex items-center gap-2">
-                    <span class="bg-indigo-100 text-indigo-700 p-1.5 rounded-lg">➕</span> คีย์ทีละรายการ
+                    <span class="bg-indigo-100 text-indigo-700 p-1.5 rounded-lg">➕</span> คีย์ทีละรายการ (ปรับช่องอัตโนมัติตามตัวเลข)
                 </h2>
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                    <div>
-                        <label class="block text-xs font-medium text-slate-500 mb-1">ประเภท:</label>
-                        <select id="itemType" class="w-full px-3 py-2 border border-slate-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                            <option value="3 ตัวบน">3 ตัวบน</option>
-                            <option value="3 ตัวโต๊ด">3 ตัวโต๊ด</option>
-                            <option value="3 ตัวล่าง">3 ตัวล่าง</option>
-                            <option value="2 ตัวบน">2 ตัวบน</option>
-                            <option value="2 ตัวล่าง">2 ตัวล่าง</option>
-                            <option value="วิ่งบน">วิ่งบน</option>
-                            <option value="วิ่งล่าง">วิ่งล่าง</option>
-                        </select>
+                <div class="grid grid-cols-1 sm:grid-cols-4 gap-3">
+                    <div class="sm:col-span-1">
+                        <label class="block text-xs font-medium text-slate-500 mb-1">ตัวเลข:</label>
+                        <input type="text" id="itemNumber" oninput="onNumberInputChanged()" placeholder="เช่น 123 หรือ 45" class="w-full px-3 py-2 border border-slate-300 rounded-xl text-sm font-bold font-mono focus:outline-none focus:ring-2 focus:ring-indigo-500">
                     </div>
-                    <div>
-                        <label class="block text-xs font-medium text-slate-500 mb-1">ตัวเลข (หลัก):</label>
-                        <input type="text" id="itemNumber" placeholder="เช่น 123 หรือ 45" class="w-full px-3 py-2 border border-slate-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-medium text-slate-500 mb-1">ราคา (บาท):</label>
-                        <input type="number" id="itemPrice" placeholder="เช่น 100" class="w-full px-3 py-2 border border-slate-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    <div class="sm:col-span-3 grid grid-cols-3 gap-2" id="priceInputsContainer">
+                        <!-- Dynamic Price Inputs will render here -->
+                        <div>
+                            <label class="block text-xs font-medium text-slate-500 mb-1" id="labelPrice1">บน / วิ่ง</label>
+                            <input type="number" id="price1" placeholder="บาท" class="w-full px-3 py-2 border border-slate-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-slate-500 mb-1" id="labelPrice2">โต๊ด</label>
+                            <input type="number" id="price2" placeholder="บาท" class="w-full px-3 py-2 border border-slate-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-slate-500 mb-1" id="labelPrice3">ล่าง</label>
+                            <input type="number" id="price3" placeholder="บาท" class="w-full px-3 py-2 border border-slate-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        </div>
                     </div>
                 </div>
-                <div class="flex items-center justify-between pt-1">
-                    <label class="flex items-center gap-2 cursor-pointer select-none">
-                        <input type="checkbox" id="itemReverse" class="w-4 h-4 text-indigo-600 rounded border-slate-300 focus:ring-indigo-500">
-                        <span class="text-xs font-medium text-slate-700">กลับตัวอัตโนมัติ (ตรง/กลับ)</span>
-                    </label>
-                    <button onclick="addSingleItem()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-5 py-2 rounded-xl text-sm shadow transition">
+                <div class="flex flex-wrap items-center justify-between pt-1 gap-2">
+                    <div class="flex items-center gap-4">
+                        <label class="flex items-center gap-2 cursor-pointer select-none">
+                            <input type="checkbox" id="itemReverse" class="w-4 h-4 text-indigo-600 rounded border-slate-300 focus:ring-indigo-500">
+                            <span class="text-xs font-medium text-slate-700" id="reverseLabelText">กลับตัว (2 กลับ / 6 กลับ)</span>
+                        </label>
+                        <button onclick="setEqualPrices()" class="text-xs text-indigo-600 hover:underline font-medium">⚡ ใส่ราคาเท่ากันทุกช่อง</button>
+                    </div>
+                    <button onclick="addSmartItem()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-6 py-2.5 rounded-xl text-sm shadow transition">
                         + เพิ่มเข้ารายการ
                     </button>
                 </div>
@@ -95,7 +103,7 @@
                 <h2 class="text-sm font-bold text-slate-700 flex items-center gap-2">
                     <span class="bg-amber-100 text-amber-700 p-1.5 rounded-lg">⚡</span> โหมดวางโพยด่วน (Quick Paste)
                 </h2>
-                <p class="text-xs text-slate-500">พิมพ์หรือวางข้อความ เช่น: <code class="bg-slate-100 px-1.5 py-0.5 rounded text-indigo-600">25 100x100</code>, <code class="bg-slate-100 px-1.5 py-0.5 rounded text-indigo-600">89 50x50 กลับ</code>, <code class="bg-slate-100 px-1.5 py-0.5 rounded text-indigo-600">123 100*100 กลับ</code></p>
+                <p class="text-xs text-slate-500">พิมพ์หรือวางข้อความ เช่น: <code class="bg-slate-100 px-1.5 py-0.5 rounded text-indigo-600">123 100*50*100</code>, <code class="bg-slate-100 px-1.5 py-0.5 rounded text-indigo-600">45 100x100 กลับ</code></p>
                 <textarea id="quickPasteText" rows="3" placeholder="วางข้อความโพยที่นี่..." class="w-full px-3 py-2 border border-slate-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"></textarea>
                 <div class="flex justify-end">
                     <button onclick="processQuickPaste()" class="bg-amber-600 hover:bg-amber-700 text-white font-semibold px-5 py-2 rounded-xl text-sm shadow transition">
@@ -104,10 +112,15 @@
                 </div>
             </div>
 
-            <!-- Current Bill Items Table -->
+            <!-- Current Bill Items Table with Filter Tabs -->
             <div class="bg-white rounded-2xl shadow-sm p-5 border border-slate-200 space-y-4">
-                <div class="flex justify-between items-center">
-                    <h2 class="text-sm font-bold text-slate-700">รายการในโพยปัจจุบัน</h2>
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+                    <div class="flex gap-2 bg-slate-100 p-1 rounded-xl text-xs font-semibold">
+                        <button onclick="filterCurrentTab('all')" id="curTabAll" class="px-3 py-1.5 rounded-lg bg-white shadow-sm text-indigo-600">ทั้งหมด</button>
+                        <button onclick="filterCurrentTab('3d')" id="curTab3D" class="px-3 py-1.5 rounded-lg text-slate-600 hover:bg-white/50">3 ตัว</button>
+                        <button onclick="filterCurrentTab('2d')" id="curTab2D" class="px-3 py-1.5 rounded-lg text-slate-600 hover:bg-white/50">2 ตัว</button>
+                        <button onclick="filterCurrentTab('run')" id="curTabRun" class="px-3 py-1.5 rounded-lg text-slate-600 hover:bg-white/50">เลขวิ่ง</button>
+                    </div>
                     <span id="currentBillCount" class="text-xs bg-slate-100 px-2.5 py-1 rounded-full text-slate-600 font-medium">0 รายการ</span>
                 </div>
 
@@ -135,11 +148,14 @@
                         <span class="text-xs text-slate-500">ยอดรวมสุทธิทั้งสิ้น:</span>
                         <div class="text-2xl font-bold text-indigo-600" id="currentBillTotal">0 ฿</div>
                     </div>
-                    <div class="flex gap-2 w-full sm:w-auto">
-                        <button onclick="clearCurrentBill()" class="flex-1 sm:flex-none px-4 py-2.5 border border-slate-300 text-slate-600 hover:bg-slate-50 rounded-xl text-sm font-medium transition">
+                    <div class="flex flex-wrap gap-2 w-full sm:w-auto">
+                        <button onclick="copyBillToLine()" class="px-4 py-2.5 bg-sky-500 hover:bg-sky-600 text-white rounded-xl text-sm font-semibold shadow transition">
+                            📋 คัดลอกส่งไลน์
+                        </button>
+                        <button onclick="clearCurrentBill()" class="px-4 py-2.5 border border-slate-300 text-slate-600 hover:bg-slate-50 rounded-xl text-sm font-medium transition">
                             ล้างรายการ
                         </button>
-                        <button onclick="submitBill()" class="flex-1 sm:flex-none px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-sm font-semibold shadow transition">
+                        <button onclick="submitBill()" class="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-sm font-semibold shadow transition">
                             📤 ส่งโพยให้เจ้ามือ
                         </button>
                     </div>
@@ -154,7 +170,7 @@
             <div id="adminLockBox" class="bg-white rounded-2xl shadow-sm p-8 border border-slate-200 text-center max-w-md mx-auto space-y-4">
                 <div class="w-12 h-12 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center mx-auto text-xl font-bold">🔒</div>
                 <h2 class="text-lg font-bold text-slate-800">เข้าสู่ระบบแอดมิน (เจ้ามือ)</h2>
-                <p class="text-xs text-slate-500">กรุณาใส่รหัสผ่านเพื่อดูยอดรวมและตรวจรางวัล (รหัสผ่านเริ่มต้น: <code class="bg-slate-100 text-indigo-600 px-1 py-0.5 rounded font-mono">1234</code>)</p>
+                <p class="text-xs text-slate-500">กรุณาใส่รหัสผ่านเพื่อดูยอดรวมและจัดการเลขอั้น (รหัสผ่านเริ่มต้น: <code class="bg-slate-100 text-indigo-600 px-1 py-0.5 rounded font-mono">1234</code>)</p>
                 <input type="password" id="adminPasswordInput" placeholder="รหัสผ่าน 4 หลัก" class="w-full px-4 py-2.5 text-center tracking-widest border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
                 <button onclick="checkAdminPassword()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2.5 rounded-xl text-sm shadow transition">
                     ปลดล็อกแอดมิน
@@ -174,20 +190,28 @@
                     </div>
                     <div class="flex items-center gap-2 w-full sm:w-auto justify-end">
                         <button onclick="exportData()" class="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-medium transition">
-                            💾 สำรองข้อมูล
+                            💾 สำรองข้อมูล (JSON)
                         </button>
+                        <label class="px-3 py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 rounded-xl text-xs font-medium transition cursor-pointer">
+                            📂 นำเข้าข้อมูล <input type="file" id="importFile" onchange="importData(event)" class="hidden" accept=".json">
+                        </label>
                         <button onclick="clearAllData()" class="px-3 py-2 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-xl text-xs font-medium transition">
-                            🗑️ ล้างข้อมูลทั้งหมด
+                            🗑️ ล้างทั้งหมด
                         </button>
                     </div>
                 </div>
 
-                <!-- Summary Cards -->
+                <!-- Summary Cards & Sales Breakdown -->
                 <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
                     <div class="bg-gradient-to-br from-indigo-600 to-blue-700 text-white rounded-2xl p-5 shadow-sm">
-                        <div class="text-xs text-indigo-200 font-medium">ยอดรับรวมทั้งสิ้น</div>
+                        <div class="text-xs text-indigo-200 font-medium">ยอดขายรับรวมเต็ม</div>
                         <div class="text-2xl font-bold mt-1" id="adminTotalRevenue">0 ฿</div>
                         <div class="text-xs text-indigo-100 mt-2" id="adminTotalBillsCount">จาก 0 บิล</div>
+                    </div>
+                    <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200">
+                        <div class="text-xs font-semibold text-slate-500">ยอดหลังหักส่วนลดลูกทีม</div>
+                        <div class="text-xl font-bold text-emerald-600 mt-1" id="adminNetSales">0 ฿</div>
+                        <div class="text-xs text-slate-400 mt-2">ส่วนลดรวม: <span id="adminTotalDiscount" class="font-semibold text-slate-600">0 ฿</span></div>
                     </div>
                     <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200">
                         <div class="text-xs font-semibold text-slate-500">ยอดรวม 2 ตัว (บน/ล่าง)</div>
@@ -198,19 +222,47 @@
                         </div>
                     </div>
                     <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200">
-                        <div class="text-xs font-semibold text-slate-500">ยอดรวม 3 ตัว (ตรง/โต๊ด)</div>
+                        <div class="text-xs font-semibold text-slate-500">ยอดรวม 3 ตัว / วิ่ง</div>
                         <div class="text-xl font-bold text-slate-800 mt-1" id="adminSum3D">0 ฿</div>
                         <div class="text-xs text-slate-400 mt-2 flex justify-between">
-                            <span>ตรง: <strong id="adminSum3DTop" class="text-slate-600">0</strong></span>
-                            <span>โต๊ด: <strong id="adminSum3DTod" class="text-slate-600">0</strong></span>
+                            <span>3ตัว: <strong id="adminSum3DTotal" class="text-slate-600">0</strong></span>
+                            <span>วิ่ง: <strong id="adminSumRunTotal" class="text-slate-600">0</strong></span>
                         </div>
                     </div>
-                    <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200">
-                        <div class="text-xs font-semibold text-slate-500">ยอดรวมเลขวิ่ง (บน/ล่าง)</div>
-                        <div class="text-xl font-bold text-slate-800 mt-1" id="adminSumRun">0 ฿</div>
-                        <div class="text-xs text-slate-400 mt-2 flex justify-between">
-                            <span>วิ่งบน: <strong id="adminSumRunTop" class="text-slate-600">0</strong></span>
-                            <span>วิ่งล่าง: <strong id="adminSumRunBot" class="text-slate-600">0</strong></span>
+                </div>
+
+                <!-- Admin Management Tools (Blocked Numbers & Cut-off for Agent) -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <!-- Blocked & Half-Pay Numbers -->
+                    <div class="bg-white rounded-2xl shadow-sm p-5 border border-slate-200 space-y-3">
+                        <h2 class="text-sm font-bold text-slate-800 flex items-center gap-2">
+                            <span class="bg-rose-100 text-rose-700 p-1.5 rounded-lg">🚫</span> ตั้งค่าเลขอั้น / เลขปิดรับ
+                        </h2>
+                        <div class="flex gap-2">
+                            <input type="text" id="blockedNumInput" placeholder="เลขเช่น 789 หรือ 25" class="px-3 py-2 border border-slate-300 rounded-xl text-sm flex-1">
+                            <select id="blockedTypeInput" class="px-3 py-2 border border-slate-300 rounded-xl text-xs">
+                                <option value="จ่ายครึ่ง">จ่ายครึ่ง (อั้น)</option>
+                                <option value="ปิดรับ">ปิดรับ (ไม่รับแทง)</option>
+                            </select>
+                            <button onclick="addBlockedNumber()" class="bg-rose-600 hover:bg-rose-700 text-white font-semibold px-4 py-2 rounded-xl text-xs transition">เพิ่ม</button>
+                        </div>
+                        <div id="blockedNumbersList" class="flex flex-wrap gap-1.5 pt-1">
+                            <span class="text-xs text-slate-400">ยังไม่มีการตั้งค่าเลขอั้น</span>
+                        </div>
+                    </div>
+
+                    <!-- Cut-off to Main Dealer -->
+                    <div class="bg-white rounded-2xl shadow-sm p-5 border border-slate-200 space-y-3">
+                        <h2 class="text-sm font-bold text-slate-800 flex items-center gap-2">
+                            <span class="bg-indigo-100 text-indigo-700 p-1.5 rounded-lg">✂️</span> ตัดยอดเกินเพดาน (ส่งเจ้ามือใหญ่)
+                        </h2>
+                        <div class="text-xs text-slate-500">ตั้งเพดานรับสูงสุดต่อเลข (บาท) เพื่อตัดส่วนเกินส่งเจ้ามือใหญ่</div>
+                        <div class="flex gap-2 items-center">
+                            <input type="number" id="maxQuotaInput" value="1000" onchange="renderAdminData()" class="px-3 py-2 border border-slate-300 rounded-xl text-sm w-32 font-bold">
+                            <span class="text-xs text-slate-600">บาท/เลข</span>
+                            <button onclick="copyCutoffToLine()" class="ml-auto px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-semibold transition">
+                                📋 คัดลอกยอดตัดส่งไลน์
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -228,30 +280,12 @@
                     <div id="payoutSettingsBox" class="hidden bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-3">
                         <h3 class="text-xs font-bold text-slate-700">กำหนดอัตราจ่ายรางวัล (บาทละ)</h3>
                         <div class="grid grid-cols-2 sm:grid-cols-6 gap-2 text-xs">
-                            <div>
-                                <label class="text-slate-500">3 ตัวตรง</label>
-                                <input type="number" id="rate3Top" value="900" class="w-full mt-1 px-2.5 py-1.5 border rounded-lg bg-white">
-                            </div>
-                            <div>
-                                <label class="text-slate-500">3 ตัวโต๊ด</label>
-                                <input type="number" id="rate3Tod" value="150" class="w-full mt-1 px-2.5 py-1.5 border rounded-lg bg-white">
-                            </div>
-                            <div>
-                                <label class="text-slate-500">2 ตัวบน</label>
-                                <input type="number" id="rate2Top" value="90" class="w-full mt-1 px-2.5 py-1.5 border rounded-lg bg-white">
-                            </div>
-                            <div>
-                                <label class="text-slate-500">2 ตัวล่าง</label>
-                                <input type="number" id="rate2Bot" value="90" class="w-full mt-1 px-2.5 py-1.5 border rounded-lg bg-white">
-                            </div>
-                            <div>
-                                <label class="text-slate-500">วิ่งบน</label>
-                                <input type="number" id="rateRunTop" value="3" class="w-full mt-1 px-2.5 py-1.5 border rounded-lg bg-white">
-                            </div>
-                            <div>
-                                <label class="text-slate-500">วิ่งล่าง</label>
-                                <input type="number" id="rateRunBot" value="4" class="w-full mt-1 px-2.5 py-1.5 border rounded-lg bg-white">
-                            </div>
+                            <div><label class="text-slate-500">3 ตัวตรง</label><input type="number" id="rate3Top" value="900" class="w-full mt-1 px-2.5 py-1.5 border rounded-lg bg-white"></div>
+                            <div><label class="text-slate-500">3 ตัวโต๊ด</label><input type="number" id="rate3Tod" value="150" class="w-full mt-1 px-2.5 py-1.5 border rounded-lg bg-white"></div>
+                            <div><label class="text-slate-500">2 ตัวบน</label><input type="number" id="rate2Top" value="90" class="w-full mt-1 px-2.5 py-1.5 border rounded-lg bg-white"></div>
+                            <div><label class="text-slate-500">2 ตัวล่าง</label><input type="number" id="rate2Bot" value="90" class="w-full mt-1 px-2.5 py-1.5 border rounded-lg bg-white"></div>
+                            <div><label class="text-slate-500">วิ่งบน</label><input type="number" id="rateRunTop" value="3" class="w-full mt-1 px-2.5 py-1.5 border rounded-lg bg-white"></div>
+                            <div><label class="text-slate-500">วิ่งล่าง</label><input type="number" id="rateRunBot" value="4" class="w-full mt-1 px-2.5 py-1.5 border rounded-lg bg-white"></div>
                         </div>
                     </div>
 
@@ -267,18 +301,16 @@
                         </div>
                         <div class="flex gap-2">
                             <button onclick="calculatePrizes()" class="flex-1 bg-amber-600 hover:bg-amber-700 text-white font-semibold py-2.5 rounded-xl text-sm shadow transition">
-                                ตรวจรางวัล & คำนวณได้-เสีย
+                                ตรวจรางวัล & คำนวณกำไร
                             </button>
-                            <button onclick="resetPrizes()" class="px-3 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl text-sm font-medium transition" title="ล้างผลรางวัล">
-                                🔄
-                            </button>
+                            <button onclick="resetPrizes()" class="px-3 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl text-sm font-medium transition" title="ล้างผลรางวัล">🔄</button>
                         </div>
                     </div>
 
                     <!-- Pls/Loss Result Cards -->
                     <div id="dealerResultCard" class="hidden grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
                         <div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
-                            <div class="text-xs text-slate-500">ยอดรับแทงทั้งหมด</div>
+                            <div class="text-xs text-slate-500">ยอดรับแทงสุทธิ</div>
                             <div class="text-lg font-bold text-slate-800" id="dealerTotalIn">0 ฿</div>
                         </div>
                         <div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
@@ -294,16 +326,11 @@
 
                 <!-- Admin Tabs -->
                 <div class="bg-white rounded-2xl shadow-sm p-5 border border-slate-200 space-y-4">
-                    <div class="flex border-b border-slate-200 gap-4">
-                        <button onclick="switchAdminTab('bills')" id="adminTabBillsBtn" class="pb-2.5 text-sm font-semibold border-b-2 border-indigo-600 text-indigo-600">
-                            📜 ประวัติบิลทั้งหมด
-                        </button>
-                        <button onclick="switchAdminTab('summary')" id="adminTabSummaryBtn" class="pb-2.5 text-sm font-semibold border-b-2 border-transparent text-slate-500 hover:text-slate-700">
-                            📊 สรุปยอดรวมรายเลข (เลขอั้น)
-                        </button>
-                        <button onclick="switchAdminTab('winners')" id="adminTabWinnersBtn" class="pb-2.5 text-sm font-semibold border-b-2 border-transparent text-slate-500 hover:text-slate-700">
-                            🎉 รายการที่ถูกรางวัล
-                        </button>
+                    <div class="flex border-b border-slate-200 gap-4 overflow-x-auto">
+                        <button onclick="switchAdminTab('bills')" id="adminTabBillsBtn" class="pb-2.5 text-sm font-semibold border-b-2 border-indigo-600 text-indigo-600 whitespace-nowrap">📜 ประวัติบิลทั้งหมด</button>
+                        <button onclick="switchAdminTab('summary')" id="adminTabSummaryBtn" class="pb-2.5 text-sm font-semibold border-b-2 border-transparent text-slate-500 hover:text-slate-700 whitespace-nowrap">📊 สรุปยอดรวมรายเลข</button>
+                        <button onclick="switchAdminTab('customers')" id="adminTabCustomersBtn" class="pb-2.5 text-sm font-semibold border-b-2 border-transparent text-slate-500 hover:text-slate-700 whitespace-nowrap">👥 บัญชีลูกค้า & เคลียร์ยอด</button>
+                        <button onclick="switchAdminTab('winners')" id="adminTabWinnersBtn" class="pb-2.5 text-sm font-semibold border-b-2 border-transparent text-slate-500 hover:text-slate-700 whitespace-nowrap">🎉 รายการถูกรางวัล</button>
                     </div>
 
                     <!-- Sub-tab 1: Bills History -->
@@ -315,9 +342,9 @@
                                         <th class="p-2.5 font-semibold">งวดวันที่</th>
                                         <th class="p-2.5 font-semibold">ชื่อผู้ส่ง</th>
                                         <th class="p-2.5 font-semibold">เวลาส่ง</th>
-                                        <th class="p-2.5 font-semibold text-center">จำนวนรายการ</th>
+                                        <th class="p-2.5 font-semibold text-center">รายการ</th>
                                         <th class="p-2.5 font-semibold text-right">ยอดรวม (บาท)</th>
-                                        <th class="p-2.5 font-semibold text-center">สถานะ</th>
+                                        <th class="p-2.5 font-semibold text-center">สถานะถูกรางวัล</th>
                                         <th class="p-2.5 font-semibold text-center">จัดการ</th>
                                     </tr>
                                 </thead>
@@ -340,7 +367,7 @@
                                     <tr class="bg-slate-50 text-slate-600 text-xs border-b border-slate-200">
                                         <th class="p-2.5 font-semibold">ประเภท</th>
                                         <th class="p-2.5 font-semibold">ตัวเลข</th>
-                                        <th class="p-2.5 font-semibold text-center">จำนวนครั้งที่แทง</th>
+                                        <th class="p-2.5 font-semibold text-center">จำนวนครั้ง</th>
                                         <th class="p-2.5 font-semibold text-right">ยอดรวมเงิน (บาท)</th>
                                     </tr>
                                 </thead>
@@ -351,7 +378,28 @@
                         </div>
                     </div>
 
-                    <!-- Sub-tab 3: Winners -->
+                    <!-- Sub-tab 3: Customers Account & Settlement -->
+                    <div id="adminSubTabCustomers" class="hidden space-y-3">
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left border-collapse text-sm">
+                                <thead>
+                                    <tr class="bg-slate-50 text-slate-600 text-xs border-b border-slate-200">
+                                        <th class="p-2.5 font-semibold">ชื่อลูกค้า</th>
+                                        <th class="p-2.5 font-semibold text-center">จำนวนบิล</th>
+                                        <th class="p-2.5 font-semibold text-right">ยอดแทงรวม</th>
+                                        <th class="p-2.5 font-semibold text-right">ส่วนลด (%)</th>
+                                        <th class="p-2.5 font-semibold text-right">ยอดสุทธิที่ต้องเก็บ</th>
+                                        <th class="p-2.5 font-semibold text-center">สถานะเคลียร์ยอด</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="adminCustomerTableBody" class="divide-y divide-slate-100">
+                                    <tr><td colspan="6" class="text-center py-6 text-slate-400 text-xs">ยังไม่มีข้อมูลลูกค้า</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Sub-tab 4: Winners -->
                     <div id="adminSubTabWinners" class="hidden space-y-3">
                         <div class="overflow-x-auto">
                             <table class="w-full text-left border-collapse text-sm">
@@ -383,8 +431,10 @@
     <script>
         let currentBill = [];
         let savedBills = JSON.parse(localStorage.getItem('lottery_savedBills')) || [];
+        let blockedNumbers = JSON.parse(localStorage.getItem('lottery_blockedNumbers')) || [];
         let globalDrawDateValue = localStorage.getItem('lottery_drawDate') || new Date().toISOString().split('T')[0];
         let prizeResult = JSON.parse(localStorage.getItem('lottery_prizeResult')) || { t3: '', b2: '', calculated: false };
+        let currentFilterTab = 'all';
 
         document.getElementById('globalDrawDate').value = globalDrawDateValue;
         if(prizeResult.calculated) {
@@ -432,6 +482,71 @@
             document.getElementById('payoutSettingsBox').classList.toggle('hidden');
         }
 
+        // Smart Single Item UI Dynamic Adaptation
+        function onNumberInputChanged() {
+            const num = document.getElementById('itemNumber').value.trim();
+            const container = document.getElementById('priceInputsContainer');
+            const reverseLabel = document.getElementById('reverseLabelText');
+
+            if(num.length === 3) {
+                container.innerHTML = `
+                    <div>
+                        <label class="block text-xs font-medium text-slate-500 mb-1">3 ตัวบน</label>
+                        <input type="number" id="price1" placeholder="บาท" class="w-full px-3 py-2 border border-slate-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-500 mb-1">3 ตัวโต๊ด</label>
+                        <input type="number" id="price2" placeholder="บาท" class="w-full px-3 py-2 border border-slate-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-500 mb-1">3 ตัวล่าง</label>
+                        <input type="number" id="price3" placeholder="บาท" class="w-full px-3 py-2 border border-slate-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    </div>
+                `;
+                reverseLabel.innerText = "กลับตัว (6 กลับ / โต๊ด)";
+            } else if(num.length === 2) {
+                container.innerHTML = `
+                    <div>
+                        <label class="block text-xs font-medium text-slate-500 mb-1">2 ตัวบน</label>
+                        <input type="number" id="price1" placeholder="บาท" class="w-full px-3 py-2 border border-slate-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-500 mb-1">2 ตัวล่าง</label>
+                        <input type="number" id="price2" placeholder="บาท" class="w-full px-3 py-2 border border-slate-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-400 mb-1">-</label>
+                        <input type="number" disabled placeholder="-" class="w-full px-3 py-2 border border-slate-200 bg-slate-100 rounded-xl text-sm text-slate-400">
+                    </div>
+                `;
+                reverseLabel.innerText = "กลับตัว (2 กลับ ตรง/กลับ)";
+            } else {
+                container.innerHTML = `
+                    <div>
+                        <label class="block text-xs font-medium text-slate-500 mb-1">วิ่งบน / วิ่งล่าง</label>
+                        <input type="number" id="price1" placeholder="บาท" class="w-full px-3 py-2 border border-slate-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-400 mb-1">-</label>
+                        <input type="number" disabled placeholder="-" class="w-full px-3 py-2 border border-slate-200 bg-slate-100 rounded-xl text-sm text-slate-400">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-400 mb-1">-</label>
+                        <input type="number" disabled placeholder="-" class="w-full px-3 py-2 border border-slate-200 bg-slate-100 rounded-xl text-sm text-slate-400">
+                    </div>
+                `;
+                reverseLabel.innerText = "เลขวิ่ง";
+            }
+        }
+
+        function setEqualPrices() {
+            const p1 = parseFloat(document.getElementById('price1').value) || 0;
+            const pInput2 = document.getElementById('price2');
+            const pInput3 = document.getElementById('price3');
+            if(pInput2 && !pInput2.disabled) pInput2.value = p1;
+            if(pInput3 && !pInput3.disabled) pInput3.value = p1;
+        }
+
         function getPermutations(str) {
             if (str.length === 1) return [str];
             let results = [];
@@ -445,54 +560,77 @@
             return [...new Set(results)];
         }
 
-        function getReverses(numStr, type) {
-            let items = [];
-            if(type.includes('2 ตัว')) {
-                let rev = numStr.split('').reverse().join('');
-                items.push({ num: numStr, label: '[ตรง]' });
-                if(rev !== numStr) items.push({ num: rev, label: '[กลับ]' });
-            } else if(type.includes('3 ตัว')) {
-                let perms = getPermutations(numStr);
-                let isStraightAdded = false;
-                perms.forEach(p => {
-                    if(p === numStr && !isStraightAdded) {
-                        items.push({ num: p, label: '[ตรง]' });
-                        isStraightAdded = true;
-                    } else if(p !== numStr) {
-                        items.push({ num: p, label: '[โต๊ด/กลับ]' });
-                    }
-                });
-            } else {
-                items.push({ num: numStr, label: '[ตรง]' });
-            }
-            return items;
+        function checkBlockStatus(num, type) {
+            let found = blockedNumbers.find(b => b.number === num);
+            if(!found) return { status: 'normal', label: '[ตรง]' };
+            if(found.type === 'ปิดรับ') return { status: 'closed', label: '⛔ ปิดรับ' };
+            return { status: 'half', label: '⚠️ จ่ายครึ่ง' };
         }
 
-        function addSingleItem() {
-            const type = document.getElementById('itemType').value;
+        function addSmartItem() {
             const num = document.getElementById('itemNumber').value.trim();
-            const price = parseFloat(document.getElementById('itemPrice').value);
+            const p1Input = document.getElementById('price1');
+            const p2Input = document.getElementById('price2');
+            const p3Input = document.getElementById('price3');
             const isReverse = document.getElementById('itemReverse').checked;
 
-            if(!num || isNaN(price) || price <= 0) {
-                alert('กรุณากรอกตัวเลขและราคาให้ถูกต้อง');
+            if(!num) { alert('กรุณากรอกตัวเลข'); return; }
+
+            let p1 = p1Input ? parseFloat(p1Input.value) || 0 : 0;
+            let p2 = p2Input && !p2Input.disabled ? parseFloat(p2Input.value) || 0 : 0;
+            let p3 = p3Input && !p3Input.disabled ? parseFloat(p3Input.value) || 0 : 0;
+
+            if(num.length === 3) {
+                if(p1 > 0) addItemEntry('3 ตัวบน', num, p1, isReverse);
+                if(p2 > 0) addItemEntry('3 ตัวโต๊ด', num, p2, isReverse);
+                if(p3 > 0) addItemEntry('3 ตัวล่าง', num, p3, isReverse);
+            } else if(num.length === 2) {
+                if(p1 > 0) addItemEntry('2 ตัวบน', num, p1, isReverse);
+                if(p2 > 0) addItemEntry('2 ตัวล่าง', num, p2, isReverse);
+            } else if(num.length === 1) {
+                if(p1 > 0) {
+                    addItemEntry('วิ่งบน', num, p1, false);
+                    addItemEntry('วิ่งล่าง', num, p1, false);
+                }
+            } else {
+                alert('กรุณากรอกตัวเลข 1-3 หลักให้ถูกต้อง');
                 return;
             }
 
-            if(isReverse) {
-                let revList = getReverses(num, type);
-                let splitPrice = price / revList.length;
-                revList.forEach(r => {
-                    currentBill.push({ type: type, number: r.num, statusLabel: r.label, price: splitPrice });
-                });
-            } else {
-                currentBill.push({ type: type, number: num, statusLabel: '[ตรง]', price: price });
+            document.getElementById('itemNumber').value = '';
+            onNumberInputChanged();
+            renderCurrentBill();
+        }
+
+        function addItemEntry(type, num, price, isReverse) {
+            let block = checkBlockStatus(num, type);
+            if(block.status === 'closed') {
+                alert(`⚠️ เลข "${num}" (${type}) ถูกตั้งปิดรับโดยแอดมินแล้ว ไม่สามารถแทงได้`);
+                return;
             }
 
-            document.getElementById('itemNumber').value = '';
-            document.getElementById('itemPrice').value = '';
-            document.getElementById('itemReverse').checked = false;
-            renderCurrentBill();
+            if(isReverse && num.length >= 2) {
+                if(num.length === 2) {
+                    let rev = num.split('').reverse().join('');
+                    let items = [{ num: num, label: '[ตรง]' }];
+                    if(rev !== num) items.push({ num: rev, label: '[กลับ]' });
+                    let splitP = price / items.length;
+                    items.forEach(it => {
+                        let b = checkBlockStatus(it.num, type);
+                        currentBill.push({ type: type, number: it.num, statusLabel: it.label + (b.status==='half'?' ⚠️จ่ายครึ่ง': ''), price: splitP });
+                    });
+                } else if(num.length === 3 && type.includes('3 ตัว')) {
+                    let perms = getPermutations(num);
+                    let splitP = price / perms.length;
+                    perms.forEach(p => {
+                        let label = (p === num) ? '[ตรง]' : '[โต๊ด/กลับ]';
+                        let b = checkBlockStatus(p, type);
+                        currentBill.push({ type: type, number: p, statusLabel: label + (b.status==='half'?' ⚠️จ่ายครึ่ง': ''), price: splitP });
+                    });
+                }
+            } else {
+                currentBill.push({ type: type, number: num, statusLabel: '[ตรง]' + (block.status==='half'?' ⚠️จ่ายครึ่ง': ''), price: price });
+            }
         }
 
         function processQuickPaste() {
@@ -510,30 +648,25 @@
                     let num = parts[0];
                     let pricePart = parts[1];
                     let isRev = line.toLowerCase().includes('กลับ');
-                    let type = '2 ตัวบน';
-                    if(num.length === 3) type = '3 ตัวบน';
-                    else if(num.length === 1) type = 'วิ่งบน';
+                    let prices = pricePart.split(/[\*x\/]/).map(p => parseFloat(p)).filter(p => !isNaN(p));
 
-                    let prices = [100];
-                    if(pricePart.includes('x') || pricePart.includes('*')) {
-                        prices = pricePart.split(/[\*x]/).map(p => parseFloat(p)).filter(p => !isNaN(p));
-                    } else {
-                        let p = parseFloat(pricePart);
-                        if(!isNaN(p)) prices = [p];
-                    }
-
-                    let mainPrice = prices[0] || 100;
-                    if(isRev && num.length >= 2) {
-                        let revList = getReverses(num, type);
-                        let splitPrice = mainPrice / revList.length;
-                        revList.forEach(r => {
-                            currentBill.push({ type: type, number: r.num, statusLabel: r.label, price: splitPrice });
-                        });
-                    } else {
-                        currentBill.push({ type: type, number: num, statusLabel: '[ตรง]', price: mainPrice });
-                        if(prices.length > 1 && num.length === 2) {
-                            let botType = type.replace('บน', 'ล่าง');
-                            currentBill.push({ type: botType, number: num, statusLabel: '[ตรง]', price: prices[1] });
+                    if(num.length === 3) {
+                        let pTop = prices[0] || 0;
+                        let pTod = prices[1] || 0;
+                        let pBot = prices[2] || pTop;
+                        if(pTop > 0) addItemEntry('3 ตัวบน', num, pTop, isRev);
+                        if(pTod > 0) addItemEntry('3 ตัวโต๊ด', num, pTod, false);
+                        if(pBot > 0) addItemEntry('3 ตัวล่าง', num, pBot, false);
+                    } else if(num.length === 2) {
+                        let pTop = prices[0] || 0;
+                        let pBot = prices[1] || pTop;
+                        if(pTop > 0) addItemEntry('2 ตัวบน', num, pTop, isRev);
+                        if(pBot > 0) addItemEntry('2 ตัวล่าง', num, pBot, isRev);
+                    } else if(num.length === 1) {
+                        let p = prices[0] || 0;
+                        if(p > 0) {
+                            addItemEntry('วิ่งบน', num, p, false);
+                            addItemEntry('วิ่งล่าง', num, p, false);
                         }
                     }
                     addedCount++;
@@ -549,10 +682,24 @@
             }
         }
 
+        function filterCurrentTab(tab) {
+            currentFilterTab = tab;
+            ['all', '3d', '2d', 'run'].forEach(t => {
+                document.getElementById('curTab' + t.toUpperCase()).className = (t === tab) ? "px-3 py-1.5 rounded-lg bg-white shadow-sm text-indigo-600" : "px-3 py-1.5 rounded-lg text-slate-600 hover:bg-white/50";
+            });
+            renderCurrentBill();
+        }
+
         function renderCurrentBill() {
             const tbody = document.getElementById('currentBillTableBody');
             const countEl = document.getElementById('currentBillCount');
             const totalEl = document.getElementById('currentBillTotal');
+
+            let filtered = currentBill;
+            if(currentFilterTab === '3d') filtered = currentBill.filter(i => i.type.includes('3 ตัว'));
+            else if(currentFilterTab === '2d') filtered = currentBill.filter(i => i.type.includes('2 ตัว'));
+            else if(currentFilterTab === 'run') filtered = currentBill.filter(i => i.type.includes('วิ่ง'));
+
             countEl.innerText = `${currentBill.length} รายการ`;
 
             if(currentBill.length === 0) {
@@ -563,18 +710,21 @@
 
             let html = '';
             let total = 0;
-            currentBill.forEach((item, index) => {
-                total += item.price;
+            currentBill.forEach(item => total += item.price);
+
+            filtered.forEach((item, index) => {
+                let realIndex = currentBill.indexOf(item);
                 let badgeColor = item.statusLabel.includes('ตรง') ? 'bg-blue-100 text-blue-700' : 'bg-amber-100 text-amber-700';
+                if(item.statusLabel.includes('อั้น') || item.statusLabel.includes('จ่ายครึ่ง')) badgeColor = 'bg-rose-100 text-rose-700';
                 html += `
                     <tr class="hover:bg-slate-50">
-                        <td class="p-2.5 text-xs text-slate-500">${index + 1}</td>
+                        <td class="p-2.5 text-xs text-slate-500">${realIndex + 1}</td>
                         <td class="p-2.5 font-medium text-slate-700">${item.type}</td>
                         <td class="p-2.5 font-bold font-mono text-indigo-600">${item.number}</td>
                         <td class="p-2.5"><span class="text-[10px] px-2 py-0.5 rounded-full font-semibold ${badgeColor}">${item.statusLabel}</span></td>
                         <td class="p-2.5 text-right font-semibold text-slate-800">${item.price.toLocaleString()} ฿</td>
                         <td class="p-2.5 text-center">
-                            <button onclick="removeCurrentItem(${index})" class="text-rose-500 hover:text-rose-700 text-xs font-bold">✕</button>
+                            <button onclick="removeCurrentItem(${realIndex})" class="text-rose-500 hover:text-rose-700 text-xs font-bold">✕</button>
                         </td>
                     </tr>
                 `;
@@ -595,17 +745,34 @@
             }
         }
 
+        function copyBillToLine() {
+            if(currentBill.length === 0) { alert('ไม่มีรายการในโพย'); return; }
+            let sender = document.getElementById('senderName').value.trim() || 'ลูกค้าทั่วไป';
+            let text = `📝 โพยหวย: ${sender}\nงวดวันที่: ${globalDrawDateValue}\n-------------------\n`;
+            let total = 0;
+            currentBill.forEach(i => {
+                text += `${i.type} [${i.number}] ${i.statusLabel} : ${i.price} บาท\n`;
+                total += i.price;
+            });
+            text += `-------------------\nรวมสุทธิ: ${total.toLocaleString()} บาท`;
+            navigator.clipboard.writeText(text);
+            alert('คัดลอกข้อความโพยสำหรับส่งไลน์เรียบร้อยแล้ว!');
+        }
+
         function submitBill() {
             const senderName = document.getElementById('senderName').value.trim() || 'ลูกค้าทั่วไป';
+            const discountRate = parseFloat(document.getElementById('senderDiscountRate').value) || 0;
             if(currentBill.length === 0) { alert('ยังไม่มีรายการในโพย'); return; }
 
             const newBill = {
                 id: 'B_' + Date.now(),
                 date: globalDrawDateValue,
                 sender: senderName,
+                discountRate: discountRate,
                 timestamp: new Date().toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' }),
                 items: [...currentBill],
-                total: currentBill.reduce((sum, i) => sum + i.price, 0)
+                total: currentBill.reduce((sum, i) => sum + i.price, 0),
+                cleared: false
             };
 
             savedBills.push(newBill);
@@ -616,20 +783,51 @@
             document.getElementById('senderName').value = '';
         }
 
+        // Admin Functions
         let adminSubTab = 'bills';
         function switchAdminTab(tab) {
             adminSubTab = tab;
-            document.getElementById('adminTabBillsBtn').className = tab === 'bills' ? "pb-2.5 text-sm font-semibold border-b-2 border-indigo-600 text-indigo-600" : "pb-2.5 text-sm font-semibold border-b-2 border-transparent text-slate-500";
-            document.getElementById('adminTabSummaryBtn').className = tab === 'summary' ? "pb-2.5 text-sm font-semibold border-b-2 border-indigo-600 text-indigo-600" : "pb-2.5 text-sm font-semibold border-b-2 border-transparent text-slate-500";
-            document.getElementById('adminTabWinnersBtn').className = tab === 'winners' ? "pb-2.5 text-sm font-semibold border-b-2 border-indigo-600 text-indigo-600" : "pb-2.5 text-sm font-semibold border-b-2 border-transparent text-slate-500";
-
-            document.getElementById('adminSubTabBills').classList.toggle('hidden', tab !== 'bills');
-            document.getElementById('adminSubTabSummary').classList.toggle('hidden', tab !== 'summary');
-            document.getElementById('adminSubTabWinners').classList.toggle('hidden', tab !== 'winners');
+            ['bills', 'summary', 'customers', 'winners'].forEach(t => {
+                document.getElementById('adminTab' + t.charAt(0).toUpperCase() + t.slice(1) + 'Btn').className = (t === tab) ? "pb-2.5 text-sm font-semibold border-b-2 border-indigo-600 text-indigo-600 whitespace-nowrap" : "pb-2.5 text-sm font-semibold border-b-2 border-transparent text-slate-500 whitespace-nowrap";
+                document.getElementById('adminSubTab' + t.charAt(0).toUpperCase() + t.slice(1)).classList.toggle('hidden', t !== tab);
+            });
 
             if(tab === 'bills') renderAdminBills();
             else if(tab === 'summary') renderNumberSummary();
+            else if(tab === 'customers') renderCustomerAccounts();
             else if(tab === 'winners') renderWinnersTable();
+        }
+
+        function addBlockedNumber() {
+            const num = document.getElementById('blockedNumInput').value.trim();
+            const type = document.getElementById('blockedTypeInput').value;
+            if(!num) { alert('กรุณากรอกเลข'); return; }
+            blockedNumbers.push({ number: num, type: type });
+            localStorage.setItem('lottery_blockedNumbers', JSON.stringify(blockedNumbers));
+            document.getElementById('blockedNumInput').value = '';
+            renderBlockedNumbers();
+        }
+
+        function removeBlockedNumber(index) {
+            blockedNumbers.splice(index, 1);
+            localStorage.setItem('lottery_blockedNumbers', JSON.stringify(blockedNumbers));
+            renderBlockedNumbers();
+        }
+
+        function renderBlockedNumbers() {
+            const box = document.getElementById('blockedNumbersList');
+            if(blockedNumbers.length === 0) {
+                box.innerHTML = `<span class="text-xs text-slate-400">ยังไม่มีการตั้งค่าเลขอั้น</span>`;
+                return;
+            }
+            let html = '';
+            blockedNumbers.forEach((b, idx) => {
+                let bg = b.type === 'ปิดรับ' ? 'bg-rose-100 text-rose-700 border-rose-300' : 'bg-amber-100 text-amber-700 border-amber-300';
+                html += `<span class="text-xs px-2.5 py-1 rounded-lg border font-semibold ${bg} flex items-center gap-1.5">
+                    ${b.number} (${b.type}) <button onclick="removeBlockedNumber(${idx})" class="font-bold hover:text-black">×</button>
+                </span>`;
+            });
+            box.innerHTML = html;
         }
 
         function getFilteredBills() {
@@ -639,6 +837,7 @@
         }
 
         function renderAdminData() {
+            renderBlockedNumbers();
             const select = document.getElementById('filterSenderSelect');
             const currentSelected = select.value;
             let senders = [...new Set(savedBills.map(b => b.sender))];
@@ -648,34 +847,36 @@
             select.value = senders.includes(currentSelected) ? currentSelected : 'all';
 
             const billsToCalc = getFilteredBills();
-            let totalRev = 0, sum2DTop = 0, sum2DBot = 0, sum3DTop = 0, sum3DTod = 0, sumRunTop = 0, sumRunBot = 0;
+            let totalRev = 0, totalDiscount = 0, sum2DTop = 0, sum2DBot = 0, sum3DTotal = 0, sumRunTotal = 0;
 
             billsToCalc.forEach(b => {
+                let billDisc = b.total * ((b.discountRate || 0) / 100);
+                totalRev += b.total;
+                totalDiscount += billDisc;
                 b.items.forEach(item => {
-                    totalRev += item.price;
                     if(item.type === '2 ตัวบน') sum2DTop += item.price;
                     else if(item.type === '2 ตัวล่าง') sum2DBot += item.price;
-                    else if(item.type === '3 ตัวบน') sum3DTop += item.price;
-                    else if(item.type === '3 ตัวโต๊ด') sum3DTod += item.price;
-                    else if(item.type === 'วิ่งบน') sumRunTop += item.price;
-                    else if(item.type === 'วิ่งล่าง') sumRunBot += item.price;
+                    else if(item.type.includes('3 ตัว')) sum3DTotal += item.price;
+                    else if(item.type.includes('วิ่ง')) sumRunTotal += item.price;
                 });
             });
 
+            let netSales = totalRev - totalDiscount;
+
             document.getElementById('adminTotalRevenue').innerText = totalRev.toLocaleString() + ' ฿';
             document.getElementById('adminTotalBillsCount').innerText = `จาก ${billsToCalc.length} บิล`;
+            document.getElementById('adminNetSales').innerText = netSales.toLocaleString() + ' ฿';
+            document.getElementById('adminTotalDiscount').innerText = totalDiscount.toLocaleString() + ' ฿';
             document.getElementById('adminSum2D').innerText = (sum2DTop + sum2DBot).toLocaleString() + ' ฿';
             document.getElementById('adminSum2DTop').innerText = sum2DTop.toLocaleString() + ' ฿';
             document.getElementById('adminSum2DBot').innerText = sum2DBot.toLocaleString() + ' ฿';
-            document.getElementById('adminSum3D').innerText = (sum3DTop + sum3DTod).toLocaleString() + ' ฿';
-            document.getElementById('adminSum3DTop').innerText = sum3DTop.toLocaleString() + ' ฿';
-            document.getElementById('adminSum3DTod').innerText = sum3DTod.toLocaleString() + ' ฿';
-            document.getElementById('adminSumRun').innerText = (sumRunTop + sumRunBot).toLocaleString() + ' ฿';
-            document.getElementById('adminSumRunTop').innerText = sumRunTop.toLocaleString() + ' ฿';
-            document.getElementById('adminSumRunBot').innerText = sumRunBot.toLocaleString() + ' ฿';
+            document.getElementById('adminSum3D').innerText = (sum3DTotal + sumRunTotal).toLocaleString() + ' ฿';
+            document.getElementById('adminSum3DTotal').innerText = sum3DTotal.toLocaleString() + ' ฿';
+            document.getElementById('adminSumRunTotal').innerText = sumRunTotal.toLocaleString() + ' ฿';
 
             if(adminSubTab === 'bills') renderAdminBills();
             else if(adminSubTab === 'summary') renderNumberSummary();
+            else if(adminSubTab === 'customers') renderCustomerAccounts();
             else if(adminSubTab === 'winners') renderWinnersTable();
 
             if(prizeResult.calculated) calculatePrizes(true);
@@ -744,6 +945,77 @@
             tbody.innerHTML = html;
         }
 
+        function renderCustomerAccounts() {
+            const tbody = document.getElementById('adminCustomerTableBody');
+            let customerMap = {};
+            savedBills.forEach(b => {
+                if(!customerMap[b.sender]) customerMap[b.sender] = { name: b.sender, count: 0, total: 0, discountRate: b.discountRate || 0, cleared: b.cleared };
+                customerMap[b.sender].count += 1;
+                customerMap[b.sender].total += b.total;
+            });
+
+            let list = Object.values(customerMap);
+            if(list.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" class="text-center py-6 text-slate-400 text-xs">ยังไม่มีข้อมูลลูกค้า</td></tr>`;
+                return;
+            }
+            let html = '';
+            list.forEach(c => {
+                let discountAmt = c.total * (c.discountRate / 100);
+                let netPay = c.total - discountAmt;
+                let statusBtn = c.cleared ? 
+                    `<button onclick="toggleClearCustomer('${c.name}')" class="px-3 py-1 bg-emerald-100 text-emerald-700 text-xs font-semibold rounded-full">✔ เคลียร์แล้ว</button>` : 
+                    `<button onclick="toggleClearCustomer('${c.name}')" class="px-3 py-1 bg-amber-100 text-amber-700 text-xs font-semibold rounded-full">⏳ ค้างเคลียร์</button>`;
+                html += `
+                    <tr class="hover:bg-slate-50">
+                        <td class="p-2.5 font-semibold text-slate-800">${c.name}</td>
+                        <td class="p-2.5 text-center text-xs">${c.count} บิล</td>
+                        <td class="p-2.5 text-right text-xs">${c.total.toLocaleString()} ฿</td>
+                        <td class="p-2.5 text-right text-xs">${c.discountRate}% (-${discountAmt.toLocaleString()}฿)</td>
+                        <td class="p-2.5 text-right font-bold text-indigo-600">${netPay.toLocaleString()} ฿</td>
+                        <td class="p-2.5 text-center">${statusBtn}</td>
+                    </tr>
+                `;
+            });
+            tbody.innerHTML = html;
+        }
+
+        function toggleClearCustomer(name) {
+            savedBills.forEach(b => {
+                if(b.sender === name) b.cleared = !b.cleared;
+            });
+            localStorage.setItem('lottery_savedBills', JSON.stringify(savedBills));
+            renderCustomerAccounts();
+        }
+
+        function copyCutoffToLine() {
+            const maxQuota = parseFloat(document.getElementById('maxQuotaInput').value) || 1000;
+            let map = {};
+            savedBills.forEach(b => {
+                b.items.forEach(item => {
+                    let key = item.type + '_' + item.number;
+                    if(!map[key]) map[key] = { type: item.type, number: item.number, total: 0 };
+                    map[key].total += item.price;
+                });
+            });
+
+            let cutoffs = [];
+            Object.values(map).forEach(m => {
+                if(m.total > maxQuota) {
+                    cutoffs.push({ type: m.type, number: m.number, excess: m.total - maxQuota });
+                }
+            });
+
+            if(cutoffs.length === 0) { alert('ไม่มีตัวเลขใดยอดเกินเพดานที่ตั้งไว้'); return; }
+
+            let text = `✂️ รายการตัดยอดส่งเจ้ามือใหญ่ (เกินเพดาน ${maxQuota} ฿):\nงวดวันที่: ${globalDrawDateValue}\n-------------------\n`;
+            cutoffs.forEach(c => {
+                text += `${c.type} [${c.number}] ตัดส่ง: ${c.excess.toLocaleString()} บาท\n`;
+            });
+            navigator.clipboard.writeText(text);
+            alert('คัดลอกรายการตัดยอดส่งเจ้ามือใหญ่เรียบร้อยแล้ว!');
+        }
+
         function checkBillHasWin(bill) {
             let t3 = prizeResult.t3, b2 = prizeResult.b2;
             if(!t3 && !b2) return false;
@@ -779,7 +1051,10 @@
 
             bills.forEach(b => {
                 b.items.forEach(item => {
-                    totalIn += item.price;
+                    let isHalf = item.statusLabel.includes('อั้น') || item.statusLabel.includes('จ่ายครึ่ง');
+                    let effectivePrice = isHalf ? item.price / 2 : item.price;
+                    totalIn += effectivePrice;
+
                     let winRate = 0, isWin = false;
                     let top3Num = t3, bot2Num = b2, top2Num = t3.length === 3 ? t3.slice(-2) : '', todPerms = t3.length === 3 ? getPermutations(t3) : [];
 
@@ -797,9 +1072,9 @@
                     }
 
                     if(isWin) {
-                        let payout = item.price * winRate;
+                        let payout = effectivePrice * winRate;
                         totalOut += payout;
-                        winnersList.push({ sender: b.sender, type: item.type, number: item.number, price: item.price, rate: winRate, payout: payout });
+                        winnersList.push({ sender: b.sender, type: item.type, number: item.number, price: effectivePrice, rate: winRate, payout: payout });
                     }
                 });
             });
@@ -877,6 +1152,7 @@
                 localStorage.clear();
                 savedBills = [];
                 currentBill = [];
+                blockedNumbers = [];
                 prizeResult = { t3: '', b2: '', calculated: false };
                 renderCurrentBill();
                 renderAdminData();
@@ -885,7 +1161,8 @@
         }
 
         function exportData() {
-            let dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(savedBills));
+            let dataObj = { bills: savedBills, blocked: blockedNumbers };
+            let dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(dataObj));
             let downloadAnchor = document.createElement('a');
             downloadAnchor.setAttribute("href", dataStr);
             downloadAnchor.setAttribute("download", `lottery_backup_${globalDrawDateValue}.json`);
@@ -893,6 +1170,32 @@
             downloadAnchor.click();
             downloadAnchor.remove();
         }
+
+        function importData(event) {
+            let file = event.target.files[0];
+            if(!file) return;
+            let reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    let parsed = JSON.parse(e.target.result);
+                    if(Array.isArray(parsed)) {
+                        savedBills = parsed;
+                    } else if(parsed.bills) {
+                        savedBills = parsed.bills || [];
+                        blockedNumbers = parsed.blocked || [];
+                        localStorage.setItem('lottery_blockedNumbers', JSON.stringify(blockedNumbers));
+                    }
+                    localStorage.setItem('lottery_savedBills', JSON.stringify(savedBills));
+                    renderAdminData();
+                    alert('นำเข้าข้อมูลสำเร็จเรียบร้อยแล้ว!');
+                } catch(err) {
+                    alert('ไฟล์ไม่ถูกต้อง ไม่สามารถอ่านข้อมูลได้');
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        onNumberInputChanged();
     </script>
 </body>
 </html>
