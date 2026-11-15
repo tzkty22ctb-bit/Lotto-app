@@ -21,7 +21,7 @@
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
                     ระบบจดหวย Pro (Smart Lottery & Admin)
                 </h1>
-                <p class="text-xs text-indigo-200">ระบบคีย์ด่วนอัจฉริยะ แยกบน-โต๊ด-ล่าง เช็คอั้น และตรวจผลรางวัลอัตโนมัติ</p>
+                <p class="text-xs text-indigo-200">ราคาเต็มไม่หารตัวกลับ ตรวจผลรางวัลและสรุปกำไรเจ้ามือแม่นยำ</p>
             </div>
             <!-- Draw Date Selector -->
             <div class="flex items-center gap-2 bg-indigo-800/60 px-3 py-1.5 rounded-lg border border-indigo-500/30">
@@ -61,7 +61,7 @@
             <!-- Smart Single Item Entry -->
             <div class="bg-white rounded-2xl shadow-sm p-5 border border-slate-200 space-y-4">
                 <h2 class="text-sm font-bold text-slate-700 flex items-center gap-2">
-                    <span class="bg-indigo-100 text-indigo-700 p-1.5 rounded-lg">➕</span> คีย์ทีละรายการ (ปรับช่องอัตโนมัติตามตัวเลข)
+                    <span class="bg-indigo-100 text-indigo-700 p-1.5 rounded-lg">➕</span> คีย์ทีละรายการ (ราคาเต็มทุกตัว ไม่หาร)
                 </h2>
                 <div class="grid grid-cols-1 sm:grid-cols-4 gap-3">
                     <div class="sm:col-span-1">
@@ -69,7 +69,6 @@
                         <input type="text" id="itemNumber" oninput="onNumberInputChanged()" placeholder="เช่น 123 หรือ 45" class="w-full px-3 py-2 border border-slate-300 rounded-xl text-sm font-bold font-mono focus:outline-none focus:ring-2 focus:ring-indigo-500">
                     </div>
                     <div class="sm:col-span-3 grid grid-cols-3 gap-2" id="priceInputsContainer">
-                        <!-- Dynamic Price Inputs will render here -->
                         <div>
                             <label class="block text-xs font-medium text-slate-500 mb-1" id="labelPrice1">บน / วิ่ง</label>
                             <input type="number" id="price1" placeholder="บาท" class="w-full px-3 py-2 border border-slate-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
@@ -88,7 +87,7 @@
                     <div class="flex items-center gap-4">
                         <label class="flex items-center gap-2 cursor-pointer select-none">
                             <input type="checkbox" id="itemReverse" class="w-4 h-4 text-indigo-600 rounded border-slate-300 focus:ring-indigo-500">
-                            <span class="text-xs font-medium text-slate-700" id="reverseLabelText">กลับตัว (2 กลับ / 6 กลับ)</span>
+                            <span class="text-xs font-medium text-slate-700" id="reverseLabelText">กลับตัว (ได้ราคาเต็มทุกตัว)</span>
                         </label>
                         <button onclick="setEqualPrices()" class="text-xs text-indigo-600 hover:underline font-medium">⚡ ใส่ราคาเท่ากันทุกช่อง</button>
                     </div>
@@ -170,7 +169,7 @@
             <div id="adminLockBox" class="bg-white rounded-2xl shadow-sm p-8 border border-slate-200 text-center max-w-md mx-auto space-y-4">
                 <div class="w-12 h-12 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center mx-auto text-xl font-bold">🔒</div>
                 <h2 class="text-lg font-bold text-slate-800">เข้าสู่ระบบแอดมิน (เจ้ามือ)</h2>
-                <p class="text-xs text-slate-500">กรุณาใส่รหัสผ่านเพื่อดูยอดรวมและจัดการเลขอั้น (รหัสผ่านเริ่มต้น: <code class="bg-slate-100 text-indigo-600 px-1 py-0.5 rounded font-mono">1234</code>)</p>
+                <p class="text-xs text-slate-500">กรุณาใส่รหัสผ่านเพื่อดูยอดรวมและตรวจรางวัล (รหัสผ่านเริ่มต้น: <code class="bg-slate-100 text-indigo-600 px-1 py-0.5 rounded font-mono">1234</code>)</p>
                 <input type="password" id="adminPasswordInput" placeholder="รหัสผ่าน 4 หลัก" class="w-full px-4 py-2.5 text-center tracking-widest border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
                 <button onclick="checkAdminPassword()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2.5 rounded-xl text-sm shadow transition">
                     ปลดล็อกแอดมิน
@@ -201,73 +200,7 @@
                     </div>
                 </div>
 
-                <!-- Summary Cards & Sales Breakdown -->
-                <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
-                    <div class="bg-gradient-to-br from-indigo-600 to-blue-700 text-white rounded-2xl p-5 shadow-sm">
-                        <div class="text-xs text-indigo-200 font-medium">ยอดขายรับรวมเต็ม</div>
-                        <div class="text-2xl font-bold mt-1" id="adminTotalRevenue">0 ฿</div>
-                        <div class="text-xs text-indigo-100 mt-2" id="adminTotalBillsCount">จาก 0 บิล</div>
-                    </div>
-                    <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200">
-                        <div class="text-xs font-semibold text-slate-500">ยอดหลังหักส่วนลดลูกทีม</div>
-                        <div class="text-xl font-bold text-emerald-600 mt-1" id="adminNetSales">0 ฿</div>
-                        <div class="text-xs text-slate-400 mt-2">ส่วนลดรวม: <span id="adminTotalDiscount" class="font-semibold text-slate-600">0 ฿</span></div>
-                    </div>
-                    <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200">
-                        <div class="text-xs font-semibold text-slate-500">ยอดรวม 2 ตัว (บน/ล่าง)</div>
-                        <div class="text-xl font-bold text-slate-800 mt-1" id="adminSum2D">0 ฿</div>
-                        <div class="text-xs text-slate-400 mt-2 flex justify-between">
-                            <span>บน: <strong id="adminSum2DTop" class="text-slate-600">0</strong></span>
-                            <span>ล่าง: <strong id="adminSum2DBot" class="text-slate-600">0</strong></span>
-                        </div>
-                    </div>
-                    <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200">
-                        <div class="text-xs font-semibold text-slate-500">ยอดรวม 3 ตัว / วิ่ง</div>
-                        <div class="text-xl font-bold text-slate-800 mt-1" id="adminSum3D">0 ฿</div>
-                        <div class="text-xs text-slate-400 mt-2 flex justify-between">
-                            <span>3ตัว: <strong id="adminSum3DTotal" class="text-slate-600">0</strong></span>
-                            <span>วิ่ง: <strong id="adminSumRunTotal" class="text-slate-600">0</strong></span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Admin Management Tools (Blocked Numbers & Cut-off for Agent) -->
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <!-- Blocked & Half-Pay Numbers -->
-                    <div class="bg-white rounded-2xl shadow-sm p-5 border border-slate-200 space-y-3">
-                        <h2 class="text-sm font-bold text-slate-800 flex items-center gap-2">
-                            <span class="bg-rose-100 text-rose-700 p-1.5 rounded-lg">🚫</span> ตั้งค่าเลขอั้น / เลขปิดรับ
-                        </h2>
-                        <div class="flex gap-2">
-                            <input type="text" id="blockedNumInput" placeholder="เลขเช่น 789 หรือ 25" class="px-3 py-2 border border-slate-300 rounded-xl text-sm flex-1">
-                            <select id="blockedTypeInput" class="px-3 py-2 border border-slate-300 rounded-xl text-xs">
-                                <option value="จ่ายครึ่ง">จ่ายครึ่ง (อั้น)</option>
-                                <option value="ปิดรับ">ปิดรับ (ไม่รับแทง)</option>
-                            </select>
-                            <button onclick="addBlockedNumber()" class="bg-rose-600 hover:bg-rose-700 text-white font-semibold px-4 py-2 rounded-xl text-xs transition">เพิ่ม</button>
-                        </div>
-                        <div id="blockedNumbersList" class="flex flex-wrap gap-1.5 pt-1">
-                            <span class="text-xs text-slate-400">ยังไม่มีการตั้งค่าเลขอั้น</span>
-                        </div>
-                    </div>
-
-                    <!-- Cut-off to Main Dealer -->
-                    <div class="bg-white rounded-2xl shadow-sm p-5 border border-slate-200 space-y-3">
-                        <h2 class="text-sm font-bold text-slate-800 flex items-center gap-2">
-                            <span class="bg-indigo-100 text-indigo-700 p-1.5 rounded-lg">✂️</span> ตัดยอดเกินเพดาน (ส่งเจ้ามือใหญ่)
-                        </h2>
-                        <div class="text-xs text-slate-500">ตั้งเพดานรับสูงสุดต่อเลข (บาท) เพื่อตัดส่วนเกินส่งเจ้ามือใหญ่</div>
-                        <div class="flex gap-2 items-center">
-                            <input type="number" id="maxQuotaInput" value="1000" onchange="renderAdminData()" class="px-3 py-2 border border-slate-300 rounded-xl text-sm w-32 font-bold">
-                            <span class="text-xs text-slate-600">บาท/เลข</span>
-                            <button onclick="copyCutoffToLine()" class="ml-auto px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-semibold transition">
-                                📋 คัดลอกยอดตัดส่งไลน์
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Prize Checking & Payout Summary Card -->
+                <!-- Prize Checking & Payout Summary Card (Prominently placed at the top) -->
                 <div class="bg-white rounded-2xl shadow-sm p-5 border border-slate-200 space-y-4">
                     <div class="flex justify-between items-center border-b border-slate-100 pb-3">
                         <h2 class="text-sm font-bold text-slate-800 flex items-center gap-2">
@@ -320,6 +253,70 @@
                         <div class="bg-slate-50 p-4 rounded-xl border border-slate-200" id="dealerNetBox">
                             <div class="text-xs text-slate-500" id="dealerNetLabel">กำไร/ขาดทุนสุทธิเจ้ามือ</div>
                             <div class="text-lg font-bold" id="dealerNetVal">0 ฿</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Summary Cards & Sales Breakdown -->
+                <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
+                    <div class="bg-gradient-to-br from-indigo-600 to-blue-700 text-white rounded-2xl p-5 shadow-sm">
+                        <div class="text-xs text-indigo-200 font-medium">ยอดขายรับรวมเต็ม</div>
+                        <div class="text-2xl font-bold mt-1" id="adminTotalRevenue">0 ฿</div>
+                        <div class="text-xs text-indigo-100 mt-2" id="adminTotalBillsCount">จาก 0 บิล</div>
+                    </div>
+                    <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200">
+                        <div class="text-xs font-semibold text-slate-500">ยอดหลังหักส่วนลดลูกทีม</div>
+                        <div class="text-xl font-bold text-emerald-600 mt-1" id="adminNetSales">0 ฿</div>
+                        <div class="text-xs text-slate-400 mt-2">ส่วนลดรวม: <span id="adminTotalDiscount" class="font-semibold text-slate-600">0 ฿</span></div>
+                    </div>
+                    <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200">
+                        <div class="text-xs font-semibold text-slate-500">ยอดรวม 2 ตัว (บน/ล่าง)</div>
+                        <div class="text-xl font-bold text-slate-800 mt-1" id="adminSum2D">0 ฿</div>
+                        <div class="text-xs text-slate-400 mt-2 flex justify-between">
+                            <span>บน: <strong id="adminSum2DTop" class="text-slate-600">0</strong></span>
+                            <span>ล่าง: <strong id="adminSum2DBot" class="text-slate-600">0</strong></span>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200">
+                        <div class="text-xs font-semibold text-slate-500">ยอดรวม 3 ตัว / วิ่ง</div>
+                        <div class="text-xl font-bold text-slate-800 mt-1" id="adminSum3D">0 ฿</div>
+                        <div class="text-xs text-slate-400 mt-2 flex justify-between">
+                            <span>3ตัว: <strong id="adminSum3DTotal" class="text-slate-600">0</strong></span>
+                            <span>วิ่ง: <strong id="adminSumRunTotal" class="text-slate-600">0</strong></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Admin Management Tools -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div class="bg-white rounded-2xl shadow-sm p-5 border border-slate-200 space-y-3">
+                        <h2 class="text-sm font-bold text-slate-800 flex items-center gap-2">
+                            <span class="bg-rose-100 text-rose-700 p-1.5 rounded-lg">🚫</span> ตั้งค่าเลขอั้น / เลขปิดรับ
+                        </h2>
+                        <div class="flex gap-2">
+                            <input type="text" id="blockedNumInput" placeholder="เลขเช่น 789 หรือ 25" class="px-3 py-2 border border-slate-300 rounded-xl text-sm flex-1">
+                            <select id="blockedTypeInput" class="px-3 py-2 border border-slate-300 rounded-xl text-xs">
+                                <option value="จ่ายครึ่ง">จ่ายครึ่ง (อั้น)</option>
+                                <option value="ปิดรับ">ปิดรับ (ไม่รับแทง)</option>
+                            </select>
+                            <button onclick="addBlockedNumber()" class="bg-rose-600 hover:bg-rose-700 text-white font-semibold px-4 py-2 rounded-xl text-xs transition">เพิ่ม</button>
+                        </div>
+                        <div id="blockedNumbersList" class="flex flex-wrap gap-1.5 pt-1">
+                            <span class="text-xs text-slate-400">ยังไม่มีการตั้งค่าเลขอั้น</span>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-2xl shadow-sm p-5 border border-slate-200 space-y-3">
+                        <h2 class="text-sm font-bold text-slate-800 flex items-center gap-2">
+                            <span class="bg-indigo-100 text-indigo-700 p-1.5 rounded-lg">✂️</span> ตัดยอดเกินเพดาน (ส่งเจ้ามือใหญ่)
+                        </h2>
+                        <div class="text-xs text-slate-500">ตั้งเพดานรับสูงสุดต่อเลข (บาท) เพื่อตัดส่วนเกินส่งเจ้ามือใหญ่</div>
+                        <div class="flex gap-2 items-center">
+                            <input type="number" id="maxQuotaInput" value="1000" onchange="renderAdminData()" class="px-3 py-2 border border-slate-300 rounded-xl text-sm w-32 font-bold">
+                            <span class="text-xs text-slate-600">บาท/เลข</span>
+                            <button onclick="copyCutoffToLine()" class="ml-auto px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-semibold transition">
+                                📋 คัดลอกยอดตัดส่งไลน์
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -378,7 +375,7 @@
                         </div>
                     </div>
 
-                    <!-- Sub-tab 3: Customers Account & Settlement -->
+                    <!-- Sub-tab 3: Customers Account -->
                     <div id="adminSubTabCustomers" class="hidden space-y-3">
                         <div class="overflow-x-auto">
                             <table class="w-full text-left border-collapse text-sm">
@@ -482,7 +479,6 @@
             document.getElementById('payoutSettingsBox').classList.toggle('hidden');
         }
 
-        // Smart Single Item UI Dynamic Adaptation
         function onNumberInputChanged() {
             const num = document.getElementById('itemNumber').value.trim();
             const container = document.getElementById('priceInputsContainer');
@@ -503,7 +499,7 @@
                         <input type="number" id="price3" placeholder="บาท" class="w-full px-3 py-2 border border-slate-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
                     </div>
                 `;
-                reverseLabel.innerText = "กลับตัว (6 กลับ / โต๊ด)";
+                reverseLabel.innerText = "กลับตัว (ได้ราคาเต็มทุกตัว)";
             } else if(num.length === 2) {
                 container.innerHTML = `
                     <div>
@@ -519,7 +515,7 @@
                         <input type="number" disabled placeholder="-" class="w-full px-3 py-2 border border-slate-200 bg-slate-100 rounded-xl text-sm text-slate-400">
                     </div>
                 `;
-                reverseLabel.innerText = "กลับตัว (2 กลับ ตรง/กลับ)";
+                reverseLabel.innerText = "กลับตัว (ได้ราคาเต็มทุกตัว)";
             } else {
                 container.innerHTML = `
                     <div>
@@ -582,7 +578,7 @@
 
             if(num.length === 3) {
                 if(p1 > 0) addItemEntry('3 ตัวบน', num, p1, isReverse);
-                if(p2 > 0) addItemEntry('3 ตัวโต๊ด', num, p2, isReverse);
+                if(p2 > 0) addItemEntry('3 ตัวโต๊ด', num, p2, false);
                 if(p3 > 0) addItemEntry('3 ตัวล่าง', num, p3, isReverse);
             } else if(num.length === 2) {
                 if(p1 > 0) addItemEntry('2 ตัวบน', num, p1, isReverse);
@@ -614,18 +610,18 @@
                     let rev = num.split('').reverse().join('');
                     let items = [{ num: num, label: '[ตรง]' }];
                     if(rev !== num) items.push({ num: rev, label: '[กลับ]' });
-                    let splitP = price / items.length;
+                    
+                    // ใช้ราคาเต็มเท่ากันทุกตัว ไม่หารแล้ว
                     items.forEach(it => {
                         let b = checkBlockStatus(it.num, type);
-                        currentBill.push({ type: type, number: it.num, statusLabel: it.label + (b.status==='half'?' ⚠️จ่ายครึ่ง': ''), price: splitP });
+                        currentBill.push({ type: type, number: it.num, statusLabel: it.label + (b.status==='half'?' ⚠️จ่ายครึ่ง': ''), price: price });
                     });
                 } else if(num.length === 3 && type.includes('3 ตัว')) {
                     let perms = getPermutations(num);
-                    let splitP = price / perms.length;
                     perms.forEach(p => {
                         let label = (p === num) ? '[ตรง]' : '[โต๊ด/กลับ]';
                         let b = checkBlockStatus(p, type);
-                        currentBill.push({ type: type, number: p, statusLabel: label + (b.status==='half'?' ⚠️จ่ายครึ่ง': ''), price: splitP });
+                        currentBill.push({ type: type, number: p, statusLabel: label + (b.status==='half'?' ⚠️จ่ายครึ่ง': ''), price: price });
                     });
                 }
             } else {
@@ -656,7 +652,7 @@
                         let pBot = prices[2] || pTop;
                         if(pTop > 0) addItemEntry('3 ตัวบน', num, pTop, isRev);
                         if(pTod > 0) addItemEntry('3 ตัวโต๊ด', num, pTod, false);
-                        if(pBot > 0) addItemEntry('3 ตัวล่าง', num, pBot, false);
+                        if(pBot > 0) addItemEntry('3 ตัวล่าง', num, pBot, isRev);
                     } else if(num.length === 2) {
                         let pTop = prices[0] || 0;
                         let pBot = prices[1] || pTop;
