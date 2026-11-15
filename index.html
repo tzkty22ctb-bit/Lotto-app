@@ -1192,6 +1192,20 @@
         }
 
         onNumberInputChanged();
+   window.addEventListener('DOMContentLoaded', () => {
+    const p = new URLSearchParams(window.location.search);
+    if (p.get('mode') === 'sender') {
+        let n = document.getElementById('navTabs');
+        if (n) n.style.display = 'none';
+
+        let a = document.getElementById('admin-section');
+        if (a) a.style.display = 'none';
+
+        let s = document.getElementById('sender-section');
+        if (s) s.style.display = 'block';
+    }
+});
+
     </script>
 </body>
 </html>
