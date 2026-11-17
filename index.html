@@ -374,15 +374,16 @@
                     </div>
                 </div>
             </div>
+            <!-- แสดงรายละเอียดการถูกรางวัลแยกตามรายคนแบบละเอียด -->
             <div class="bg-white rounded-3xl border shadow-sm p-6 space-y-4">
-                <h4 class="font-bold text-slate-800 text-sm">ยอดถูกรางวัลแยกตามรายชื่อคนส่ง</h4>
-                <div id="winners-by-customer-list" class="space-y-2.5 text-xs"></div>
+                <h4 class="font-bold text-slate-800 text-sm">รายละเอียดการถูกรางวัลแยกตามรายชื่อคนส่ง</h4>
+                <div id="winners-by-customer-list" class="space-y-4 text-xs"></div>
             </div>
         </div>
     </div>
 
     <!-- =====================================================================
-         3. หน้าเจ้าใหญ่ (Big Boss) - ย้ายช่องตรวจรางวัลและสรุปยอดขึ้นด้านบน
+         3. หน้าเจ้าใหญ่ (Big Boss)
          ===================================================================== -->
     <div id="page-bigboss" class="hidden max-w-7xl mx-auto px-4 py-6 space-y-6">
         <section class="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -403,7 +404,6 @@
             </div>
         </section>
 
-        <!-- [ย้ายขึ้นด้านบนตามต้องการ] หน้าเจ้าใหญ่: ตรวจรางวัลและสรุปยอด -->
         <div class="bg-white rounded-3xl border p-6 shadow-sm space-y-4">
             <h3 class="text-base font-bold text-indigo-950 flex items-center gap-2">
                 <i class="fa-solid fa-trophy text-indigo-600"></i> ตรวจรางวัลและสรุปยอดส่งเจ้าใหญ่
@@ -464,7 +464,7 @@
 
         function loadFromLocalStorage() {
             try {
-                const local = localStorage.getItem('smart_lotto_backup_v7');
+                const local = localStorage.getItem('smart_lotto_backup_v8');
                 if (local) {
                     const data = JSON.parse(local);
                     entries = data.entries || [];
@@ -481,7 +481,7 @@
 
         window.initAppFirebase = function() {
             const statusEl = document.getElementById('db-status');
-            onValue(ref(db, 'lotto_data_v7'), (snapshot) => {
+            onValue(ref(db, 'lotto_data_v8'), (snapshot) => {
                 const data = snapshot.val();
                 if (data) {
                     entries = data.entries || [];
@@ -491,7 +491,7 @@
                     bigBossItems = data.bigBossItems || [];
                     isDealerClosed = !!data.isDealerClosed;
                     lottoDate = data.lottoDate || '2026-11-16';
-                    localStorage.setItem('smart_lotto_backup_v7', JSON.stringify(data));
+                    localStorage.setItem('smart_lotto_backup_v8', JSON.stringify(data));
                 }
                 statusEl.textContent = 'ออนไลน์';
                 statusEl.className = 'text-emerald-400 font-bold';
@@ -505,8 +505,8 @@
 
         window.saveDataToFirebase = function() {
             const payload = { entries, specialNumbers, maxLimits, payoutRates, bigBossItems, isDealerClosed, lottoDate };
-            localStorage.setItem('smart_lotto_backup_v7', JSON.stringify(payload));
-            set(ref(db, 'lotto_data_v7'), payload).catch(err => {});
+            localStorage.setItem('smart_lotto_backup_v8', JSON.stringify(payload));
+            set(ref(db, 'lotto_data_v8'), payload).catch(err => {});
         }
 
         window.addEventListener('DOMContentLoaded', () => {
@@ -725,14 +725,22 @@
 
             const parsed = parseSmartText(rawText, customer, discPct, forcedType);
 
-            let hasClosed = false;
+            // ตรวจสอบเลขอั้นหรือเลขปิดรับ
+            let closedNumbers = [];
+            let halfNumbers = [];
             parsed.forEach(p => {
-                if (checkNumberRestriction(p.number, p.type) === 'closed') hasClosed = true;
+                const status = checkNumberRestriction(p.number, p.type);
+                if (status === 'closed') closedNumbers.push(`${p.number} (${p.type})`);
+                if (status === 'half') halfNumbers.push(`${p.number} (${p.type})`);
             });
 
-            if (hasClosed) {
-                showToast('❌ มีเลขปิดรับในรายการ ไม่อนุญาตให้บันทึก!', 'error');
+            if (closedNumbers.length > 0) {
+                showToast(`❌ ไม่อนุญาตให้บันทึก! มีเลขปิดรับ: ${closedNumbers.join(', ')}`, 'error');
                 return;
+            }
+
+            if (halfNumbers.length > 0) {
+                showToast(`⚠️ แจ้งเตือน: มีเลขอั้น (จ่ายครึ่ง): ${halfNumbers.join(', ')}`, 'warning');
             }
 
             if (parsed.length > 0) {
@@ -770,8 +778,16 @@
             const { entries } = window.getFirebaseData();
             const item = entries.find(e => e.id === id);
             if (item) {
-                item.number = document.getElementById('edit-item-num').value.trim();
-                item.amount = parseInt(document.getElementById('edit-item-amt').value) || 0;
+                const num = document.getElementById('edit-item-num').value.trim();
+                const amt = parseInt(document.getElementById('edit-item-amt').value) || 0;
+                
+                if (checkNumberRestriction(num, item.type) === 'closed') {
+                    showToast('❌ ไม่สามารถแก้ไขได้เนื่องจากเป็นเลขปิดรับ', 'error');
+                    return;
+                }
+
+                item.number = num;
+                item.amount = amt;
                 window.setFirebaseData(entries, null, null, null, null, undefined, undefined);
                 toggleModal('edit-modal', false);
                 showToast('แก้ไขรายการสำเร็จ', 'success');
@@ -927,7 +943,7 @@
             const { payoutRates, entries, maxLimits, bigBossItems } = window.getFirebaseData();
 
             let totalKeptIn = 0, totalPayout = 0;
-            const customerWinners = {};
+            const customerDetails = {};
 
             const netAmountMap = {};
             entries.forEach(e => {
@@ -961,8 +977,17 @@
                     const prize = keptAmt * rate * multiplier;
                     totalPayout += prize;
 
-                    if (!customerWinners[item.customer]) customerWinners[item.customer] = 0;
-                    customerWinners[item.customer] += prize;
+                    if (!customerDetails[item.customer]) {
+                        customerDetails[item.customer] = { wins: [], totalPrize: 0 };
+                    }
+                    customerDetails[item.customer].wins.push({
+                        number: item.number,
+                        type: item.type,
+                        amount: keptAmt,
+                        rate,
+                        prize
+                    });
+                    customerDetails[item.customer].totalPrize += prize;
                 }
             });
 
@@ -972,18 +997,28 @@
             document.getElementById('pay-net-amount').textContent = (netProfit >= 0 ? '+' : '') + netProfit.toLocaleString('th-TH') + ' ฿';
 
             const listDiv = document.getElementById('winners-by-customer-list');
-            const entriesList = Object.entries(customerWinners);
-            if (entriesList.length === 0) {
+            const custEntries = Object.entries(customerDetails);
+            if (custEntries.length === 0) {
                 listDiv.innerHTML = '<p class="text-slate-400">ไม่มีผู้ถูกรางวัลจากยอดรับเองในงวดนี้</p>';
             } else {
-                listDiv.innerHTML = entriesList.map(([cust, prize]) => `
-                    <div class="flex justify-between bg-slate-50 p-3 rounded-2xl border">
-                        <span class="font-bold text-slate-700">${cust}</span>
-                        <span class="font-bold text-rose-600 number-font">ถูกรางวัลรวม: ${prize.toLocaleString('th-TH')} ฿</span>
+                listDiv.innerHTML = custEntries.map(([cust, data]) => `
+                    <div class="bg-slate-50 p-4 rounded-2xl border space-y-2">
+                        <div class="flex justify-between items-center border-b pb-2">
+                            <span class="font-bold text-slate-800 text-sm">👤 ${cust}</span>
+                            <span class="font-bold text-rose-600 number-font text-sm">ถูกรางวัลรวม: ${data.totalPrize.toLocaleString('th-TH')} ฿</span>
+                        </div>
+                        <div class="space-y-1 pt-1">
+                            ${data.wins.map(w => `
+                                <div class="flex justify-between text-slate-600 text-xs">
+                                    <span>• ถูกเลข <b class="text-slate-900">${w.number}</b> (${w.type}) แทงสู้ ${w.amount.toLocaleString()} บ. (จ่ายบาทละ ${w.rate})</span>
+                                    <span class="font-bold text-rose-500 number-font">+${w.prize.toLocaleString('th-TH')} ฿</span>
+                                </div>
+                            `).join('')}
+                        </div>
                     </div>
                 `).join('');
             }
-            showToast('คำนวณผลรางวัลเรียบร้อย', 'success');
+            showToast('คำนวณผลรางวัลและแจงรายละเอียดเรียบร้อย', 'success');
         }
 
         function calculateBossPayout() {
