@@ -128,7 +128,7 @@
                 </div>
 
                 <div class="relative">
-                    <textarea id="smart-input" rows="4" class="w-full rounded-2xl border-2 border-teal-200 focus:border-teal-600 p-4 text-lg font-medium resize-none number-font shadow-inner" placeholder="เช่น: 12 50x50 หรือ 674=100x100"></textarea>
+                    <textarea id="smart-input" rows="4" class="w-full rounded-2xl border-2 border-teal-200 focus:border-teal-600 p-4 text-lg font-medium resize-none number-font shadow-inner" placeholder="เช่น: 12 50x50 หรือ 674โต๊ด100 หรือ 674=100x100"></textarea>
                     <button type="button" onclick="clearInputBox('smart-input', 'clear-input-btn')" id="clear-input-btn" class="hidden absolute top-3 right-3 text-slate-400 bg-slate-100 w-7 h-7 rounded-full flex items-center justify-center text-xs">✕</button>
                 </div>
 
@@ -216,7 +216,7 @@
         <div class="flex flex-wrap items-center justify-between gap-3 bg-white p-3.5 rounded-3xl border shadow-sm">
             <div class="flex gap-1.5">
                 <button id="dlr-subtab-risk" onclick="switchDealerSubTab('risk')" class="px-4 py-2.5 rounded-2xl text-xs font-bold bg-purple-700 text-white shadow">ความเสี่ยง & เพดานรับสู้</button>
-                <button id="dlr-subtab-limits" onclick="switchDealerSubTab('limits')" class="px-4 py-2.5 rounded-2xl text-xs font-bold text-slate-600 hover:bg-slate-100">เลขอั้น 3 ตัวอั้นทุกกลับ & เลขปิด</button>
+                <button id="dlr-subtab-limits" onclick="switchDealerSubTab('limits')" class="px-4 py-2.5 rounded-2xl text-xs font-bold text-slate-600 hover:bg-slate-100">เลขอั้น (ตรง*โต๊ด*ทุกกลับ) & เลขปิด</button>
                 <button id="dlr-subtab-payout" onclick="switchDealerSubTab('payout')" class="px-4 py-2.5 rounded-2xl text-xs font-bold text-slate-600 hover:bg-slate-100">ตรวจรางวัล & กำไรขาดทุน</button>
             </div>
         </div>
@@ -246,14 +246,14 @@
         <div id="dlr-panel-limits" class="hidden grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
             <div class="lg:col-span-5 bg-white rounded-3xl border p-6 space-y-4 shadow-sm">
                 <h3 class="text-base font-bold text-purple-950">กำหนดเลขอั้น & เลขปิดรับ</h3>
-                <p class="text-xs text-slate-500">ติ๊ก <strong>"อั้นทุกกลับอัตโนมัติ (โต๊ดทุกทาง)"</strong> สำหรับเลข 3 ตัวได้ทันที</p>
+                <p class="text-xs text-slate-500">ติ๊ก <strong>"อั้นทุกกลับแบบ ตรง*โต๊ด*ทุกกลับ"</strong> สำหรับเลข 3 ตัว</p>
                 <div>
                     <label class="text-xs font-bold text-slate-700 block mb-1">ตัวเลข (เช่น 123)</label>
                     <input type="text" id="new-limit-numbers" placeholder="ระบุตัวเลข..." class="w-full px-4 py-3 border-2 rounded-2xl font-bold number-font">
                 </div>
                 <div class="flex items-center gap-2.5 bg-purple-50 p-3.5 rounded-2xl border border-purple-200">
-                    <input type="checkbox" id="auto-reverse-limit" class="w-4 h-4 text-purple-600 rounded">
-                    <label for="auto-reverse-limit" class="text-xs font-bold text-purple-900 cursor-pointer">อั้นทุกกลับอัตโนมัติ (สำหรับ 3 ตัว)</label>
+                    <input type="checkbox" id="auto-reverse-limit" class="w-4 h-4 text-purple-600 rounded" checked>
+                    <label for="auto-reverse-limit" class="text-xs font-bold text-purple-900 cursor-pointer">อั้นทุกกลับ (บันทึกเป็น ตรง*โต๊ด*ทุกกลับ)</label>
                 </div>
                 <div>
                     <label class="text-xs font-bold text-slate-700 block mb-1">เงื่อนไข</label>
@@ -268,7 +268,7 @@
                 <div class="p-4 border-b bg-slate-50 font-bold text-sm text-slate-800">รายการเลขอั้นทั้งหมด</div>
                 <table class="w-full text-left border-collapse">
                     <thead class="bg-slate-50 border-b text-xs text-slate-500 uppercase">
-                        <tr><th class="py-3 px-4">ตัวเลข</th><th class="py-3 px-4">เงื่อนไข</th><th class="py-3 px-4 text-center">ลบ</th></tr>
+                        <tr><th class="py-3 px-4">ตัวเลข</th><th class="py-3 px-4">เงื่อนไข / รูปแบบ</th><th class="py-3 px-4 text-center">ลบ</th></tr>
                     </thead>
                     <tbody id="dlr-limits-tbody" class="divide-y text-sm"></tbody>
                 </table>
@@ -301,7 +301,7 @@
     </div>
 
     <!-- =====================================================================
-         3. หน้าเจ้ามือใหญ่ (Big Boss) - พร้อมช่องกรอกเลขแบบหน้าคนจดโพย
+         3. หน้าเจ้าใหญ่ (Big Boss)
          ===================================================================== -->
     <div id="page-bigboss" class="hidden max-w-7xl mx-auto px-4 py-6 space-y-6">
         <section class="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -323,7 +323,6 @@
         </section>
 
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-            <!-- Left: ช่องกรอกเลขแบบหน้าคนจดโพย + ปุ่มช่วยพิมพ์ -->
             <div class="lg:col-span-5 bg-white rounded-3xl border p-6 space-y-4 shadow-sm">
                 <h3 class="text-base font-bold text-indigo-950 flex items-center gap-2">
                     <i class="fa-solid fa-pen-to-square text-indigo-600"></i> ช่องกรอกเลขส่งเจ้าใหญ่ (Smart Format)
@@ -331,7 +330,7 @@
                 <p class="text-xs text-slate-500">พิมพ์หรือวางโพยส่งเจ้าใหญ่ได้ทันที พร้อมปุ่มช่วยคีย์ด้านล่าง</p>
                 
                 <div class="relative">
-                    <textarea id="bigboss-input" rows="4" class="w-full border-2 border-indigo-200 rounded-2xl p-4 text-sm focus:border-indigo-600 resize-none number-font" placeholder="เช่น 12 50x50 หรือ 674=100x100"></textarea>
+                    <textarea id="bigboss-input" rows="4" class="w-full border-2 border-indigo-200 rounded-2xl p-4 text-sm focus:border-indigo-600 resize-none number-font" placeholder="เช่น 12 50x50 หรือ 674โต๊ด100"></textarea>
                     <button type="button" onclick="clearInputBox('bigboss-input', 'clear-bigboss-btn')" id="clear-bigboss-btn" class="hidden absolute top-3 right-3 text-slate-400 bg-slate-100 w-7 h-7 rounded-full flex items-center justify-center text-xs">✕</button>
                 </div>
 
@@ -364,7 +363,6 @@
                 </button>
             </div>
 
-            <!-- Right: รายการที่ส่ง -->
             <div class="lg:col-span-7 bg-white rounded-3xl border shadow-sm overflow-hidden flex flex-col">
                 <div class="p-5 border-b bg-slate-50 flex justify-between items-center">
                     <h4 class="font-bold text-slate-800 text-sm">รายการที่ส่งเจ้าใหญ่ & สรุปเคลียร์เงิน</h4>
@@ -447,9 +445,7 @@
         window.saveDataToFirebase = function() {
             const payload = { entries, specialNumbers, maxLimits, bigBossItems };
             localStorage.setItem('smart_lotto_backup_v1', JSON.stringify(payload));
-            set(ref(db, 'lotto_data'), payload).catch(err => {
-                console.warn("Firebase offline mode active.");
-            });
+            set(ref(db, 'lotto_data'), payload).catch(err => {});
         }
 
         window.addEventListener('DOMContentLoaded', () => {
@@ -513,10 +509,12 @@
             });
         }
 
-        function checkNumberRestriction(num) {
+        function checkNumberRestriction(num, type) {
             const { specialNumbers } = window.getFirebaseData();
-            const hit = specialNumbers.find(r => r.number === num);
-            return hit ? hit.status : 'normal';
+            // ค้นหาแบบตรงตัวหรือเช็คเงื่อนไขตรง*โต๊ด*ทุกกลับ
+            const hit = specialNumbers.find(r => r.number === num || (r.isAutoReverse && r.baseNumber && isTodMatch(r.baseNumber, num)));
+            if (hit) return hit.status;
+            return 'normal';
         }
 
         function clearInputBox(inputId, btnId) {
@@ -537,6 +535,7 @@
             insertText(inputId, ' ' + amt, btnId);
         }
 
+        // --- ปรับปรุง Parser ให้รองรับโต๊ดได้สมบูรณ์ ---
         function parseSmartText(rawText, customer, discountPct) {
             const lines = rawText.split(/\r?\n/);
             const results = [];
@@ -549,20 +548,30 @@
                 const isTod = /(โต๊ด|\bต\b)/i.test(clean);
                 let stripped = clean.replace(/(วิ่งบน|วิ่งล่าง|วิ่ง|ล่าง|โต๊ด|บน|\bล\b|\bต\b)/gi, ' ').trim();
                 const amountMatch = stripped.match(/(\d+(?:\s*[x*\/]\s*[0-9]+)?)\s*$/i);
-                if (!amountMatch) return;
-
-                const amountPart = amountMatch[1].replace(/\s+/g, '');
-                const numbersPart = stripped.slice(0, amountMatch.index).trim();
-                const rawNumbers = numbersPart.split(/[\s,.-]+/).filter(n => /^\d{1,3}$/.test(n));
-
+                
                 let amt1 = 0, amt2 = 0, hasSecondAmt = false;
-                if (/[x*\/]/i.test(amountPart)) {
-                    const parts = amountPart.split(/[x*\/]/i);
-                    amt1 = parseInt(parts[0], 10) || 0;
-                    amt2 = parseInt(parts[1], 10) || 0;
-                    hasSecondAmt = true;
+                let rawNumbers = [];
+
+                if (amountMatch) {
+                    const amountPart = amountMatch[1].replace(/\s+/g, '');
+                    const numbersPart = stripped.slice(0, amountMatch.index).trim();
+                    rawNumbers = numbersPart.split(/[\s,.-]+/).filter(n => /^\d{1,3}$/.test(n));
+
+                    if (/[x*\/]/i.test(amountPart)) {
+                        const parts = amountPart.split(/[x*\/]/i);
+                        amt1 = parseInt(parts[0], 10) || 0;
+                        amt2 = parseInt(parts[1], 10) || 0;
+                        hasSecondAmt = true;
+                    } else {
+                        amt1 = parseInt(amountPart, 10) || 0;
+                    }
                 } else {
-                    amt1 = parseInt(amountPart, 10) || 0;
+                    // กรณีพิมพ์ติดกันเช่น 674โต๊ด100 หรือ 674 100
+                    const parts = clean.split(/\s+/);
+                    if (parts.length >= 2) {
+                        rawNumbers = [parts[0]].filter(n => /^\d{1,3}$/.test(n));
+                        amt1 = parseInt(parts[1].replace(/[^\d]/g, ''), 10) || 0;
+                    }
                 }
 
                 rawNumbers.forEach(num => {
@@ -592,7 +601,7 @@
 
             let hasClosed = false;
             parsed.forEach(p => {
-                if (checkNumberRestriction(p.number) === 'closed') hasClosed = true;
+                if (checkNumberRestriction(p.number, p.type) === 'closed') hasClosed = true;
             });
 
             if (hasClosed) {
@@ -649,17 +658,7 @@
             showToast('ลบรายการแล้ว', 'info');
         }
 
-        function getPermutations(str) {
-            if (str.length <= 1) return [str];
-            const set = new Set();
-            for (let i = 0; i < str.length; i++) {
-                const char = str[i];
-                const rem = str.slice(0, i) + str.slice(i + 1);
-                getPermutations(rem).forEach(sub => set.add(char + sub));
-            }
-            return Array.from(set);
-        }
-
+        // --- เพิ่มฟังก์ชันอั้นแบบ ตรง*โต๊ด*ทุกกลับ ---
         function addSpecialNumber() {
             const rawNums = document.getElementById('new-limit-numbers').value.trim().split(/\s+/);
             const status = document.getElementById('new-limit-status').value;
@@ -668,21 +667,21 @@
 
             rawNums.forEach(num => {
                 if (/^\d{1,3}$/.test(num)) {
-                    let targets = [num];
-                    if (autoRev && num.length === 3) {
-                        targets = getPermutations(num);
-                    }
-                    targets.forEach(t => {
-                        const idx = specialNumbers.findIndex(r => r.number === t);
-                        if(idx >= 0) specialNumbers.splice(idx, 1);
-                        specialNumbers.push({ number: t, status });
+                    const idx = specialNumbers.findIndex(r => r.number === num);
+                    if(idx >= 0) specialNumbers.splice(idx, 1);
+
+                    specialNumbers.push({ 
+                        number: num, 
+                        status, 
+                        isAutoReverse: autoRev && num.length === 3,
+                        displayLabel: (autoRev && num.length === 3) ? `${num} (ตรง*โต๊ด*ทุกกลับ)` : num
                     });
                 }
             });
 
             window.setFirebaseData(null, specialNumbers, null, null);
             document.getElementById('new-limit-numbers').value = '';
-            showToast('บันทึกเลขอั้นเรียบร้อย', 'success');
+            showToast('บันทึกเลขอั้น (ตรง*โต๊ด*ทุกกลับ) เรียบร้อย', 'success');
         }
 
         function renderDealerLimitsTable() {
@@ -690,7 +689,7 @@
             const tbody = document.getElementById('dlr-limits-tbody');
             tbody.innerHTML = specialNumbers.map((r, i) => `
                 <tr>
-                    <td class="py-3 px-4 font-bold number-font">${r.number}</td>
+                    <td class="py-3 px-4 font-bold number-font">${r.displayLabel || r.number}</td>
                     <td class="py-3 px-4"><span class="px-2 py-0.5 rounded text-xs ${r.status === 'closed' ? 'bg-rose-100 text-rose-800' : 'bg-amber-100 text-amber-800'}">${r.status === 'closed' ? 'ปิดรับ' : 'อั้นจ่ายครึ่ง'}</span></td>
                     <td class="py-3 px-4 text-center"><button onclick="deleteSpecialRule(${i})" class="text-rose-500 font-bold hover:underline">ลบ</button></td>
                 </tr>
@@ -779,7 +778,7 @@
                 else if (e.type === '2ตัวล่าง' && e.number === rawBottom2) rate = payoutRates['2ตัว'];
 
                 if (rate > 0) {
-                    const restriction = checkNumberRestriction(e.number);
+                    const restriction = checkNumberRestriction(e.number, e.type);
                     const multiplier = restriction === 'half' ? 0.5 : 1;
                     const prize = keptAmt * rate * multiplier;
                     totalPayout += prize;
@@ -929,7 +928,7 @@
             const chips = document.getElementById('recorder-limits-chips');
             if (specialNumbers.length > 0) {
                 banner.classList.remove('hidden');
-                chips.innerHTML = specialNumbers.map(r => `<span class="px-2.5 py-1 rounded-lg bg-amber-100 text-amber-800 font-bold number-font border border-amber-300">${r.number} (${r.status === 'closed' ? 'ปิดรับ' : 'อั้นจ่ายครึ่ง'})</span>`).join('');
+                chips.innerHTML = specialNumbers.map(r => `<span class="px-2.5 py-1 rounded-lg bg-amber-100 text-amber-800 font-bold number-font border border-amber-300">${r.displayLabel || r.number} (${r.status === 'closed' ? 'ปิดรับ' : 'จ่ายครึ่ง'})</span>`).join('');
             } else {
                 banner.classList.add('hidden');
             }
