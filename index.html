@@ -382,7 +382,7 @@
     </div>
 
     <!-- =====================================================================
-         3. หน้าเจ้าใหญ่ (Big Boss)
+         3. หน้าเจ้าใหญ่ (Big Boss) - ย้ายช่องตรวจรางวัลและสรุปยอดขึ้นด้านบน
          ===================================================================== -->
     <div id="page-bigboss" class="hidden max-w-7xl mx-auto px-4 py-6 space-y-6">
         <section class="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -403,7 +403,7 @@
             </div>
         </section>
 
-        <!-- หน้าเจ้าใหญ่: ตรวจรางวัลและสรุปยอด -->
+        <!-- [ย้ายขึ้นด้านบนตามต้องการ] หน้าเจ้าใหญ่: ตรวจรางวัลและสรุปยอด -->
         <div class="bg-white rounded-3xl border p-6 shadow-sm space-y-4">
             <h3 class="text-base font-bold text-indigo-950 flex items-center gap-2">
                 <i class="fa-solid fa-trophy text-indigo-600"></i> ตรวจรางวัลและสรุปยอดส่งเจ้าใหญ่
@@ -414,13 +414,6 @@
                 <button onclick="calculateBossPayout()" class="py-3 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm shadow">คำนวณเงินรางวัลเจ้าใหญ่</button>
             </div>
             <div id="boss-payout-result-box" class="pt-2 text-xs text-slate-600"></div>
-        </div>
-
-        <div class="bg-white rounded-3xl border p-6 shadow-sm space-y-4">
-            <h3 class="text-base font-bold text-indigo-950 flex items-center gap-2">
-                <i class="fa-solid fa-users text-indigo-600"></i> สรุปยอดส่งเจ้าใหญ่แยกตามรายชื่อคนจด
-            </h3>
-            <div id="bigboss-customer-breakdown-list" class="grid grid-cols-1 sm:grid-cols-3 gap-4"></div>
         </div>
 
         <div class="bg-white rounded-3xl border shadow-sm overflow-hidden flex flex-col">
@@ -471,7 +464,7 @@
 
         function loadFromLocalStorage() {
             try {
-                const local = localStorage.getItem('smart_lotto_backup_v6');
+                const local = localStorage.getItem('smart_lotto_backup_v7');
                 if (local) {
                     const data = JSON.parse(local);
                     entries = data.entries || [];
@@ -488,7 +481,7 @@
 
         window.initAppFirebase = function() {
             const statusEl = document.getElementById('db-status');
-            onValue(ref(db, 'lotto_data_v6'), (snapshot) => {
+            onValue(ref(db, 'lotto_data_v7'), (snapshot) => {
                 const data = snapshot.val();
                 if (data) {
                     entries = data.entries || [];
@@ -498,7 +491,7 @@
                     bigBossItems = data.bigBossItems || [];
                     isDealerClosed = !!data.isDealerClosed;
                     lottoDate = data.lottoDate || '2026-11-16';
-                    localStorage.setItem('smart_lotto_backup_v6', JSON.stringify(data));
+                    localStorage.setItem('smart_lotto_backup_v7', JSON.stringify(data));
                 }
                 statusEl.textContent = 'ออนไลน์';
                 statusEl.className = 'text-emerald-400 font-bold';
@@ -512,8 +505,8 @@
 
         window.saveDataToFirebase = function() {
             const payload = { entries, specialNumbers, maxLimits, payoutRates, bigBossItems, isDealerClosed, lottoDate };
-            localStorage.setItem('smart_lotto_backup_v6', JSON.stringify(payload));
-            set(ref(db, 'lotto_data_v6'), payload).catch(err => {});
+            localStorage.setItem('smart_lotto_backup_v7', JSON.stringify(payload));
+            set(ref(db, 'lotto_data_v7'), payload).catch(err => {});
         }
 
         window.addEventListener('DOMContentLoaded', () => {
@@ -1062,34 +1055,11 @@
         }
 
         function renderBigBossView() {
-            const { bigBossItems, entries } = window.getFirebaseData();
+            const { bigBossItems } = window.getFirebaseData();
             const discPct = parseFloat(document.getElementById('bigboss-discount-pct').value) || 0;
             let totalGross = 0;
             const tbody = document.getElementById('bigboss-tbody');
             const empty = document.getElementById('bigboss-empty');
-
-            const customerBreakdownMap = {};
-            entries.forEach(e => {
-                const name = e.customer || 'ทั่วไป';
-                if (!customerBreakdownMap[name]) customerBreakdownMap[name] = 0;
-                customerBreakdownMap[name] += e.amount;
-            });
-
-            const breakdownListEl = document.getElementById('bigboss-customer-breakdown-list');
-            const breakdownKeys = Object.keys(customerBreakdownMap);
-            if (breakdownKeys.length === 0) {
-                breakdownListEl.innerHTML = '<div class="text-xs text-slate-400 col-span-3 text-center py-2">ยังไม่มีข้อมูลยอดแยกรายบุคคล</div>';
-            } else {
-                breakdownListEl.innerHTML = breakdownKeys.map(cust => {
-                    const custTotal = customerBreakdownMap[cust];
-                    return `
-                        <div class="bg-slate-50 p-4 rounded-2xl border space-y-1">
-                            <div class="text-xs text-slate-500 font-medium">👤 ${cust}</div>
-                            <div class="text-lg font-bold text-indigo-900 number-font">${custTotal.toLocaleString('th-TH')} <span class="text-xs font-normal">บาท</span></div>
-                        </div>
-                    `;
-                }).join('');
-            }
 
             if (bigBossItems.length === 0) {
                 tbody.innerHTML = '';
@@ -1127,12 +1097,10 @@
         function refreshAllViews() {
             const { entries, isDealerClosed, bigBossItems, lottoDate, payoutRates } = window.getFirebaseData();
 
-            // อัปเดตวันที่แสดงผลในหัวข้อและแบนเนอร์
             document.getElementById('lotto-date-picker').value = lottoDate;
             document.getElementById('banner-date-text').textContent = lottoDate;
             document.getElementById('table-date-text').textContent = lottoDate;
 
-            // อัปเดตช่องตั้งค่าอัตราจ่าย
             document.getElementById('rate-3straight').value = payoutRates['3ตัวตรง'];
             document.getElementById('rate-3tod').value = payoutRates['3ตัวโต๊ด'];
             document.getElementById('rate-2updown').value = payoutRates['2ตัว'];
