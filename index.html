@@ -367,7 +367,7 @@
                     </div>
                     <button onclick="calculateWinnersAndProfit()" class="w-full py-4 rounded-2xl bg-amber-500 hover:bg-amber-600 text-white font-bold text-sm shadow">คำนวณผลรางวัล & กำไรขาดทุน</button>
                 </div>
-                <div class="lg:col-span-7 bg-white rounded-3xl border p-6 shadow-sm space-y-4">
+                <div class="lg:col-span-7 bg-white rounded-3xl border p-6 space-y-4 shadow-sm">
                     <div class="grid grid-cols-3 gap-3 text-center">
                         <div class="p-4 bg-slate-50 rounded-2xl border"><div class="text-xs text-slate-500">ยอดรับเอง (สู้)</div><div id="pay-kept-in" class="font-extrabold text-xl number-font text-purple-900 mt-1">0</div></div>
                         <div class="p-4 bg-rose-50 rounded-2xl border border-rose-100"><div class="text-xs text-rose-600">ยอดจ่ายรางวัลรวม</div><div id="pay-total-out" class="font-extrabold text-xl text-rose-600 number-font mt-1">0</div></div>
@@ -489,7 +489,7 @@
 
         function loadFromLocalStorage() {
             try {
-                const local = localStorage.getItem('smart_lotto_backup_v12');
+                const local = localStorage.getItem('smart_lotto_backup_v13');
                 if (local) {
                     const data = JSON.parse(local);
                     entries = data.entries || [];
@@ -506,7 +506,7 @@
 
         window.initAppFirebase = function() {
             const statusEl = document.getElementById('db-status');
-            onValue(ref(db, 'lotto_data_v12'), (snapshot) => {
+            onValue(ref(db, 'lotto_data_v13'), (snapshot) => {
                 const data = snapshot.val();
                 if (data) {
                     entries = data.entries || [];
@@ -516,7 +516,7 @@
                     bigBossItems = data.bigBossItems || [];
                     isDealerClosed = !!data.isDealerClosed;
                     lottoDate = data.lottoDate || '2026-11-16';
-                    localStorage.setItem('smart_lotto_backup_v12', JSON.stringify(data));
+                    localStorage.setItem('smart_lotto_backup_v13', JSON.stringify(data));
                 }
                 statusEl.textContent = 'ออนไลน์';
                 statusEl.className = 'text-emerald-400 font-bold';
@@ -530,8 +530,8 @@
 
         window.saveDataToFirebase = function() {
             const payload = { entries, specialNumbers, maxLimits, payoutRates, bigBossItems, isDealerClosed, lottoDate };
-            localStorage.setItem('smart_lotto_backup_v12', JSON.stringify(payload));
-            set(ref(db, 'lotto_data_v12'), payload).catch(err => {});
+            localStorage.setItem('smart_lotto_backup_v13', JSON.stringify(payload));
+            set(ref(db, 'lotto_data_v13'), payload).catch(err => {});
         }
 
         window.addEventListener('DOMContentLoaded', () => {
@@ -1195,12 +1195,11 @@
         }
 
         function generatePeriodReportText() {
-            const { lottoDate, entries, bigBossItems, payoutRates, maxLimits } = window.getFirebaseData();
+            const { lottoDate, entries, bigBossItems } = window.getFirebaseData();
             const { totalKept, totalCutoff } = computeRiskAggregates();
             let totalGross = 0;
             entries.forEach(e => totalGross += e.amount);
 
-            // จำลองการคำนวณยอดจ่ายรางวัลภาพรวมจากหน้าตรวจรางวัล (ถ้ามีการกรอกผลรางวัลไว้ หรือคำนวณคร่าวๆ)
             const reportStr = [
                 `===================================`,
                 `📊 รายงานสรุปยอดประจำงวด: ${lottoDate}`,
@@ -1210,10 +1209,6 @@
                 `• ยอดส่งตัดเจ้าใหญ่: ${totalCutoff.toLocaleString('th-TH')} บาท`,
                 `• จำนวนรายการโพยทั้งหมด: ${entries.length} รายการ`,
                 `• จำนวนรายการส่งเจ้าใหญ่: ${bigBossItems.length} รายการ`,
-                `===================================`,
-                `💡 คำแนะนำ: สามารถดูรายละเอียดการถูกรางวัล",`,
-                `   ยอดจ่าย และกำไรขาดทุนสุทธิได้ที่แท็บ`,
-                `   "ตรวจรางวัล & กำไรขาดทุน"`,
                 `===================================`,
                 `ออกรายงาน ณ วันที่: ${new Date().toLocaleString('th-TH')}`,
                 `Smart Lotto Pro - ระบบจัดการหวยครบวงจร`
@@ -1244,6 +1239,21 @@
             a.click();
             document.body.removeChild(a);
             showToast('ดาวน์โหลดไฟล์รายงานสำเร็จ', 'success');
+        }
+
+        function copyCustomerSummary(name, total, discPct, netToDealer) {
+            const discAmt = total * (discPct / 100);
+            const text = [
+                `📋 สรุปยอดส่งโพย: คุณ${name}`,
+                `------------------------`,
+                `• ยอดเต็ม: ${total.toLocaleString('th-TH')} บาท`,
+                `• ส่วนลด (${discPct}%): ${discAmt.toLocaleString('th-TH')} บาท`,
+                `• ยอดสุทธิส่งเจ้า: ${netToDealer.toLocaleString('th-TH')} บาท`,
+                `------------------------`,
+                `งวดประจำวันที่: ${window.getFirebaseData().lottoDate}`
+            ].join('\n');
+            navigator.clipboard.writeText(text);
+            showToast(`คัดลอกยอดของ "${name}" เรียบร้อย`, 'success');
         }
 
         function refreshAllViews() {
@@ -1320,17 +1330,22 @@
             const dealerSummaryBox = document.getElementById('dealer-customer-summary-box');
             const custKeys = Object.keys(custMap);
             if (custKeys.length === 0) {
-                dealerSummaryBox.innerHTML = '<div class="text-xs text-slate-400 col-span-3 text-center py-2">ยังไม่มีข้อมูลยอดคนจด</div>';
+                dealerSummaryBox.innerHTML = '<div class="text-xs text-slate-400 col-span-3 text-center py-2">ยังไม่มียอดคนจด</div>';
             } else {
                 dealerSummaryBox.innerHTML = custKeys.map(name => {
                     const data = custMap[name];
                     const discAmt = data.total * (data.discPct / 100);
                     const netToDealer = data.total - discAmt;
                     return `
-                        <div class="bg-slate-50 p-4 rounded-2xl border space-y-2">
+                        <div class="bg-slate-50 p-4 rounded-2xl border space-y-2 relative">
                             <div class="flex justify-between items-center">
                                 <span class="font-bold text-purple-950">${name}</span>
-                                <span class="text-xs bg-purple-100 text-purple-800 px-2 py-0.5 rounded-full">ลด ${data.discPct}%</span>
+                                <div class="flex items-center gap-1.5">
+                                    <span class="text-xs bg-purple-100 text-purple-800 px-2 py-0.5 rounded-full">ลด ${data.discPct}%</span>
+                                    <button onclick="copyCustomerSummary('${name}', ${data.total}, ${data.discPct}, ${netToDealer})" class="px-2.5 py-1 bg-sky-600 hover:bg-sky-700 text-white rounded-lg text-[10px] font-bold shadow flex items-center gap-1" title="คัดลอกยอดของลูกค้ารายนี้">
+                                        <i class="fa-regular fa-copy"></i> คัดลอก
+                                    </button>
+                                </div>
                             </div>
                             <div class="text-xs text-slate-600 space-y-0.5">
                                 <div>ยอดเต็ม: <b class="number-font">${data.total.toLocaleString()}</b> ฿</div>
@@ -1445,6 +1460,7 @@
         window.saveEditedItem = saveEditedItem;
         window.deleteEntry = deleteEntry;
         window.toggleModal = toggleModal;
+        window.copyCustomerSummary = copyCustomerSummary;
     </script>
 </body>
 </html>
