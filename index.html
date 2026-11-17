@@ -127,14 +127,11 @@
                 <div class="space-y-1.5">
                     <label class="text-xs font-bold text-slate-700 flex items-center gap-1.5"><i class="fa-solid type text-teal-600"></i> เลือกประเภทหวย:</label>
                     <select id="quick-bet-type" class="w-full px-3.5 py-2.5 border-2 border-teal-200 focus:border-teal-600 rounded-xl text-sm font-semibold bg-white text-slate-700">
-                        <option value="auto">🤖 ตรวจจับอัตโนมัติ (จากช่องพิมพ์)</option>
-                        <option value="3ตัวตรงโต๊ด">3 ตัวตรง*โต๊ด</option>
+                        <option value="auto">🤖 ตรวจจับอัตโนมัติ (รองรับ 3 ตัว ตรง*โต๊ด และ 2 ตัว บน*ล่าง พร้อมกัน)</option>
+                        <option value="3ตัวตรงโต๊ด">3 ตัวตรง*โต๊ด (เช่น 674=50*50)</option>
+                        <option value="2ตัวบนล่าง">2 ตัวบน*ล่าง (เช่น 67=50*50)</option>
                         <option value="3ตัวตรง">3 ตัวตรง</option>
                         <option value="3ตัวโต๊ด">3 ตัวโต๊ด</option>
-                        <option value="3ตัวล่าง">3 ตัวล่าง</option>
-                        <option value="3กลับ">3 กลับ</option>
-                        <option value="6กลับ">6 กลับ</option>
-                        <option value="2ตัวบนล่าง">2 ตัวบน*ล่าง</option>
                         <option value="2ตัวบน">2 ตัวบน</option>
                         <option value="2ตัวล่าง">2 ตัวล่าง</option>
                         <option value="วิ่งบน">วิ่งบน</option>
@@ -147,7 +144,7 @@
                 </div>
 
                 <div class="relative">
-                    <textarea id="smart-input" rows="4" class="w-full rounded-2xl border-2 border-teal-200 focus:border-teal-600 p-4 text-lg font-medium resize-none number-font shadow-inner" placeholder="เช่น: 674=50*50 หรือ 675=50 หรือ 675=50 โต๊ด"></textarea>
+                    <textarea id="smart-input" rows="4" class="w-full rounded-2xl border-2 border-teal-200 focus:border-teal-600 p-4 text-lg font-medium resize-none number-font shadow-inner" placeholder="เช่น: 674=50*50 หรือ 67=50*50"></textarea>
                     <button type="button" onclick="clearInputBox('smart-input', 'clear-input-btn')" id="clear-input-btn" class="hidden absolute top-3 right-3 text-slate-400 bg-slate-100 w-7 h-7 rounded-full flex items-center justify-center text-xs">✕</button>
                 </div>
 
@@ -233,7 +230,7 @@
         </section>
 
         <div class="flex flex-wrap items-center justify-between gap-3 bg-white p-3.5 rounded-3xl border shadow-sm">
-            <div class="flex gap-1.5">
+            <div class="flex gap-1.5 flex-wrap">
                 <button id="dlr-subtab-risk" onclick="switchDealerSubTab('risk')" class="px-4 py-2.5 rounded-2xl text-xs font-bold bg-purple-700 text-white shadow">ความเสี่ยง & เพดานรับสู้</button>
                 <button id="dlr-subtab-limits" onclick="switchDealerSubTab('limits')" class="px-4 py-2.5 rounded-2xl text-xs font-bold text-slate-600 hover:bg-slate-100">เลขอั้น & เลขปิด</button>
                 <button id="dlr-subtab-payout" onclick="switchDealerSubTab('payout')" class="px-4 py-2.5 rounded-2xl text-xs font-bold text-slate-600 hover:bg-slate-100">ตรวจรางวัล & กำไรขาดทุน</button>
@@ -345,6 +342,16 @@
                 <div class="text-3xl font-extrabold number-font text-amber-300" id="bigboss-sum-net">0 <span class="text-sm">฿</span></div>
             </div>
         </section>
+
+        <!-- ส่วนแสดงยอดรวมและแยกของแต่ละคน (Customer Breakdown สำหรับเจ้าใหญ่) -->
+        <div class="bg-white rounded-3xl border p-6 shadow-sm space-y-4">
+            <h3 class="text-base font-bold text-indigo-950 flex items-center gap-2">
+                <i class="fa-solid fa-users text-indigo-600"></i> สรุปยอดส่งเจ้าใหญ่แยกตามรายชื่อคนจด
+            </h3>
+            <div id="bigboss-customer-breakdown-list" class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <!-- ข้อมูลจะถูก render ที่นี่ -->
+            </div>
+        </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
             <div class="lg:col-span-5 bg-white rounded-3xl border p-6 space-y-4 shadow-sm">
@@ -640,10 +647,10 @@
                     }
                 }
 
-                if (detectedType === '3ตัวตรงโต๊ด' && len === 3) {
+                if ((detectedType === '3ตัวตรงโต๊ด' || (forcedType === 'auto' && hasSecondAmt && len === 3)) && len === 3) {
                     if (amt1 > 0) results.push({ id: Math.random().toString(36).substr(2, 9), number: num, type: '3ตัวตรง', amount: amt1, customer, discountPct, sentToDealer: false });
                     if (amt2 > 0) results.push({ id: Math.random().toString(36).substr(2, 9), number: num, type: '3ตัวโต๊ด', amount: amt2, customer, discountPct, sentToDealer: false });
-                } else if (detectedType === '2ตัวบนล่าง' && len === 2) {
+                } else if ((detectedType === '2ตัวบนล่าง' || (forcedType === 'auto' && hasSecondAmt && len === 2)) && len === 2) {
                     if (amt1 > 0) results.push({ id: Math.random().toString(36).substr(2, 9), number: num, type: '2ตัวบน', amount: amt1, customer, discountPct, sentToDealer: false });
                     if (amt2 > 0) results.push({ id: Math.random().toString(36).substr(2, 9), number: num, type: '2ตัวล่าง', amount: amt2, customer, discountPct, sentToDealer: false });
                 } else if (detectedType === '3กลับ' && len === 3) {
@@ -704,9 +711,10 @@
 
         function sendEntriesToDealer() {
             const { entries } = window.getFirebaseData();
+            if (entries.length === 0) return showToast('ไม่มีรายการโพยให้ส่ง', 'warning');
             entries.forEach(e => e.sentToDealer = true);
             window.setFirebaseData(entries, null, null, null);
-            showToast('ส่งโพยเข้าสู่หน้าเจ้ามือเรียบร้อย', 'success');
+            showToast('ส่งโพยเข้าสู่หน้าเจ้ามือเรียบร้อย (รายการยังแสดงอยู่เพื่อสรุปยอด)', 'success');
         }
 
         function openEditModal(id) {
@@ -739,7 +747,6 @@
             showToast('ลบรายการแล้ว', 'info');
         }
 
-        // --- ตั้งค่าแสดงผลเลขอั้นตามรูปแบบใหม่ ---
         function addSpecialNumber() {
             const rawNums = document.getElementById('new-limit-numbers').value.trim().split(/\s+/);
             const status = document.getElementById('new-limit-status').value;
@@ -933,11 +940,36 @@
         }
 
         function renderBigBossView() {
-            const { bigBossItems } = window.getFirebaseData();
+            const { bigBossItems, entries } = window.getFirebaseData();
             const discPct = parseFloat(document.getElementById('bigboss-discount-pct').value) || 0;
             let totalGross = 0;
             const tbody = document.getElementById('bigboss-tbody');
             const empty = document.getElementById('bigboss-empty');
+
+            // --- ส่วนสรุปยอดแยกตามรายชื่อคนจดในหน้าเจ้าใหญ่ ---
+            const customerBreakdownMap = {};
+            entries.forEach(e => {
+                const name = e.customer || 'ทั่วไป';
+                if (!customerBreakdownMap[name]) customerBreakdownMap[name] = 0;
+                customerBreakdownMap[name] += e.amount;
+            });
+
+            const breakdownListEl = document.getElementById('bigboss-customer-breakdown-list');
+            const breakdownKeys = Object.keys(customerBreakdownMap);
+            if (breakdownKeys.length === 0) {
+                breakdownListEl.innerHTML = '<div class="text-xs text-slate-400 col-span-3 text-center py-2">ยังไม่มีข้อมูลยอดแยกรายบุคคล</div>';
+            } else {
+                breakdownListEl.innerHTML = breakdownKeys.map(cust => {
+                    const custTotal = customerBreakdownMap[cust];
+                    return `
+                        <div class="bg-slate-50 p-4 rounded-2xl border space-y-1">
+                            <div class="text-xs text-slate-500 font-medium">👤 ${cust}</div>
+                            <div class="text-lg font-bold text-indigo-900 number-font">${custTotal.toLocaleString('th-TH')} <span class="text-xs font-normal">บาท</span></div>
+                        </div>
+                    `;
+                }).join('');
+            }
+
             if (bigBossItems.length === 0) {
                 tbody.innerHTML = '';
                 empty.classList.remove('hidden');
