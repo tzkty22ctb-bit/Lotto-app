@@ -46,7 +46,11 @@
                         <span>Smart Lotto Pro</span>
                         <span id="mode-badge" class="text-xs font-medium px-2.5 py-0.5 rounded-full bg-emerald-500/30 text-emerald-200 border border-emerald-400/30">1. หน้าคนจดโพย</span>
                     </h1>
-                    <p class="text-xs text-slate-300 mt-0.5">งวดประจำวันที่: <span id="lotto-date-text" class="font-bold text-amber-300">16 พฤศจิกายน 2026</span> | สถานะ: <span id="db-status" class="text-emerald-400 font-bold">ออนไลน์</span></p>
+                    <div class="flex items-center gap-2 mt-0.5 text-xs text-slate-300 flex-wrap">
+                        <span>งวดประจำวันที่:</span>
+                        <input type="date" id="lotto-date-picker" onchange="updateLottoDate()" class="bg-slate-800 text-amber-300 font-bold px-2 py-0.5 rounded-lg border border-slate-700 focus:outline-none text-xs number-font">
+                        <span>| สถานะ: <span id="db-status" class="text-emerald-400 font-bold">ออนไลน์</span></span>
+                    </div>
                 </div>
             </div>
 
@@ -85,11 +89,11 @@
             <div class="bg-white rounded-3xl p-4 border shadow-sm flex flex-col justify-center"><span class="text-xs text-slate-400 font-medium">3 ตัว & วิ่ง</span><div class="text-base font-bold number-font mt-1"><span id="rec-sum-3all" class="text-amber-600">0</span> / <span id="rec-sum-run" class="text-rose-600">0</span></div></div>
         </section>
 
-        <!-- ประกาศเลขอั้น -->
+        <!-- ประกาศเลขอั้น พร้อมแสดงงวดวันที่ -->
         <div id="recorder-limits-banner" class="hidden bg-amber-50 border border-amber-200 rounded-2xl px-4 py-3 flex items-center justify-between text-xs shadow-sm">
-            <div class="flex items-center gap-2 text-amber-900 font-medium">
+            <div class="flex items-center gap-2 text-amber-900 font-medium flex-wrap">
                 <i class="fa-solid fa-bullhorn text-amber-600 text-base"></i>
-                <span>ประกาศเลขอั้น/เลขปิดรับจากเจ้ามือ:</span>
+                <span>ประกาศเลขอั้น/เลขปิดรับ (งวดประจำวันที่ <strong id="banner-date-text">--</strong>):</span>
                 <div id="recorder-limits-chips" class="flex flex-wrap gap-1.5"></div>
             </div>
         </div>
@@ -222,7 +226,7 @@
             <div class="bg-white rounded-3xl p-4 border shadow-sm"><div class="text-xs text-slate-400">วิ่งบน/ล่าง</div><div class="text-sm font-bold number-font mt-1"><span id="dlr-sum-runup">0</span>/<span id="dlr-sum-rundown">0</span></div></div>
         </section>
 
-        <!-- ย้ายช่องกรอกส่งเจ้าใหญ่มาไว้หน้าเจ้ามือ -->
+        <!-- ช่องกรอกส่งเจ้าใหญ่ -->
         <div class="bg-white rounded-3xl border p-6 shadow-sm space-y-4">
             <h3 class="text-base font-bold text-purple-950 flex items-center gap-2">
                 <i class="fa-solid fa-pen-to-square text-purple-600"></i> ช่องกรอกเลขส่งเจ้าใหญ่จากหน้าเจ้ามือ (Smart Format)
@@ -274,6 +278,7 @@
             <div class="flex gap-1.5 flex-wrap">
                 <button id="dlr-subtab-risk" onclick="switchDealerSubTab('risk')" class="px-4 py-2.5 rounded-2xl text-xs font-bold bg-purple-700 text-white shadow transition">ความเสี่ยง & เพดานรับสู้</button>
                 <button id="dlr-subtab-limits" onclick="switchDealerSubTab('limits')" class="px-4 py-2.5 rounded-2xl text-xs font-bold text-slate-600 hover:bg-slate-100 transition">เลขอั้น & เลขปิด</button>
+                <button id="dlr-subtab-rates" onclick="switchDealerSubTab('rates')" class="px-4 py-2.5 rounded-2xl text-xs font-bold text-slate-600 hover:bg-slate-100 transition">ตั้งค่าอัตราจ่าย</button>
                 <button id="dlr-subtab-payout" onclick="switchDealerSubTab('payout')" class="px-4 py-2.5 rounded-2xl text-xs font-bold text-slate-600 hover:bg-slate-100 transition">ตรวจรางวัล & กำไรขาดทุน</button>
             </div>
         </div>
@@ -327,13 +332,27 @@
                 <button onclick="addSpecialNumber()" class="w-full py-3.5 rounded-2xl bg-purple-700 hover:bg-purple-800 text-white font-bold text-sm shadow">บันทึกเลขอั้น</button>
             </div>
             <div class="lg:col-span-7 bg-white rounded-3xl border shadow-sm overflow-hidden">
-                <div class="p-4 border-b bg-slate-50 font-bold text-sm text-slate-800">รายการเลขอั้นทั้งหมด</div>
+                <div class="p-4 border-b bg-slate-50 font-bold text-sm text-slate-800">รายการเลขอั้นทั้งหมด (งวดประจำวันที่ <span id="table-date-text">--</span>)</div>
                 <table class="w-full text-left border-collapse">
                     <thead class="bg-slate-50 border-b text-xs text-slate-500 uppercase">
                         <tr><th class="py-3 px-4">ตัวเลข</th><th class="py-3 px-4">เงื่อนไข / รูปแบบ</th><th class="py-3 px-4 text-center">ลบ</th></tr>
                     </thead>
                     <tbody id="dlr-limits-tbody" class="divide-y text-sm"></tbody>
                 </table>
+            </div>
+        </div>
+
+        <!-- แท็บตั้งค่าอัตราจ่ายรางวัล -->
+        <div id="dlr-panel-rates" class="hidden space-y-5">
+            <div class="bg-white rounded-3xl border p-6 shadow-sm space-y-4">
+                <h3 class="text-base font-bold text-purple-950">ตั้งค่าอัตราจ่ายรางวัล (บาทละ)</h3>
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                    <div><label class="text-xs text-slate-500 block mb-1">3 ตัวตรง</label><input type="number" id="rate-3straight" oninput="savePayoutRates()" class="w-full px-3 py-2.5 border rounded-2xl text-sm font-bold number-font" value="900"></div>
+                    <div><label class="text-xs text-slate-500 block mb-1">3 ตัวโต๊ด</label><input type="number" id="rate-3tod" oninput="savePayoutRates()" class="w-full px-3 py-2.5 border rounded-2xl text-sm font-bold number-font" value="150"></div>
+                    <div><label class="text-xs text-slate-500 block mb-1">2 ตัว (บน/ล่าง)</label><input type="number" id="rate-2updown" oninput="savePayoutRates()" class="w-full px-3 py-2.5 border rounded-2xl text-sm font-bold number-font" value="90"></div>
+                    <div><label class="text-xs text-slate-500 block mb-1">วิ่ง (บน/ล่าง)</label><input type="number" id="rate-run" oninput="savePayoutRates()" class="w-full px-3 py-2.5 border rounded-2xl text-sm font-bold number-font" value="3"></div>
+                </div>
+                <p class="text-xs text-slate-400">💡 อัตราจ่ายนี้จะถูกนำไปใช้คำนวณผลกำไร/ขาดทุนในหน้าตรวจรางวัลทันที</p>
             </div>
         </div>
 
@@ -445,19 +464,23 @@
         let entries = [];
         let specialNumbers = [];
         let maxLimits = { '2ตัวบน': 1000, '2ตัวล่าง': 1000, '3ตัวตรง': 500, '3ตัวโต๊ด': 500, '3ตัวล่าง': 500, 'วิ่งบน': 5000, 'วิ่งล่าง': 5000 };
+        let payoutRates = { '3ตัวตรง': 900, '3ตัวโต๊ด': 150, '2ตัว': 90, 'วิ่ง': 3 };
         let bigBossItems = [];
         let isDealerClosed = false;
+        let lottoDate = '2026-11-16';
 
         function loadFromLocalStorage() {
             try {
-                const local = localStorage.getItem('smart_lotto_backup_v5');
+                const local = localStorage.getItem('smart_lotto_backup_v6');
                 if (local) {
                     const data = JSON.parse(local);
                     entries = data.entries || [];
                     specialNumbers = data.specialNumbers || [];
                     if (data.maxLimits) maxLimits = data.maxLimits;
+                    if (data.payoutRates) payoutRates = data.payoutRates;
                     bigBossItems = data.bigBossItems || [];
                     isDealerClosed = !!data.isDealerClosed;
+                    lottoDate = data.lottoDate || '2026-11-16';
                 }
             } catch(e) {}
         }
@@ -465,15 +488,17 @@
 
         window.initAppFirebase = function() {
             const statusEl = document.getElementById('db-status');
-            onValue(ref(db, 'lotto_data_v5'), (snapshot) => {
+            onValue(ref(db, 'lotto_data_v6'), (snapshot) => {
                 const data = snapshot.val();
                 if (data) {
                     entries = data.entries || [];
                     specialNumbers = data.specialNumbers || [];
                     if (data.maxLimits) maxLimits = data.maxLimits;
+                    if (data.payoutRates) payoutRates = data.payoutRates;
                     bigBossItems = data.bigBossItems || [];
                     isDealerClosed = !!data.isDealerClosed;
-                    localStorage.setItem('smart_lotto_backup_v5', JSON.stringify(data));
+                    lottoDate = data.lottoDate || '2026-11-16';
+                    localStorage.setItem('smart_lotto_backup_v6', JSON.stringify(data));
                 }
                 statusEl.textContent = 'ออนไลน์';
                 statusEl.className = 'text-emerald-400 font-bold';
@@ -486,28 +511,37 @@
         };
 
         window.saveDataToFirebase = function() {
-            const payload = { entries, specialNumbers, maxLimits, bigBossItems, isDealerClosed };
-            localStorage.setItem('smart_lotto_backup_v5', JSON.stringify(payload));
-            set(ref(db, 'lotto_data_v5'), payload).catch(err => {});
+            const payload = { entries, specialNumbers, maxLimits, payoutRates, bigBossItems, isDealerClosed, lottoDate };
+            localStorage.setItem('smart_lotto_backup_v6', JSON.stringify(payload));
+            set(ref(db, 'lotto_data_v6'), payload).catch(err => {});
         }
 
         window.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('lotto-date-picker').value = lottoDate;
             window.initAppFirebase();
         });
 
-        window.getFirebaseData = () => ({ entries, specialNumbers, maxLimits, bigBossItems, isDealerClosed });
-        window.setFirebaseData = (newEntries, newSpecial, newLimits, newBigBoss, newClosed) => {
+        window.getFirebaseData = () => ({ entries, specialNumbers, maxLimits, payoutRates, bigBossItems, isDealerClosed, lottoDate });
+        window.setFirebaseData = (newEntries, newSpecial, newLimits, newRates, newBigBoss, newClosed, newDate) => {
             if (newEntries !== null) entries = newEntries;
             if (newSpecial !== null) specialNumbers = newSpecial;
             if (newLimits !== null) maxLimits = newLimits;
+            if (newRates !== null) payoutRates = newRates;
             if (newBigBoss !== null) bigBossItems = newBigBoss;
             if (newClosed !== undefined) isDealerClosed = newClosed;
+            if (newDate !== undefined) lottoDate = newDate;
             window.saveDataToFirebase();
             refreshAllViews();
         };
     </script>
 
     <script>
+        function updateLottoDate() {
+            const val = document.getElementById('lotto-date-picker').value;
+            window.setFirebaseData(null, null, null, null, null, undefined, val);
+            showToast('อัปเดตวันที่งวดประจำเรียบร้อย', 'success');
+        }
+
         function switchAppMode(mode) {
             ['recorder', 'dealer', 'bigboss'].forEach(m => {
                 document.getElementById(`page-${m}`).classList.toggle('hidden', m !== mode);
@@ -525,14 +559,16 @@
         }
 
         function switchDealerSubTab(subtab) {
-            ['risk', 'limits', 'payout'].forEach(t => {
+            ['risk', 'limits', 'rates', 'payout'].forEach(t => {
                 const isMatch = (t === subtab);
                 document.getElementById(`dlr-panel-${t}`).classList.toggle('hidden', !isMatch);
                 const btn = document.getElementById(`dlr-subtab-${t}`);
-                if (isMatch) {
-                    btn.className = "px-4 py-2.5 rounded-2xl text-xs font-bold bg-purple-700 text-white shadow transition";
-                } else {
-                    btn.className = "px-4 py-2.5 rounded-2xl text-xs font-bold text-slate-600 hover:bg-slate-100 transition";
+                if (btn) {
+                    if (isMatch) {
+                        btn.className = "px-4 py-2.5 rounded-2xl text-xs font-bold bg-purple-700 text-white shadow transition";
+                    } else {
+                        btn.className = "px-4 py-2.5 rounded-2xl text-xs font-bold text-slate-600 hover:bg-slate-100 transition";
+                    }
                 }
             });
         }
@@ -540,7 +576,7 @@
         function toggleDealerCloseStatus() {
             const { isDealerClosed } = window.getFirebaseData();
             const nextState = !isDealerClosed;
-            window.setFirebaseData(null, null, null, null, nextState);
+            window.setFirebaseData(null, null, null, null, null, nextState, undefined);
             showToast(nextState ? '🔴 ปิดรับแทงแล้ว' : '🟢 เปิดรับแทงปกติ', nextState ? 'warning' : 'success');
         }
 
@@ -709,7 +745,7 @@
             if (parsed.length > 0) {
                 const { entries } = window.getFirebaseData();
                 const newEntries = [...parsed.reverse(), ...entries];
-                window.setFirebaseData(newEntries, null, null, null);
+                window.setFirebaseData(newEntries, null, null, null, null, undefined, undefined);
                 document.getElementById('smart-input').value = '';
                 clearInputBox('smart-input', 'clear-input-btn');
                 showToast(`เพิ่มสำเร็จ ${parsed.length} รายการ`, 'success');
@@ -722,7 +758,7 @@
             const { entries } = window.getFirebaseData();
             if (entries.length === 0) return showToast('ไม่มีรายการโพยให้ส่ง', 'warning');
             entries.forEach(e => e.sentToDealer = true);
-            window.setFirebaseData(entries, null, null, null);
+            window.setFirebaseData(entries, null, null, null, null, undefined, undefined);
             showToast('ส่งโพยเข้าสู่หน้าเจ้ามือเรียบร้อย', 'success');
         }
 
@@ -743,7 +779,7 @@
             if (item) {
                 item.number = document.getElementById('edit-item-num').value.trim();
                 item.amount = parseInt(document.getElementById('edit-item-amt').value) || 0;
-                window.setFirebaseData(entries, null, null, null);
+                window.setFirebaseData(entries, null, null, null, null, undefined, undefined);
                 toggleModal('edit-modal', false);
                 showToast('แก้ไขรายการสำเร็จ', 'success');
             }
@@ -752,7 +788,7 @@
         function deleteEntry(id) {
             const { entries } = window.getFirebaseData();
             const newEntries = entries.filter(e => e.id !== id);
-            window.setFirebaseData(newEntries, null, null, null);
+            window.setFirebaseData(newEntries, null, null, null, null, undefined, undefined);
             showToast('ลบรายการแล้ว', 'info');
         }
 
@@ -787,7 +823,7 @@
                 }
             });
 
-            window.setFirebaseData(null, specialNumbers, null, null);
+            window.setFirebaseData(null, specialNumbers, null, null, null, undefined, undefined);
             document.getElementById('new-limit-numbers').value = '';
             showToast('บันทึกเลขอั้นเรียบร้อย', 'success');
         }
@@ -795,6 +831,10 @@
         function renderDealerLimitsTable() {
             const { specialNumbers } = window.getFirebaseData();
             const tbody = document.getElementById('dlr-limits-tbody');
+            if (specialNumbers.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="3" class="py-8 text-center text-slate-400">ยังไม่มีรายการเลขอั้น</td></tr>`;
+                return;
+            }
             tbody.innerHTML = specialNumbers.map((r, i) => `
                 <tr>
                     <td class="py-3 px-4 font-bold number-font">${r.displayLabel || r.number}</td>
@@ -807,8 +847,18 @@
         window.deleteSpecialRule = function(i) {
             const { specialNumbers } = window.getFirebaseData();
             specialNumbers.splice(i, 1);
-            window.setFirebaseData(null, specialNumbers, null, null);
+            window.setFirebaseData(null, specialNumbers, null, null, null, undefined, undefined);
             showToast('ลบเลขอั้นแล้ว', 'info');
+        }
+
+        function savePayoutRates() {
+            const rates = {
+                '3ตัวตรง': parseInt(document.getElementById('rate-3straight').value) || 0,
+                '3ตัวโต๊ด': parseInt(document.getElementById('rate-3tod').value) || 0,
+                '2ตัว': parseInt(document.getElementById('rate-2updown').value) || 0,
+                'วิ่ง': parseInt(document.getElementById('rate-run').value) || 0
+            };
+            window.setFirebaseData(null, null, null, rates, null, undefined, undefined);
         }
 
         function computeRiskAggregates() {
@@ -820,7 +870,6 @@
                 map[key].total += e.amount;
             });
 
-            // หักยอดที่ส่งเจ้าใหญ่ออกจากยอดรับรวมของตัวเลขนั้นๆ เพื่อให้เหลือยอดรับเอง
             bigBossItems.forEach(bb => {
                 const key = `${bb.number}|${bb.type}`;
                 if (map[key]) {
@@ -872,7 +921,7 @@
                 'วิ่งบน': parseInt(document.getElementById('limit-runup').value) || 0,
                 'วิ่งล่าง': parseInt(document.getElementById('limit-rundown').value) || 0
             };
-            window.setFirebaseData(null, null, limits, null);
+            window.setFirebaseData(null, null, limits, null, null, undefined, undefined);
         }
 
         function calculateWinnersAndProfit() {
@@ -882,13 +931,11 @@
 
             const win3Top = rawTop.slice(-3);
             const win2Top = rawTop.slice(-2);
-            const payoutRates = { '3ตัวตรง': 900, '3ตัวโต๊ด': 150, '2ตัว': 90 };
+            const { payoutRates, entries, maxLimits, bigBossItems } = window.getFirebaseData();
 
             let totalKeptIn = 0, totalPayout = 0;
             const customerWinners = {};
-            const { entries, maxLimits, bigBossItems } = window.getFirebaseData();
 
-            // คำนวณยอดรับเองหลังหักส่งเจ้าใหญ่แล้ว
             const netAmountMap = {};
             entries.forEach(e => {
                 const key = `${e.number}|${e.type}`;
@@ -912,6 +959,8 @@
                 else if (item.type === '3ตัวโต๊ด' && isTodMatch(item.number, win3Top)) rate = payoutRates['3ตัวโต๊ด'];
                 else if (item.type === '2ตัวบน' && item.number === win2Top) rate = payoutRates['2ตัว'];
                 else if (item.type === '2ตัวล่าง' && item.number === rawBottom2) rate = payoutRates['2ตัว'];
+                else if (item.type === 'วิ่งบน' && win3Top.includes(item.number)) rate = payoutRates['วิ่ง'];
+                else if (item.type === 'วิ่งล่าง' && rawBottom2.includes(item.number)) rate = payoutRates['วิ่ง'];
 
                 if (rate > 0) {
                     const restriction = checkNumberRestriction(item.number, item.type);
@@ -951,12 +1000,10 @@
 
             const win3Top = rawTop.slice(-3);
             const win2Top = rawTop.slice(-2);
-            const payoutRates = { '3ตัวตรง': 900, '3ตัวโต๊ด': 150, '2ตัว': 90 };
-
-            let totalGross = 0, totalBossPayout = 0;
-            const { bigBossItems } = window.getFirebaseData();
+            const { payoutRates, bigBossItems } = window.getFirebaseData();
             const discPct = parseFloat(document.getElementById('bigboss-discount-pct').value) || 0;
 
+            let totalGross = 0, totalBossPayout = 0;
             bigBossItems.forEach(item => {
                 totalGross += item.amount;
                 let rate = 0;
@@ -998,7 +1045,7 @@
                     addedCount++;
                 }
             });
-            window.setFirebaseData(null, null, null, bigBossItems);
+            window.setFirebaseData(null, null, null, null, bigBossItems, undefined, undefined);
             showToast(`ดึงยอดส่งเจ้าใหญ่สำเร็จ ${addedCount} รายการ`, 'success');
         }
 
@@ -1008,7 +1055,7 @@
             const parsed = parseSmartText(raw, 'เจ้าใหญ่', 0, 'auto');
             const { bigBossItems } = window.getFirebaseData();
             parsed.forEach(p => bigBossItems.push({ id: p.id, number: p.number, type: p.type, amount: p.amount }));
-            window.setFirebaseData(null, null, null, bigBossItems);
+            window.setFirebaseData(null, null, null, null, bigBossItems, undefined, undefined);
             document.getElementById('dealer-bigboss-input').value = '';
             clearInputBox('dealer-bigboss-input', 'clear-dealer-bb-btn');
             showToast('ส่งรายการเข้าหน้าเจ้าใหญ่ & หักออกจากยอดรับแล้ว', 'success');
@@ -1073,12 +1120,23 @@
         window.deleteBigBossItem = function(idx) {
             const { bigBossItems } = window.getFirebaseData();
             bigBossItems.splice(idx, 1);
-            window.setFirebaseData(null, null, null, bigBossItems);
+            window.setFirebaseData(null, null, null, null, bigBossItems, undefined, undefined);
             showToast('ลบรายการแล้ว', 'info');
         }
 
         function refreshAllViews() {
-            const { entries, specialNumbers, isDealerClosed, bigBossItems } = window.getFirebaseData();
+            const { entries, isDealerClosed, bigBossItems, lottoDate, payoutRates } = window.getFirebaseData();
+
+            // อัปเดตวันที่แสดงผลในหัวข้อและแบนเนอร์
+            document.getElementById('lotto-date-picker').value = lottoDate;
+            document.getElementById('banner-date-text').textContent = lottoDate;
+            document.getElementById('table-date-text').textContent = lottoDate;
+
+            // อัปเดตช่องตั้งค่าอัตราจ่าย
+            document.getElementById('rate-3straight').value = payoutRates['3ตัวตรง'];
+            document.getElementById('rate-3tod').value = payoutRates['3ตัวโต๊ด'];
+            document.getElementById('rate-2updown').value = payoutRates['2ตัว'];
+            document.getElementById('rate-run').value = payoutRates['วิ่ง'];
 
             const badge = document.getElementById('dealer-status-badge');
             const btnClose = document.getElementById('btn-toggle-dealer');
@@ -1104,7 +1162,6 @@
                 else if (e.type === 'วิ่งล่าง') sumRunDown += e.amount;
             });
 
-            // คำนวณยอดส่งเจ้าใหญ่รวมเพื่อหักออกจากยอดรวมเจ้ามือ
             let totalBigBossSent = 0;
             bigBossItems.forEach(bb => totalBigBossSent += bb.amount);
 
@@ -1169,10 +1226,10 @@
             }
 
             const banner = document.getElementById('recorder-limits-banner');
-            const chips = document.getElementById('recorder-limits-chips');
+            const { specialNumbers } = window.getFirebaseData();
             if (specialNumbers.length > 0) {
                 banner.classList.remove('hidden');
-                chips.innerHTML = specialNumbers.map(r => `<span class="px-2.5 py-1 rounded-lg bg-amber-100 text-amber-800 font-bold number-font border border-amber-300">${r.displayLabel || r.number} (${r.status === 'closed' ? 'ปิดรับ' : 'จ่ายครึ่ง'})</span>`).join('');
+                document.getElementById('recorder-limits-chips').innerHTML = specialNumbers.map(r => `<span class="px-2.5 py-1 rounded-lg bg-amber-100 text-amber-800 font-bold number-font border border-amber-300">${r.displayLabel || r.number} (${r.status === 'closed' ? 'ปิดรับ' : 'จ่ายครึ่ง'})</span>`).join('');
             } else {
                 banner.classList.add('hidden');
             }
@@ -1235,7 +1292,7 @@
 
         function confirmClearAll() {
             if (confirm('ต้องการล้างข้อมูลทั้งหมดหรือไม่?')) {
-                window.setFirebaseData([], [], { '2ตัวบน': 1000, '2ตัวล่าง': 1000, '3ตัวตรง': 500, '3ตัวโต๊ด': 500, '3ตัวล่าง': 500, 'วิ่งบน': 5000, 'วิ่งล่าง': 5000 }, [], false);
+                window.setFirebaseData([], [], { '2ตัวบน': 1000, '2ตัวล่าง': 1000, '3ตัวตรง': 500, '3ตัวโต๊ด': 500, '3ตัวล่าง': 500, 'วิ่งบน': 5000, 'วิ่งล่าง': 5000 }, { '3ตัวตรง': 900, '3ตัวโต๊ด': 150, '2ตัว': 90, 'วิ่ง': 3 }, [], false, '2026-11-16');
                 showToast('ล้างข้อมูลเรียบร้อย', 'info');
             }
         }
