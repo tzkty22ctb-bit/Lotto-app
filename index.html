@@ -18,7 +18,7 @@
     <!-- Toast Container -->
     <div id="toast-container" class="fixed top-4 right-4 z-50 flex flex-col gap-2 pointer-events-none max-w-sm"></div>
 
-    <!-- Password Modal for Dealer & Big Boss -->
+    <!-- Password Modal for Dealer & Big Boss (รหัส: 102021) -->
     <div id="auth-modal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
         <div class="bg-white rounded-3xl shadow-2xl max-w-sm w-full p-6 space-y-4 text-center">
             <div class="w-14 h-14 rounded-2xl bg-purple-100 text-purple-700 flex items-center justify-center mx-auto text-2xl shadow-inner">
@@ -62,7 +62,7 @@
                         <span>Smart Lotto Pro</span>
                         <span id="mode-badge" class="text-xs font-medium px-2.5 py-0.5 rounded-full bg-emerald-500/30 text-emerald-200 border border-emerald-400/30">1. หน้าคนจดโพย</span>
                     </h1>
-                    <p class="text-xs text-slate-300 mt-0.5">งวดประจำวันที่: <span id="lotto-date-text" class="font-bold text-amber-300">16 พฤศจิกายน 2026</span> | สถานะระบบ: <span id="db-status" class="text-emerald-400 font-bold">กำลังเชื่อมต่อ...</span></p>
+                    <p class="text-xs text-slate-300 mt-0.5">งวดประจำวันที่: <span id="lotto-date-text" class="font-bold text-amber-300">16 พฤศจิกายน 2026</span> | สถานะ: <span id="db-status" class="text-amber-400 font-bold">กำลังโหลด...</span></p>
                 </div>
             </div>
 
@@ -101,7 +101,7 @@
             <div class="bg-white rounded-3xl p-4 border shadow-sm flex flex-col justify-center"><span class="text-xs text-slate-400 font-medium">3 ตัว & วิ่ง</span><div class="text-base font-bold number-font mt-1"><span id="rec-sum-3all" class="text-amber-600">0</span> / <span id="rec-sum-run" class="text-rose-600">0</span></div></div>
         </section>
 
-        <!-- ประกาศเลขอั้นจากเจ้ามือ -->
+        <!-- ประกาศเลขอั้น -->
         <div id="recorder-limits-banner" class="hidden bg-amber-50 border border-amber-200 rounded-2xl px-4 py-3 flex items-center justify-between text-xs shadow-sm">
             <div class="flex items-center gap-2 text-amber-900 font-medium">
                 <i class="fa-solid fa-bullhorn text-amber-600 text-base"></i>
@@ -111,7 +111,6 @@
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-            <!-- Left Input -->
             <section class="lg:col-span-5 bg-white rounded-3xl border shadow-sm p-5 space-y-4">
                 <div class="bg-sky-50/80 border border-sky-200 rounded-2xl p-4 space-y-3">
                     <div class="flex justify-between items-center">
@@ -129,30 +128,30 @@
                 </div>
 
                 <div class="relative">
-                    <textarea id="smart-input" rows="4" class="w-full rounded-2xl border-2 border-teal-200 focus:border-teal-600 p-4 text-lg font-medium resize-none number-font shadow-inner" placeholder="เช่น: 12 50x50&#10;123 100*50"></textarea>
-                    <button type="button" onclick="clearInputBox()" id="clear-input-btn" class="hidden absolute top-3 right-3 text-slate-400 bg-slate-100 w-7 h-7 rounded-full flex items-center justify-center text-xs">✕</button>
+                    <textarea id="smart-input" rows="4" class="w-full rounded-2xl border-2 border-teal-200 focus:border-teal-600 p-4 text-lg font-medium resize-none number-font shadow-inner" placeholder="เช่น: 12 50x50 หรือ 674=100x100"></textarea>
+                    <button type="button" onclick="clearInputBox('smart-input', 'clear-input-btn')" id="clear-input-btn" class="hidden absolute top-3 right-3 text-slate-400 bg-slate-100 w-7 h-7 rounded-full flex items-center justify-center text-xs">✕</button>
                 </div>
 
                 <!-- ปุ่มช่วยพิมพ์ -->
                 <div class="space-y-2">
                     <div class="grid grid-cols-5 gap-1.5">
-                        <button type="button" onclick="insertText(' ')" class="py-2.5 bg-slate-100 rounded-xl font-bold text-xs">เว้นวรรค</button>
-                        <button type="button" onclick="insertText('x')" class="py-2.5 bg-teal-50 text-teal-700 rounded-xl font-bold">x</button>
-                        <button type="button" onclick="insertText('*')" class="py-2.5 bg-teal-50 text-teal-700 rounded-xl font-bold">*</button>
-                        <button type="button" onclick="insertText(' บน ')" class="py-2.5 bg-sky-50 text-sky-700 rounded-xl font-semibold text-xs">บน</button>
-                        <button type="button" onclick="insertText(' ล่าง ')" class="py-2.5 bg-emerald-50 text-emerald-700 rounded-xl font-semibold text-xs">ล่าง</button>
+                        <button type="button" onclick="insertText('smart-input', ' ', 'clear-input-btn')" class="py-2.5 bg-slate-100 rounded-xl font-bold text-xs">เว้นวรรค</button>
+                        <button type="button" onclick="insertText('smart-input', 'x', 'clear-input-btn')" class="py-2.5 bg-teal-50 text-teal-700 rounded-xl font-bold">x</button>
+                        <button type="button" onclick="insertText('smart-input', '*', 'clear-input-btn')" class="py-2.5 bg-teal-50 text-teal-700 rounded-xl font-bold">*</button>
+                        <button type="button" onclick="insertText('smart-input', ' บน ', 'clear-input-btn')" class="py-2.5 bg-sky-50 text-sky-700 rounded-xl font-semibold text-xs">บน</button>
+                        <button type="button" onclick="insertText('smart-input', ' ล่าง ', 'clear-input-btn')" class="py-2.5 bg-emerald-50 text-emerald-700 rounded-xl font-semibold text-xs">ล่าง</button>
                     </div>
                     <div class="grid grid-cols-3 gap-1.5">
-                        <button type="button" onclick="insertText(' โต๊ด ')" class="py-2.5 bg-purple-50 text-purple-700 rounded-xl font-semibold text-xs">โต๊ด</button>
-                        <button type="button" onclick="insertText(' วิ่งบน ')" class="py-2.5 bg-rose-50 text-rose-700 rounded-xl font-semibold text-xs">วิ่งบน</button>
-                        <button type="button" onclick="insertText(' วิ่งล่าง ')" class="py-2.5 bg-pink-50 text-pink-700 rounded-xl font-semibold text-xs">วิ่งล่าง</button>
+                        <button type="button" onclick="insertText('smart-input', ' โต๊ด ', 'clear-input-btn')" class="py-2.5 bg-purple-50 text-purple-700 rounded-xl font-semibold text-xs">โต๊ด</button>
+                        <button type="button" onclick="insertText('smart-input', ' วิ่งบน ', 'clear-input-btn')" class="py-2.5 bg-rose-50 text-rose-700 rounded-xl font-semibold text-xs">วิ่งบน</button>
+                        <button type="button" onclick="insertText('smart-input', ' วิ่งล่าง ', 'clear-input-btn')" class="py-2.5 bg-pink-50 text-pink-700 rounded-xl font-semibold text-xs">วิ่งล่าง</button>
                     </div>
                     <div class="grid grid-cols-5 gap-1.5">
-                        <button type="button" onclick="insertAmount('10')" class="py-2.5 bg-amber-50 text-amber-800 rounded-xl font-bold text-xs number-font">+10</button>
-                        <button type="button" onclick="insertAmount('50')" class="py-2.5 bg-amber-50 text-amber-800 rounded-xl font-bold text-xs number-font">+50</button>
-                        <button type="button" onclick="insertAmount('100')" class="py-2.5 bg-amber-50 text-amber-800 rounded-xl font-bold text-xs number-font">+100</button>
-                        <button type="button" onclick="insertAmount('500')" class="py-2.5 bg-amber-50 text-amber-800 rounded-xl font-bold text-xs number-font">+500</button>
-                        <button type="button" onclick="insertAmount('1000')" class="py-2.5 bg-amber-50 text-amber-800 rounded-xl font-bold text-xs number-font">+1000</button>
+                        <button type="button" onclick="insertAmount('smart-input', '10', 'clear-input-btn')" class="py-2.5 bg-amber-50 text-amber-800 rounded-xl font-bold text-xs number-font">+10</button>
+                        <button type="button" onclick="insertAmount('smart-input', '50', 'clear-input-btn')" class="py-2.5 bg-amber-50 text-amber-800 rounded-xl font-bold text-xs number-font">+50</button>
+                        <button type="button" onclick="insertAmount('smart-input', '100', 'clear-input-btn')" class="py-2.5 bg-amber-50 text-amber-800 rounded-xl font-bold text-xs number-font">+100</button>
+                        <button type="button" onclick="insertAmount('smart-input', '500', 'clear-input-btn')" class="py-2.5 bg-amber-50 text-amber-800 rounded-xl font-bold text-xs number-font">+500</button>
+                        <button type="button" onclick="insertAmount('smart-input', '1000', 'clear-input-btn')" class="py-2.5 bg-amber-50 text-amber-800 rounded-xl font-bold text-xs number-font">+1000</button>
                     </div>
                 </div>
 
@@ -161,7 +160,6 @@
                 </button>
             </section>
 
-            <!-- Right Entries & Summary Table -->
             <section class="lg:col-span-7 bg-white rounded-3xl border shadow-sm overflow-hidden flex flex-col">
                 <div class="p-5 border-b bg-slate-50 flex flex-wrap justify-between items-center gap-3">
                     <div class="font-bold text-slate-800 text-sm">รายการโพยทั้งหมด (<span id="rec-tab-count">0</span>)</div>
@@ -175,7 +173,6 @@
                     </div>
                 </div>
 
-                <!-- สรุปยอดรายคนส่ง & หัก % & ยอดส่งเจ้า -->
                 <div id="recorder-customer-summary" class="p-4 bg-slate-50/50 border-b grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs"></div>
 
                 <div class="overflow-x-auto max-h-[460px] overflow-y-auto">
@@ -216,7 +213,6 @@
             <div class="bg-white rounded-3xl p-4 border shadow-sm"><div class="text-xs text-slate-400">วิ่งบน/ล่าง</div><div class="text-sm font-bold number-font mt-1"><span id="dlr-sum-runup">0</span>/<span id="dlr-sum-rundown">0</span></div></div>
         </section>
 
-        <!-- Sub Tabs -->
         <div class="flex flex-wrap items-center justify-between gap-3 bg-white p-3.5 rounded-3xl border shadow-sm">
             <div class="flex gap-1.5">
                 <button id="dlr-subtab-risk" onclick="switchDealerSubTab('risk')" class="px-4 py-2.5 rounded-2xl text-xs font-bold bg-purple-700 text-white shadow">ความเสี่ยง & เพดานรับสู้</button>
@@ -225,17 +221,16 @@
             </div>
         </div>
 
-        <!-- Panel: Risk -->
         <div id="dlr-panel-risk" class="space-y-5">
             <div class="bg-white rounded-3xl border p-6 shadow-sm space-y-4">
                 <h3 class="text-base font-bold text-purple-950">ตั้งเพดานรับสู้สูงสุด (Max Limit ต่อตัวเลข)</h3>
                 <div class="grid grid-cols-2 sm:grid-cols-6 gap-3">
                     <div><label class="text-xs text-slate-500 block mb-1">2 ตัวบน</label><input type="number" id="limit-2up" oninput="saveMaxLimits()" class="w-full px-3 py-2.5 border rounded-2xl text-sm font-bold number-font" value="1000"></div>
                     <div><label class="text-xs text-slate-500 block mb-1">2 ตัวล่าง</label><input type="number" id="limit-2down" oninput="saveMaxLimits()" class="w-full px-3 py-2.5 border rounded-2xl text-sm font-bold number-font" value="1000"></div>
-                    <div><label class="text-xs text-slate-500 block mb-1">3 ตัวตรง</label><input type="number" id="limit-3straight" oninput="saveMaxLimits()" class="w-full px-3 py-2 border rounded-2xl text-sm font-bold number-font" value="500"></div>
-                    <div><label class="text-xs text-slate-500 block mb-1">3 ตัวโต๊ด</label><input type="number" id="limit-3tod" oninput="saveMaxLimits()" class="w-full px-3 py-2 border rounded-2xl text-sm font-bold number-font" value="500"></div>
-                    <div><label class="text-xs text-slate-500 block mb-1">วิ่งบน</label><input type="number" id="limit-runup" oninput="saveMaxLimits()" class="w-full px-3 py-2 border rounded-2xl text-sm font-bold number-font" value="5000"></div>
-                    <div><label class="text-xs text-slate-500 block mb-1">วิ่งล่าง</label><input type="number" id="limit-rundown" oninput="saveMaxLimits()" class="w-full px-3 py-2 border rounded-2xl text-sm font-bold number-font" value="5000"></div>
+                    <div><label class="text-xs text-slate-500 block mb-1">3 ตัวตรง</label><input type="number" id="limit-3straight" oninput="saveMaxLimits()" class="w-full px-3 py-2.5 border rounded-2xl text-sm font-bold number-font" value="500"></div>
+                    <div><label class="text-xs text-slate-500 block mb-1">3 ตัวโต๊ด</label><input type="number" id="limit-3tod" oninput="saveMaxLimits()" class="w-full px-3 py-2.5 border rounded-2xl text-sm font-bold number-font" value="500"></div>
+                    <div><label class="text-xs text-slate-500 block mb-1">วิ่งบน</label><input type="number" id="limit-runup" oninput="saveMaxLimits()" class="w-full px-3 py-2.5 border rounded-2xl text-sm font-bold number-font" value="5000"></div>
+                    <div><label class="text-xs text-slate-500 block mb-1">วิ่งล่าง</label><input type="number" id="limit-rundown" oninput="saveMaxLimits()" class="w-full px-3 py-2.5 border rounded-2xl text-sm font-bold number-font" value="5000"></div>
                 </div>
             </div>
             <div class="bg-white rounded-3xl border shadow-sm overflow-hidden">
@@ -248,7 +243,6 @@
             </div>
         </div>
 
-        <!-- Panel: Limits (เลขอั้น 3 ตัวอั้นทุกกลับอัตโนมัติ) -->
         <div id="dlr-panel-limits" class="hidden grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
             <div class="lg:col-span-5 bg-white rounded-3xl border p-6 space-y-4 shadow-sm">
                 <h3 class="text-base font-bold text-purple-950">กำหนดเลขอั้น & เลขปิดรับ</h3>
@@ -281,7 +275,6 @@
             </div>
         </div>
 
-        <!-- Panel: Payout & Profit -->
         <div id="dlr-panel-payout" class="hidden space-y-6">
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
                 <div class="lg:col-span-5 bg-white rounded-3xl border p-6 space-y-4 shadow-sm">
@@ -308,7 +301,7 @@
     </div>
 
     <!-- =====================================================================
-         3. หน้าเจ้ามือใหญ่ (Big Boss)
+         3. หน้าเจ้ามือใหญ่ (Big Boss) - พร้อมช่องกรอกเลขแบบหน้าคนจดโพย
          ===================================================================== -->
     <div id="page-bigboss" class="hidden max-w-7xl mx-auto px-4 py-6 space-y-6">
         <section class="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -330,18 +323,48 @@
         </section>
 
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+            <!-- Left: ช่องกรอกเลขแบบหน้าคนจดโพย + ปุ่มช่วยพิมพ์ -->
             <div class="lg:col-span-5 bg-white rounded-3xl border p-6 space-y-4 shadow-sm">
                 <h3 class="text-base font-bold text-indigo-950 flex items-center gap-2">
-                    <i class="fa-solid fa-pen-to-square text-indigo-600"></i> ช่องกรอกเลขส่งเจ้าใหญ่
+                    <i class="fa-solid fa-pen-to-square text-indigo-600"></i> ช่องกรอกเลขส่งเจ้าใหญ่ (Smart Format)
                 </h3>
-                <p class="text-xs text-slate-500">พิมพ์หรือวางโพยส่งเจ้าใหญ่ได้แบบหน้าคนจด หรือดึงยอดเกินเพดานจากหน้าเจ้ามือมาใส่</p>
-                <textarea id="bigboss-input" rows="4" class="w-full border-2 border-indigo-200 rounded-2xl p-4 text-sm focus:border-indigo-600" placeholder="เช่น 12 50x50"></textarea>
-                <button onclick="addManualBigBossItem()" class="w-full py-3 rounded-2xl bg-slate-800 hover:bg-slate-900 text-white text-xs font-bold">เพิ่มรายการตัดส่ง</button>
+                <p class="text-xs text-slate-500">พิมพ์หรือวางโพยส่งเจ้าใหญ่ได้ทันที พร้อมปุ่มช่วยคีย์ด้านล่าง</p>
+                
+                <div class="relative">
+                    <textarea id="bigboss-input" rows="4" class="w-full border-2 border-indigo-200 rounded-2xl p-4 text-sm focus:border-indigo-600 resize-none number-font" placeholder="เช่น 12 50x50 หรือ 674=100x100"></textarea>
+                    <button type="button" onclick="clearInputBox('bigboss-input', 'clear-bigboss-btn')" id="clear-bigboss-btn" class="hidden absolute top-3 right-3 text-slate-400 bg-slate-100 w-7 h-7 rounded-full flex items-center justify-center text-xs">✕</button>
+                </div>
+
+                <!-- ปุ่มช่วยพิมพ์หน้าเจ้าใหญ่ -->
+                <div class="space-y-2">
+                    <div class="grid grid-cols-5 gap-1.5">
+                        <button type="button" onclick="insertText('bigboss-input', ' ', 'clear-bigboss-btn')" class="py-2.5 bg-slate-100 rounded-xl font-bold text-xs">เว้นวรรค</button>
+                        <button type="button" onclick="insertText('bigboss-input', 'x', 'clear-bigboss-btn')" class="py-2.5 bg-indigo-50 text-indigo-700 rounded-xl font-bold">x</button>
+                        <button type="button" onclick="insertText('bigboss-input', '*', 'clear-bigboss-btn')" class="py-2.5 bg-indigo-50 text-indigo-700 rounded-xl font-bold">*</button>
+                        <button type="button" onclick="insertText('bigboss-input', ' บน ', 'clear-bigboss-btn')" class="py-2.5 bg-sky-50 text-sky-700 rounded-xl font-semibold text-xs">บน</button>
+                        <button type="button" onclick="insertText('bigboss-input', ' ล่าง ', 'clear-bigboss-btn')" class="py-2.5 bg-emerald-50 text-emerald-700 rounded-xl font-semibold text-xs">ล่าง</button>
+                    </div>
+                    <div class="grid grid-cols-3 gap-1.5">
+                        <button type="button" onclick="insertText('bigboss-input', ' โต๊ด ', 'clear-bigboss-btn')" class="py-2.5 bg-purple-50 text-purple-700 rounded-xl font-semibold text-xs">โต๊ด</button>
+                        <button type="button" onclick="insertText('bigboss-input', ' วิ่งบน ', 'clear-bigboss-btn')" class="py-2.5 bg-rose-50 text-rose-700 rounded-xl font-semibold text-xs">วิ่งบน</button>
+                        <button type="button" onclick="insertText('bigboss-input', ' วิ่งล่าง ', 'clear-bigboss-btn')" class="py-2.5 bg-pink-50 text-pink-700 rounded-xl font-semibold text-xs">วิ่งล่าง</button>
+                    </div>
+                    <div class="grid grid-cols-5 gap-1.5">
+                        <button type="button" onclick="insertAmount('bigboss-input', '10', 'clear-bigboss-btn')" class="py-2.5 bg-amber-50 text-amber-800 rounded-xl font-bold text-xs number-font">+10</button>
+                        <button type="button" onclick="insertAmount('bigboss-input', '50', 'clear-bigboss-btn')" class="py-2.5 bg-amber-50 text-amber-800 rounded-xl font-bold text-xs number-font">+50</button>
+                        <button type="button" onclick="insertAmount('bigboss-input', '100', 'clear-bigboss-btn')" class="py-2.5 bg-amber-50 text-amber-800 rounded-xl font-bold text-xs number-font">+100</button>
+                        <button type="button" onclick="insertAmount('bigboss-input', '500', 'clear-bigboss-btn')" class="py-2.5 bg-amber-50 text-amber-800 rounded-xl font-bold text-xs number-font">+500</button>
+                        <button type="button" onclick="insertAmount('bigboss-input', '1000', 'clear-bigboss-btn')" class="py-2.5 bg-amber-50 text-amber-800 rounded-xl font-bold text-xs number-font">+1000</button>
+                    </div>
+                </div>
+
+                <button onclick="addManualBigBossItem()" class="w-full py-3 rounded-2xl bg-slate-800 hover:bg-slate-900 text-white text-xs font-bold shadow">เพิ่มรายการส่งเจ้าใหญ่</button>
                 <button onclick="autoImportCutoffToBigBoss()" class="w-full py-3.5 rounded-2xl bg-indigo-700 hover:bg-indigo-800 text-white font-bold text-sm shadow flex items-center justify-center gap-2">
                     <i class="fa-solid fa-download"></i> ดึงยอดเกินเพดานจากหน้าเจ้ามือ
                 </button>
             </div>
 
+            <!-- Right: รายการที่ส่ง -->
             <div class="lg:col-span-7 bg-white rounded-3xl border shadow-sm overflow-hidden flex flex-col">
                 <div class="p-5 border-b bg-slate-50 flex justify-between items-center">
                     <h4 class="font-bold text-slate-800 text-sm">รายการที่ส่งเจ้าใหญ่ & สรุปเคลียร์เงิน</h4>
@@ -360,7 +383,7 @@
         </div>
     </div>
 
-    <!-- Firebase SDK & Script -->
+    <!-- Firebase SDK & Hybrid LocalStorage Fallback -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
@@ -386,6 +409,20 @@
         let maxLimits = { '2ตัวบน': 1000, '2ตัวล่าง': 1000, '3ตัวตรง': 500, '3ตัวโต๊ด': 500, 'วิ่งบน': 5000, 'วิ่งล่าง': 5000 };
         let bigBossItems = [];
 
+        function loadFromLocalStorage() {
+            try {
+                const local = localStorage.getItem('smart_lotto_backup_v1');
+                if (local) {
+                    const data = JSON.parse(local);
+                    entries = data.entries || [];
+                    specialNumbers = data.specialNumbers || [];
+                    if (data.maxLimits) maxLimits = data.maxLimits;
+                    bigBossItems = data.bigBossItems || [];
+                }
+            } catch(e) {}
+        }
+        loadFromLocalStorage();
+
         window.initAppFirebase = function() {
             const statusEl = document.getElementById('db-status');
             onValue(ref(db, 'lotto_data'), (snapshot) => {
@@ -395,23 +432,24 @@
                     specialNumbers = data.specialNumbers || [];
                     if (data.maxLimits) maxLimits = data.maxLimits;
                     bigBossItems = data.bigBossItems || [];
+                    localStorage.setItem('smart_lotto_backup_v1', JSON.stringify(data));
                 }
-                statusEl.textContent = 'เชื่อมต่อสำเร็จ (Online)';
+                statusEl.textContent = 'ออนไลน์ (เชื่อมต่อแล้ว)';
                 statusEl.className = 'text-emerald-400 font-bold';
                 refreshAllViews();
             }, (error) => {
-                statusEl.textContent = 'เชื่อมต่อล้มเหลว (Offline)';
-                statusEl.className = 'text-rose-400 font-bold';
+                statusEl.textContent = 'ออฟไลน์ (บันทึกในเครื่อง)';
+                statusEl.className = 'text-amber-400 font-bold';
+                refreshAllViews();
             });
         };
 
         window.saveDataToFirebase = function() {
-            set(ref(db, 'lotto_data'), {
-                entries,
-                specialNumbers,
-                maxLimits,
-                bigBossItems
-            }).catch(err => console.error("Firebase save error:", err));
+            const payload = { entries, specialNumbers, maxLimits, bigBossItems };
+            localStorage.setItem('smart_lotto_backup_v1', JSON.stringify(payload));
+            set(ref(db, 'lotto_data'), payload).catch(err => {
+                console.warn("Firebase offline mode active.");
+            });
         }
 
         window.addEventListener('DOMContentLoaded', () => {
@@ -420,17 +458,16 @@
 
         window.getFirebaseData = () => ({ entries, specialNumbers, maxLimits, bigBossItems });
         window.setFirebaseData = (newEntries, newSpecial, newLimits, newBigBoss) => {
-            if (newEntries) entries = newEntries;
-            if (newSpecial) specialNumbers = newSpecial;
-            if (newLimits) maxLimits = newLimits;
-            if (newBigBoss) bigBossItems = newBigBoss;
+            if (newEntries !== null) entries = newEntries;
+            if (newSpecial !== null) specialNumbers = newSpecial;
+            if (newLimits !== null) maxLimits = newLimits;
+            if (newBigBoss !== null) bigBossItems = newBigBoss;
             window.saveDataToFirebase();
             refreshAllViews();
         };
     </script>
 
     <script>
-        // --- Password & Security Logic ---
         let pendingMode = '';
         function requestAccess(mode) {
             pendingMode = mode;
@@ -454,7 +491,6 @@
             toggleModal('auth-modal', false);
         }
 
-        // --- App Mode Switcher ---
         function switchAppMode(mode) {
             ['recorder', 'dealer', 'bigboss'].forEach(m => {
                 document.getElementById(`page-${m}`).classList.toggle('hidden', m !== mode);
@@ -483,23 +519,23 @@
             return hit ? hit.status : 'normal';
         }
 
-        // --- Recorder Logic ---
-        const smartInputEl = document.getElementById('smart-input');
-        const clearInputBtn = document.getElementById('clear-input-btn');
-
-        smartInputEl.addEventListener('input', () => clearInputBtn.classList.toggle('hidden', smartInputEl.value.length === 0));
-
-        function clearInputBox() {
-            smartInputEl.value = '';
-            clearInputBtn.classList.add('hidden');
+        function clearInputBox(inputId, btnId) {
+            const el = document.getElementById(inputId);
+            el.value = '';
+            document.getElementById(btnId).classList.add('hidden');
+            el.focus();
         }
 
-        function insertText(txt) {
-            smartInputEl.value += txt;
-            smartInputEl.focus();
-            clearInputBtn.classList.remove('hidden');
+        function insertText(inputId, txt, btnId) {
+            const el = document.getElementById(inputId);
+            el.value += txt;
+            el.focus();
+            document.getElementById(btnId).classList.remove('hidden');
         }
-        function insertAmount(amt) { insertText(' ' + amt); }
+
+        function insertAmount(inputId, amt, btnId) {
+            insertText(inputId, ' ' + amt, btnId);
+        }
 
         function parseSmartText(rawText, customer, discountPct) {
             const lines = rawText.split(/\r?\n/);
@@ -507,6 +543,8 @@
             lines.forEach(line => {
                 let clean = line.trim();
                 if (!clean) return;
+                clean = clean.replace(/=/g, ' ');
+
                 const isBottom = /(ล่าง|\bล\b)/i.test(clean);
                 const isTod = /(โต๊ด|\bต\b)/i.test(clean);
                 let stripped = clean.replace(/(วิ่งบน|วิ่งล่าง|วิ่ง|ล่าง|โต๊ด|บน|\bล\b|\bต\b)/gi, ' ').trim();
@@ -546,7 +584,7 @@
         }
 
         function processSmartInput() {
-            const rawText = smartInputEl.value.trim();
+            const rawText = document.getElementById('smart-input').value.trim();
             if (!rawText) return;
             const customer = document.getElementById('customer-note').value.trim() || 'ทั่วไป';
             const discPct = parseFloat(document.getElementById('customer-discount-pct').value) || 0;
@@ -566,9 +604,11 @@
                 const { entries } = window.getFirebaseData();
                 const newEntries = [...parsed.reverse(), ...entries];
                 window.setFirebaseData(newEntries, null, null, null);
-                smartInputEl.value = '';
-                clearInputBtn.classList.add('hidden');
+                document.getElementById('smart-input').value = '';
+                clearInputBox('smart-input', 'clear-input-btn');
                 showToast(`เพิ่มสำเร็จ ${parsed.length} รายการ`, 'success');
+            } else {
+                showToast('⚠️ รูปแบบการพิมพ์ไม่ถูกต้อง กรุณาตรวจสอบอีกครั้ง', 'warning');
             }
         }
 
@@ -609,7 +649,6 @@
             showToast('ลบรายการแล้ว', 'info');
         }
 
-        // --- Dealer Limits (เลขอั้น 3 ตัวอั้นทุกกลับอัตโนมัติ) ---
         function getPermutations(str) {
             if (str.length <= 1) return [str];
             const set = new Set();
@@ -775,7 +814,6 @@
             return bet3.split('').sort().join('') === win3.split('').sort().join('');
         }
 
-        // --- Big Boss Logic ---
         function autoImportCutoffToBigBoss() {
             const { rows } = computeRiskAggregates();
             const { bigBossItems } = window.getFirebaseData();
@@ -798,7 +836,8 @@
             parsed.forEach(p => bigBossItems.push({ id: p.id, number: p.number, type: p.type, amount: p.amount }));
             window.setFirebaseData(null, null, null, bigBossItems);
             document.getElementById('bigboss-input').value = '';
-            showToast('เพิ่มรายการตัดส่งสำเร็จ', 'success');
+            clearInputBox('bigboss-input', 'clear-bigboss-btn');
+            showToast('เพิ่มรายการส่งเจ้าใหญ่สำเร็จ', 'success');
         }
 
         function renderBigBossView() {
@@ -840,7 +879,6 @@
             showToast('ลบรายการแล้ว', 'info');
         }
 
-        // --- Global Refresh ---
         function refreshAllViews() {
             const { entries, specialNumbers } = window.getFirebaseData();
             let totalAll = 0, sum2Up = 0, sum2Down = 0, sum3Str = 0, sum3Tod = 0, sumRunUp = 0, sumRunDown = 0;
@@ -863,7 +901,6 @@
             document.getElementById('rec-sum-3all').textContent = (sum3Str + sum3Tod).toLocaleString('th-TH');
             document.getElementById('rec-sum-run').textContent = (sumRunUp + sumRunDown).toLocaleString('th-TH');
 
-            // สรุปยอดรายคนส่ง & หัก % & ส่งเจ้า
             const custMap = {};
             entries.forEach(e => {
                 const name = e.customer || 'ทั่วไป';
@@ -888,7 +925,6 @@
                 `;
             }).join('') || '<span class="text-slate-400">ยังไม่มีข้อมูลคนส่ง</span>';
 
-            // แบนเนอร์เลขอั้น
             const banner = document.getElementById('recorder-limits-banner');
             const chips = document.getElementById('recorder-limits-chips');
             if (specialNumbers.length > 0) {
