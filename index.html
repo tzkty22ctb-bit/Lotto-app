@@ -272,11 +272,11 @@
                 <div class="space-y-2 bg-purple-50 p-3.5 rounded-2xl border border-purple-200">
                     <div class="flex items-center gap-2.5">
                         <input type="checkbox" id="auto-reverse-limit" class="w-4 h-4 text-purple-600 rounded" checked>
-                        <label for="auto-reverse-limit" class="text-xs font-bold text-purple-900 cursor-pointer">อั้น 3 ตัว (ตรง*โต๊ด) <span class="text-purple-600 font-normal">(พร้อมตัวกลับ)</span></label>
+                        <label for="auto-reverse-limit" class="text-xs font-bold text-purple-900 cursor-pointer">อั้น 3 ตัว <span class="text-purple-600 font-normal">(ตรง*โต๊ด*6กลับ)</span></label>
                     </div>
                     <div class="flex items-center gap-2.5 pt-1 border-t border-purple-200/60">
                         <input type="checkbox" id="auto-twoupdown-limit" class="w-4 h-4 text-purple-600 rounded">
-                        <label for="auto-twoupdown-limit" class="text-xs font-bold text-purple-900 cursor-pointer">อั้น 2 ตัว <span class="text-purple-600 font-normal">(บน*ล่าง)</span></label>
+                        <label for="auto-twoupdown-limit" class="text-xs font-bold text-purple-900 cursor-pointer">อั้น 2 ตัว <span class="text-purple-600 font-normal">(บน*ล่าง)(พร้อมตัวกลับ)</span></label>
                     </div>
                 </div>
                 <div>
@@ -433,7 +433,7 @@
 
         function loadFromLocalStorage() {
             try {
-                const local = localStorage.getItem('smart_lotto_backup_v2');
+                const local = localStorage.getItem('smart_lotto_backup_v3');
                 if (local) {
                     const data = JSON.parse(local);
                     entries = data.entries || [];
@@ -447,14 +447,14 @@
 
         window.initAppFirebase = function() {
             const statusEl = document.getElementById('db-status');
-            onValue(ref(db, 'lotto_data_v2'), (snapshot) => {
+            onValue(ref(db, 'lotto_data_v3'), (snapshot) => {
                 const data = snapshot.val();
                 if (data) {
                     entries = data.entries || [];
                     specialNumbers = data.specialNumbers || [];
                     if (data.maxLimits) maxLimits = data.maxLimits;
                     bigBossItems = data.bigBossItems || [];
-                    localStorage.setItem('smart_lotto_backup_v2', JSON.stringify(data));
+                    localStorage.setItem('smart_lotto_backup_v3', JSON.stringify(data));
                 }
                 statusEl.textContent = 'ออนไลน์ (เชื่อมต่อแล้ว)';
                 statusEl.className = 'text-emerald-400 font-bold';
@@ -468,8 +468,8 @@
 
         window.saveDataToFirebase = function() {
             const payload = { entries, specialNumbers, maxLimits, bigBossItems };
-            localStorage.setItem('smart_lotto_backup_v2', JSON.stringify(payload));
-            set(ref(db, 'lotto_data_v2'), payload).catch(err => {});
+            localStorage.setItem('smart_lotto_backup_v3', JSON.stringify(payload));
+            set(ref(db, 'lotto_data_v3'), payload).catch(err => {});
         }
 
         window.addEventListener('DOMContentLoaded', () => {
@@ -538,11 +538,15 @@
             const hit = specialNumbers.find(r => {
                 if (r.number === num) return true;
                 if (r.isAutoReverse && r.baseNumber && r.length === 3 && num.length === 3 && isTodMatch(r.baseNumber, num)) return true;
-                if (r.isAutoTwoUpDown && r.baseNumber && r.length === 2 && num.length === 2 && r.baseNumber === num) return true;
+                if (r.isAutoTwoUpDown && r.baseNumber && r.length === 2 && num.length === 2 && (r.baseNumber === num || isTwoReverseMatch(r.baseNumber, num))) return true;
                 return false;
             });
             if (hit) return hit.status;
             return 'normal';
+        }
+
+        function isTwoReverseMatch(n1, n2) {
+            return n1 === n2 || n1 === n2.split('').reverse().join('');
         }
 
         function clearInputBox(inputId, btnId) {
@@ -563,7 +567,6 @@
             insertText(inputId, ' ' + amt, btnId);
         }
 
-        // --- ฟังก์ชันสร้างตัวกลับสำหรับ 3 ตัว (3 กลับ และ 6 กลับ) ---
         function getPermutations(str, length) {
             const results = new Set();
             const arr = str.split('');
@@ -582,7 +585,6 @@
             return Array.from(results);
         }
 
-        // --- ตัวแยกข้อความ (Parser) รองรับตัวอย่างที่คุณต้องการ ---
         function parseSmartText(rawText, customer, discountPct, forcedType = 'auto') {
             const lines = rawText.split(/\r?\n/);
             const results = [];
@@ -591,11 +593,9 @@
                 let clean = line.trim();
                 if (!clean) return;
 
-                // ตัวอย่าง: 674=50*50 หรือ 675=50 หรือ 675=50 โต๊ด
                 let num = '', amt1 = 0, amt2 = 0, hasSecondAmt = false;
                 let detectedType = forcedType;
 
-                // แยกด้วยเครื่องหมาย = ถ้ามี
                 if (clean.includes('=')) {
                     const parts = clean.split('=');
                     num = parts[0].trim();
@@ -610,7 +610,6 @@
                         amt1 = parseInt(rightPart, 10) || 0;
                     }
                 } else {
-                    // แยกด้วยเว้นวรรค
                     const parts = clean.split(/\s+/);
                     num = parts[0];
                     if (parts.length >= 2) {
@@ -629,7 +628,6 @@
                 if (!/^\d{1,3}$/.test(num)) return;
                 const len = num.length;
 
-                // ตรวจจับคำสั่งพิเศษจากข้อความหรือ Dropdown
                 if (forcedType === 'auto') {
                     if (/โต๊ด/i.test(clean)) detectedType = '3ตัวโต๊ด';
                     else if (/ล่าง/i.test(clean) && len === 2) detectedType = '2ตัวล่าง';
@@ -642,7 +640,6 @@
                     }
                 }
 
-                // บันทึกตามประเภท
                 if (detectedType === '3ตัวตรงโต๊ด' && len === 3) {
                     if (amt1 > 0) results.push({ id: Math.random().toString(36).substr(2, 9), number: num, type: '3ตัวตรง', amount: amt1, customer, discountPct, sentToDealer: false });
                     if (amt2 > 0) results.push({ id: Math.random().toString(36).substr(2, 9), number: num, type: '3ตัวโต๊ด', amount: amt2, customer, discountPct, sentToDealer: false });
@@ -650,13 +647,11 @@
                     if (amt1 > 0) results.push({ id: Math.random().toString(36).substr(2, 9), number: num, type: '2ตัวบน', amount: amt1, customer, discountPct, sentToDealer: false });
                     if (amt2 > 0) results.push({ id: Math.random().toString(36).substr(2, 9), number: num, type: '2ตัวล่าง', amount: amt2, customer, discountPct, sentToDealer: false });
                 } else if (detectedType === '3กลับ' && len === 3) {
-                    // 3 กลับ (เฉพาะเลขโต๊ดหรือสลับ 3 ตัวไม่ซ้ำ)
                     const perms = getPermutations(num, 3);
                     perms.forEach(p => {
                         if (amt1 > 0) results.push({ id: Math.random().toString(36).substr(2, 9), number: p, type: '3ตัวโต๊ด', amount: amt1, customer, discountPct, sentToDealer: false });
                     });
                 } else if (detectedType === '6กลับ' && len === 3) {
-                    // 6 กลับ (ตรง + โต๊ด ทุกตัวที่สลับได้)
                     const perms = getPermutations(num, 3);
                     perms.forEach(p => {
                         if (amt1 > 0) results.push({ id: Math.random().toString(36).substr(2, 9), number: p, type: '3ตัวตรง', amount: amt1, customer, discountPct, sentToDealer: false });
@@ -744,7 +739,7 @@
             showToast('ลบรายการแล้ว', 'info');
         }
 
-        // --- เพิ่มเลขอั้น พร้อมแสดง (พร้อมตัวกลับ)(บน*ล่าง) ---
+        // --- ตั้งค่าแสดงผลเลขอั้นตามรูปแบบใหม่ ---
         function addSpecialNumber() {
             const rawNums = document.getElementById('new-limit-numbers').value.trim().split(/\s+/);
             const status = document.getElementById('new-limit-status').value;
@@ -759,9 +754,9 @@
 
                     let displayLabel = num;
                     if (autoRev && num.length === 3) {
-                        displayLabel = `${num} (พร้อมตัวกลับ)(บน*ล่าง)`;
+                        displayLabel = `${num} (ตรง*โต๊ด*6กลับ)`;
                     } else if (autoTwoUpDown && num.length === 2) {
-                        displayLabel = `${num} (บน*ล่าง)`;
+                        displayLabel = `${num} (บน*ล่าง)(พร้อมตัวกลับ)`;
                     }
 
                     specialNumbers.push({ 
