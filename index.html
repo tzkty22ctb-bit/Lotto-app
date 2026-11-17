@@ -216,7 +216,7 @@
         <div class="flex flex-wrap items-center justify-between gap-3 bg-white p-3.5 rounded-3xl border shadow-sm">
             <div class="flex gap-1.5">
                 <button id="dlr-subtab-risk" onclick="switchDealerSubTab('risk')" class="px-4 py-2.5 rounded-2xl text-xs font-bold bg-purple-700 text-white shadow">ความเสี่ยง & เพดานรับสู้</button>
-                <button id="dlr-subtab-limits" onclick="switchDealerSubTab('limits')" class="px-4 py-2.5 rounded-2xl text-xs font-bold text-slate-600 hover:bg-slate-100">เลขอั้น (ตรง*โต๊ด*ทุกกลับ) & เลขปิด</button>
+                <button id="dlr-subtab-limits" onclick="switchDealerSubTab('limits')" class="px-4 py-2.5 rounded-2xl text-xs font-bold text-slate-600 hover:bg-slate-100">เลขอั้น & เลขปิด</button>
                 <button id="dlr-subtab-payout" onclick="switchDealerSubTab('payout')" class="px-4 py-2.5 rounded-2xl text-xs font-bold text-slate-600 hover:bg-slate-100">ตรวจรางวัล & กำไรขาดทุน</button>
             </div>
         </div>
@@ -246,14 +246,19 @@
         <div id="dlr-panel-limits" class="hidden grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
             <div class="lg:col-span-5 bg-white rounded-3xl border p-6 space-y-4 shadow-sm">
                 <h3 class="text-base font-bold text-purple-950">กำหนดเลขอั้น & เลขปิดรับ</h3>
-                <p class="text-xs text-slate-500">ติ๊ก <strong>"อั้นทุกกลับแบบ ตรง*โต๊ด*ทุกกลับ"</strong> สำหรับเลข 3 ตัว</p>
                 <div>
-                    <label class="text-xs font-bold text-slate-700 block mb-1">ตัวเลข (เช่น 123)</label>
+                    <label class="text-xs font-bold text-slate-700 block mb-1">ตัวเลข (เช่น 123 หรือ 59)</label>
                     <input type="text" id="new-limit-numbers" placeholder="ระบุตัวเลข..." class="w-full px-4 py-3 border-2 rounded-2xl font-bold number-font">
                 </div>
-                <div class="flex items-center gap-2.5 bg-purple-50 p-3.5 rounded-2xl border border-purple-200">
-                    <input type="checkbox" id="auto-reverse-limit" class="w-4 h-4 text-purple-600 rounded" checked>
-                    <label for="auto-reverse-limit" class="text-xs font-bold text-purple-900 cursor-pointer">อั้นทุกกลับ (บันทึกเป็น ตรง*โต๊ด*ทุกกลับ)</label>
+                <div class="space-y-2 bg-purple-50 p-3.5 rounded-2xl border border-purple-200">
+                    <div class="flex items-center gap-2.5">
+                        <input type="checkbox" id="auto-reverse-limit" class="w-4 h-4 text-purple-600 rounded" checked>
+                        <label for="auto-reverse-limit" class="text-xs font-bold text-purple-900 cursor-pointer">อั้น 3 ตัว (ตรง*โต๊ด*ทุกกลับ)</label>
+                    </div>
+                    <div class="flex items-center gap-2.5 pt-1 border-t border-purple-200/60">
+                        <input type="checkbox" id="auto-twoupdown-limit" class="w-4 h-4 text-purple-600 rounded">
+                        <label for="auto-twoupdown-limit" class="text-xs font-bold text-purple-900 cursor-pointer">อั้น 2 ตัว (บน*ล่าง ทั้งบนและล่าง)</label>
+                    </div>
                 </div>
                 <div>
                     <label class="text-xs font-bold text-slate-700 block mb-1">เงื่อนไข</label>
@@ -511,8 +516,12 @@
 
         function checkNumberRestriction(num, type) {
             const { specialNumbers } = window.getFirebaseData();
-            // ค้นหาแบบตรงตัวหรือเช็คเงื่อนไขตรง*โต๊ด*ทุกกลับ
-            const hit = specialNumbers.find(r => r.number === num || (r.isAutoReverse && r.baseNumber && isTodMatch(r.baseNumber, num)));
+            const hit = specialNumbers.find(r => {
+                if (r.number === num) return true;
+                if (r.isAutoReverse && r.baseNumber && r.length === 3 && num.length === 3 && isTodMatch(r.baseNumber, num)) return true;
+                if (r.isAutoTwoUpDown && r.baseNumber && r.length === 2 && num.length === 2 && r.baseNumber === num) return true;
+                return false;
+            });
             if (hit) return hit.status;
             return 'normal';
         }
@@ -535,7 +544,7 @@
             insertText(inputId, ' ' + amt, btnId);
         }
 
-        // --- ปรับปรุง Parser ให้รองรับโต๊ดได้สมบูรณ์ ---
+        // --- Parser ปรับปรุงให้รองรับ 3 ตัวโต๊ดอย่างแม่นยำ ---
         function parseSmartText(rawText, customer, discountPct) {
             const lines = rawText.split(/\r?\n/);
             const results = [];
@@ -545,7 +554,9 @@
                 clean = clean.replace(/=/g, ' ');
 
                 const isBottom = /(ล่าง|\bล\b)/i.test(clean);
+                // ตรวจสอบคำว่า โต๊ด หรือ ต ให้ชัดเจน
                 const isTod = /(โต๊ด|\bต\b)/i.test(clean);
+
                 let stripped = clean.replace(/(วิ่งบน|วิ่งล่าง|วิ่ง|ล่าง|โต๊ด|บน|\bล\b|\bต\b)/gi, ' ').trim();
                 const amountMatch = stripped.match(/(\d+(?:\s*[x*\/]\s*[0-9]+)?)\s*$/i);
                 
@@ -566,7 +577,6 @@
                         amt1 = parseInt(amountPart, 10) || 0;
                     }
                 } else {
-                    // กรณีพิมพ์ติดกันเช่น 674โต๊ด100 หรือ 674 100
                     const parts = clean.split(/\s+/);
                     if (parts.length >= 2) {
                         rawNumbers = [parts[0]].filter(n => /^\d{1,3}$/.test(n));
@@ -581,6 +591,7 @@
                         if (amt1 > 0) results.push({ id: Math.random().toString(36).substr(2, 9), number: num, type, amount: amt1, customer, discountPct, sentToDealer: false });
                         if (hasSecondAmt && amt2 > 0) results.push({ id: Math.random().toString(36).substr(2, 9), number: num, type: type === '2ตัวบน' ? '2ตัวล่าง' : '2ตัวบน', amount: amt2, customer, discountPct, sentToDealer: false });
                     } else if (len === 3) {
+                        // บันทึกเป็น 3 ตัวโต๊ดทันทีหากมีคำว่าโต๊ด
                         const type = isTod ? '3ตัวโต๊ด' : '3ตัวตรง';
                         if (amt1 > 0) results.push({ id: Math.random().toString(36).substr(2, 9), number: num, type, amount: amt1, customer, discountPct, sentToDealer: false });
                     } else if (len === 1) {
@@ -658,11 +669,12 @@
             showToast('ลบรายการแล้ว', 'info');
         }
 
-        // --- เพิ่มฟังก์ชันอั้นแบบ ตรง*โต๊ด*ทุกกลับ ---
+        // --- เพิ่มฟังก์ชันอั้นเลข (รองรับทั้ง 3 ตัว ตรง*โต๊ด* และ 2 ตัว บน*ล่าง) ---
         function addSpecialNumber() {
             const rawNums = document.getElementById('new-limit-numbers').value.trim().split(/\s+/);
             const status = document.getElementById('new-limit-status').value;
             const autoRev = document.getElementById('auto-reverse-limit').checked;
+            const autoTwoUpDown = document.getElementById('auto-twoupdown-limit').checked;
             const { specialNumbers } = window.getFirebaseData();
 
             rawNums.forEach(num => {
@@ -670,18 +682,28 @@
                     const idx = specialNumbers.findIndex(r => r.number === num);
                     if(idx >= 0) specialNumbers.splice(idx, 1);
 
+                    let displayLabel = num;
+                    if (autoRev && num.length === 3) {
+                        displayLabel = `${num} (ตรง*โต๊ด*ทุกกลับ)`;
+                    } else if (autoTwoUpDown && num.length === 2) {
+                        displayLabel = `${num} (บน*ล่าง)`;
+                    }
+
                     specialNumbers.push({ 
                         number: num, 
                         status, 
+                        baseNumber: num,
+                        length: num.length,
                         isAutoReverse: autoRev && num.length === 3,
-                        displayLabel: (autoRev && num.length === 3) ? `${num} (ตรง*โต๊ด*ทุกกลับ)` : num
+                        isAutoTwoUpDown: autoTwoUpDown && num.length === 2,
+                        displayLabel
                     });
                 }
             });
 
             window.setFirebaseData(null, specialNumbers, null, null);
             document.getElementById('new-limit-numbers').value = '';
-            showToast('บันทึกเลขอั้น (ตรง*โต๊ด*ทุกกลับ) เรียบร้อย', 'success');
+            showToast('บันทึกเลขอั้นเรียบร้อย', 'success');
         }
 
         function renderDealerLimitsTable() {
