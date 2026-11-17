@@ -367,7 +367,7 @@
                     </div>
                     <button onclick="calculateWinnersAndProfit()" class="w-full py-4 rounded-2xl bg-amber-500 hover:bg-amber-600 text-white font-bold text-sm shadow">คำนวณผลรางวัล & กำไรขาดทุน</button>
                 </div>
-                <div class="lg:col-span-7 bg-white rounded-3xl border p-6 space-y-4 shadow-sm">
+                <div class="lg:col-span-7 bg-white rounded-3xl border p-6 shadow-sm space-y-4">
                     <div class="grid grid-cols-3 gap-3 text-center">
                         <div class="p-4 bg-slate-50 rounded-2xl border"><div class="text-xs text-slate-500">ยอดรับเอง (สู้)</div><div id="pay-kept-in" class="font-extrabold text-xl number-font text-purple-900 mt-1">0</div></div>
                         <div class="p-4 bg-rose-50 rounded-2xl border border-rose-100"><div class="text-xs text-rose-600">ยอดจ่ายรางวัลรวม</div><div id="pay-total-out" class="font-extrabold text-xl text-rose-600 number-font mt-1">0</div></div>
@@ -438,7 +438,7 @@
                 <div><label class="text-xs text-slate-500 block mb-1">ผล 2 ตัวล่าง</label><input type="text" id="boss-res-bottom2" placeholder="เช่น 89" class="w-full px-4 py-2.5 border rounded-2xl font-bold text-center number-font"></div>
                 <button onclick="calculateBossPayout()" class="py-3 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm shadow">คำนวณเงินรางวัลเจ้าใหญ่</button>
             </div>
-            <div id="boss-payout-result-box" class="pt-2 text-xs text-slate-600"></div>
+            <div id="boss-payout-result-box" class="pt-2 text-xs text-slate-600 space-y-2"></div>
         </div>
 
         <div class="bg-white rounded-3xl border shadow-sm overflow-hidden flex flex-col">
@@ -489,7 +489,7 @@
 
         function loadFromLocalStorage() {
             try {
-                const local = localStorage.getItem('smart_lotto_backup_v11');
+                const local = localStorage.getItem('smart_lotto_backup_v12');
                 if (local) {
                     const data = JSON.parse(local);
                     entries = data.entries || [];
@@ -506,7 +506,7 @@
 
         window.initAppFirebase = function() {
             const statusEl = document.getElementById('db-status');
-            onValue(ref(db, 'lotto_data_v11'), (snapshot) => {
+            onValue(ref(db, 'lotto_data_v12'), (snapshot) => {
                 const data = snapshot.val();
                 if (data) {
                     entries = data.entries || [];
@@ -516,7 +516,7 @@
                     bigBossItems = data.bigBossItems || [];
                     isDealerClosed = !!data.isDealerClosed;
                     lottoDate = data.lottoDate || '2026-11-16';
-                    localStorage.setItem('smart_lotto_backup_v11', JSON.stringify(data));
+                    localStorage.setItem('smart_lotto_backup_v12', JSON.stringify(data));
                 }
                 statusEl.textContent = 'ออนไลน์';
                 statusEl.className = 'text-emerald-400 font-bold';
@@ -530,8 +530,8 @@
 
         window.saveDataToFirebase = function() {
             const payload = { entries, specialNumbers, maxLimits, payoutRates, bigBossItems, isDealerClosed, lottoDate };
-            localStorage.setItem('smart_lotto_backup_v11', JSON.stringify(payload));
-            set(ref(db, 'lotto_data_v11'), payload).catch(err => {});
+            localStorage.setItem('smart_lotto_backup_v12', JSON.stringify(payload));
+            set(ref(db, 'lotto_data_v12'), payload).catch(err => {});
         }
 
         window.addEventListener('DOMContentLoaded', () => {
@@ -1067,6 +1067,8 @@
             });
 
             let totalGross = 0, totalBossPayout = 0;
+            const hitDetails = [];
+
             Object.values(mergedBossMap).forEach(item => {
                 totalGross += item.amount;
                 let rate = 0;
@@ -1076,12 +1078,29 @@
                 else if (item.type === '2ตัวล่าง' && item.number === rawBottom2) rate = payoutRates['2ตัว'];
 
                 if (rate > 0) {
-                    totalBossPayout += (item.amount * rate);
+                    const prize = item.amount * rate;
+                    totalBossPayout += prize;
+                    hitDetails.push({ number: item.number, type: item.type, amount: item.amount, rate, prize });
                 }
             });
 
             const netClean = totalGross - (totalGross * (discPct / 100));
             const netResult = netClean - totalBossPayout;
+
+            let hitListHtml = '<div class="text-xs text-slate-500">• ไม่มีตัวเลขที่ถูกรางวัลจากยอดส่งเจ้าใหญ่ในงวดนี้</div>';
+            if (hitDetails.length > 0) {
+                hitListHtml = `
+                    <div class="space-y-1 pt-1">
+                        <div class="font-bold text-slate-700 text-xs">🎯 รายการที่ถูกรางวัลจากเจ้าใหญ่:</div>
+                        ${hitDetails.map(h => `
+                            <div class="flex justify-between bg-white p-2 rounded-xl border text-xs">
+                                <span>• เลข <b class="text-indigo-900">${h.number}</b> (${h.type}) ส่งไป ${h.amount.toLocaleString()} บ. (จ่ายบาทละ ${h.rate})</span>
+                                <span class="font-bold text-rose-600 number-font">+${h.prize.toLocaleString('th-TH')} ฿</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            }
 
             document.getElementById('boss-payout-result-box').innerHTML = `
                 <div class="p-3 bg-indigo-50 border border-indigo-200 rounded-2xl space-y-1">
@@ -1089,6 +1108,7 @@
                     <div>ยอดเจ้าใหญ่ต้องจ่ายถูกรางวัล: <b class="text-rose-600 number-font">${totalBossPayout.toLocaleString('th-TH')}</b> บาท</div>
                     <div>สรุปยอดเจ้าใหญ่รับสุทธิ: <b class="text-emerald-700 number-font">${netResult.toLocaleString('th-TH')}</b> บาท</div>
                 </div>
+                ${hitListHtml}
             `;
             showToast('คำนวณผลรางวัลเจ้าใหญ่เรียบร้อย', 'success');
         }
@@ -1175,11 +1195,12 @@
         }
 
         function generatePeriodReportText() {
-            const { lottoDate, entries, bigBossItems } = window.getFirebaseData();
+            const { lottoDate, entries, bigBossItems, payoutRates, maxLimits } = window.getFirebaseData();
             const { totalKept, totalCutoff } = computeRiskAggregates();
             let totalGross = 0;
             entries.forEach(e => totalGross += e.amount);
 
+            // จำลองการคำนวณยอดจ่ายรางวัลภาพรวมจากหน้าตรวจรางวัล (ถ้ามีการกรอกผลรางวัลไว้ หรือคำนวณคร่าวๆ)
             const reportStr = [
                 `===================================`,
                 `📊 รายงานสรุปยอดประจำงวด: ${lottoDate}`,
@@ -1189,6 +1210,10 @@
                 `• ยอดส่งตัดเจ้าใหญ่: ${totalCutoff.toLocaleString('th-TH')} บาท`,
                 `• จำนวนรายการโพยทั้งหมด: ${entries.length} รายการ`,
                 `• จำนวนรายการส่งเจ้าใหญ่: ${bigBossItems.length} รายการ`,
+                `===================================`,
+                `💡 คำแนะนำ: สามารถดูรายละเอียดการถูกรางวัล",`,
+                `   ยอดจ่าย และกำไรขาดทุนสุทธิได้ที่แท็บ`,
+                `   "ตรวจรางวัล & กำไรขาดทุน"`,
                 `===================================`,
                 `ออกรายงาน ณ วันที่: ${new Date().toLocaleString('th-TH')}`,
                 `Smart Lotto Pro - ระบบจัดการหวยครบวงจร`
