@@ -123,12 +123,31 @@
                     <input type="text" id="customer-note" placeholder="พิมพ์ชื่อคนส่งโพย เช่น พี่เอ, คุณบี..." class="w-full text-base font-semibold bg-white border-2 border-sky-200 focus:border-teal-600 rounded-xl px-4 py-2.5">
                 </div>
 
+                <!-- เพิ่มตัวเลือกประเภทหวยด่วน -->
+                <div class="space-y-1.5">
+                    <label class="text-xs font-bold text-slate-700 flex items-center gap-1.5"><i class="fa-solid type text-teal-600"></i> เลือกประเภทหวย:</label>
+                    <select id="quick-bet-type" class="w-full px-3.5 py-2.5 border-2 border-teal-200 focus:border-teal-600 rounded-xl text-sm font-semibold bg-white text-slate-700">
+                        <option value="auto">🤖 ตรวจจับอัตโนมัติ (จากช่องพิมพ์)</option>
+                        <option value="3ตัวตรงโต๊ด">3 ตัวตรง*โต๊ด</option>
+                        <option value="3ตัวตรง">3 ตัวตรง</option>
+                        <option value="3ตัวโต๊ด">3 ตัวโต๊ด</option>
+                        <option value="3ตัวล่าง">3 ตัวล่าง</option>
+                        <option value="3กลับ">3 กลับ</option>
+                        <option value="6กลับ">6 กลับ</option>
+                        <option value="2ตัวบนล่าง">2 ตัวบน*ล่าง</option>
+                        <option value="2ตัวบน">2 ตัวบน</option>
+                        <option value="2ตัวล่าง">2 ตัวล่าง</option>
+                        <option value="วิ่งบน">วิ่งบน</option>
+                        <option value="วิ่งล่าง">วิ่งล่าง</option>
+                    </select>
+                </div>
+
                 <div class="flex items-center justify-between">
                     <h2 class="text-base font-bold text-slate-800"><i class="fa-solid fa-bolt text-teal-600 mr-1.5"></i>ช่องคีย์ด่วน / วางโพย</h2>
                 </div>
 
                 <div class="relative">
-                    <textarea id="smart-input" rows="4" class="w-full rounded-2xl border-2 border-teal-200 focus:border-teal-600 p-4 text-lg font-medium resize-none number-font shadow-inner" placeholder="เช่น: 12 50x50 หรือ 674โต๊ด100 หรือ 674=100x100"></textarea>
+                    <textarea id="smart-input" rows="4" class="w-full rounded-2xl border-2 border-teal-200 focus:border-teal-600 p-4 text-lg font-medium resize-none number-font shadow-inner" placeholder="เช่น: 674=50*50 หรือ 675=50 หรือ 675=50 โต๊ด"></textarea>
                     <button type="button" onclick="clearInputBox('smart-input', 'clear-input-btn')" id="clear-input-btn" class="hidden absolute top-3 right-3 text-slate-400 bg-slate-100 w-7 h-7 rounded-full flex items-center justify-center text-xs">✕</button>
                 </div>
 
@@ -136,7 +155,7 @@
                 <div class="space-y-2">
                     <div class="grid grid-cols-5 gap-1.5">
                         <button type="button" onclick="insertText('smart-input', ' ', 'clear-input-btn')" class="py-2.5 bg-slate-100 rounded-xl font-bold text-xs">เว้นวรรค</button>
-                        <button type="button" onclick="insertText('smart-input', 'x', 'clear-input-btn')" class="py-2.5 bg-teal-50 text-teal-700 rounded-xl font-bold">x</button>
+                        <button type="button" onclick="insertText('smart-input', '=', 'clear-input-btn')" class="py-2.5 bg-teal-50 text-teal-700 rounded-xl font-bold">=</button>
                         <button type="button" onclick="insertText('smart-input', '*', 'clear-input-btn')" class="py-2.5 bg-teal-50 text-teal-700 rounded-xl font-bold">*</button>
                         <button type="button" onclick="insertText('smart-input', ' บน ', 'clear-input-btn')" class="py-2.5 bg-sky-50 text-sky-700 rounded-xl font-semibold text-xs">บน</button>
                         <button type="button" onclick="insertText('smart-input', ' ล่าง ', 'clear-input-btn')" class="py-2.5 bg-emerald-50 text-emerald-700 rounded-xl font-semibold text-xs">ล่าง</button>
@@ -247,17 +266,17 @@
             <div class="lg:col-span-5 bg-white rounded-3xl border p-6 space-y-4 shadow-sm">
                 <h3 class="text-base font-bold text-purple-950">กำหนดเลขอั้น & เลขปิดรับ</h3>
                 <div>
-                    <label class="text-xs font-bold text-slate-700 block mb-1">ตัวเลข (เช่น 123 หรือ 59)</label>
+                    <label class="text-xs font-bold text-slate-700 block mb-1">ตัวเลข (เช่น 674 หรือ 12)</label>
                     <input type="text" id="new-limit-numbers" placeholder="ระบุตัวเลข..." class="w-full px-4 py-3 border-2 rounded-2xl font-bold number-font">
                 </div>
                 <div class="space-y-2 bg-purple-50 p-3.5 rounded-2xl border border-purple-200">
                     <div class="flex items-center gap-2.5">
                         <input type="checkbox" id="auto-reverse-limit" class="w-4 h-4 text-purple-600 rounded" checked>
-                        <label for="auto-reverse-limit" class="text-xs font-bold text-purple-900 cursor-pointer">อั้น 3 ตัว (ตรง*โต๊ด*ทุกกลับ)</label>
+                        <label for="auto-reverse-limit" class="text-xs font-bold text-purple-900 cursor-pointer">อั้น 3 ตัว (ตรง*โต๊ด) <span class="text-purple-600 font-normal">(พร้อมตัวกลับ)</span></label>
                     </div>
                     <div class="flex items-center gap-2.5 pt-1 border-t border-purple-200/60">
                         <input type="checkbox" id="auto-twoupdown-limit" class="w-4 h-4 text-purple-600 rounded">
-                        <label for="auto-twoupdown-limit" class="text-xs font-bold text-purple-900 cursor-pointer">อั้น 2 ตัว (บน*ล่าง ทั้งบนและล่าง)</label>
+                        <label for="auto-twoupdown-limit" class="text-xs font-bold text-purple-900 cursor-pointer">อั้น 2 ตัว <span class="text-purple-600 font-normal">(บน*ล่าง)</span></label>
                     </div>
                 </div>
                 <div>
@@ -335,7 +354,7 @@
                 <p class="text-xs text-slate-500">พิมพ์หรือวางโพยส่งเจ้าใหญ่ได้ทันที พร้อมปุ่มช่วยคีย์ด้านล่าง</p>
                 
                 <div class="relative">
-                    <textarea id="bigboss-input" rows="4" class="w-full border-2 border-indigo-200 rounded-2xl p-4 text-sm focus:border-indigo-600 resize-none number-font" placeholder="เช่น 12 50x50 หรือ 674โต๊ด100"></textarea>
+                    <textarea id="bigboss-input" rows="4" class="w-full border-2 border-indigo-200 rounded-2xl p-4 text-sm focus:border-indigo-600 resize-none number-font" placeholder="เช่น 674=50*50 หรือ 675=100"></textarea>
                     <button type="button" onclick="clearInputBox('bigboss-input', 'clear-bigboss-btn')" id="clear-bigboss-btn" class="hidden absolute top-3 right-3 text-slate-400 bg-slate-100 w-7 h-7 rounded-full flex items-center justify-center text-xs">✕</button>
                 </div>
 
@@ -343,7 +362,7 @@
                 <div class="space-y-2">
                     <div class="grid grid-cols-5 gap-1.5">
                         <button type="button" onclick="insertText('bigboss-input', ' ', 'clear-bigboss-btn')" class="py-2.5 bg-slate-100 rounded-xl font-bold text-xs">เว้นวรรค</button>
-                        <button type="button" onclick="insertText('bigboss-input', 'x', 'clear-bigboss-btn')" class="py-2.5 bg-indigo-50 text-indigo-700 rounded-xl font-bold">x</button>
+                        <button type="button" onclick="insertText('bigboss-input', '=', 'clear-bigboss-btn')" class="py-2.5 bg-indigo-50 text-indigo-700 rounded-xl font-bold">=</button>
                         <button type="button" onclick="insertText('bigboss-input', '*', 'clear-bigboss-btn')" class="py-2.5 bg-indigo-50 text-indigo-700 rounded-xl font-bold">*</button>
                         <button type="button" onclick="insertText('bigboss-input', ' บน ', 'clear-bigboss-btn')" class="py-2.5 bg-sky-50 text-sky-700 rounded-xl font-semibold text-xs">บน</button>
                         <button type="button" onclick="insertText('bigboss-input', ' ล่าง ', 'clear-bigboss-btn')" class="py-2.5 bg-emerald-50 text-emerald-700 rounded-xl font-semibold text-xs">ล่าง</button>
@@ -409,12 +428,12 @@
 
         let entries = [];
         let specialNumbers = [];
-        let maxLimits = { '2ตัวบน': 1000, '2ตัวล่าง': 1000, '3ตัวตรง': 500, '3ตัวโต๊ด': 500, 'วิ่งบน': 5000, 'วิ่งล่าง': 5000 };
+        let maxLimits = { '2ตัวบน': 1000, '2ตัวล่าง': 1000, '3ตัวตรง': 500, '3ตัวโต๊ด': 500, '3ตัวล่าง': 500, 'วิ่งบน': 5000, 'วิ่งล่าง': 5000 };
         let bigBossItems = [];
 
         function loadFromLocalStorage() {
             try {
-                const local = localStorage.getItem('smart_lotto_backup_v1');
+                const local = localStorage.getItem('smart_lotto_backup_v2');
                 if (local) {
                     const data = JSON.parse(local);
                     entries = data.entries || [];
@@ -428,14 +447,14 @@
 
         window.initAppFirebase = function() {
             const statusEl = document.getElementById('db-status');
-            onValue(ref(db, 'lotto_data'), (snapshot) => {
+            onValue(ref(db, 'lotto_data_v2'), (snapshot) => {
                 const data = snapshot.val();
                 if (data) {
                     entries = data.entries || [];
                     specialNumbers = data.specialNumbers || [];
                     if (data.maxLimits) maxLimits = data.maxLimits;
                     bigBossItems = data.bigBossItems || [];
-                    localStorage.setItem('smart_lotto_backup_v1', JSON.stringify(data));
+                    localStorage.setItem('smart_lotto_backup_v2', JSON.stringify(data));
                 }
                 statusEl.textContent = 'ออนไลน์ (เชื่อมต่อแล้ว)';
                 statusEl.className = 'text-emerald-400 font-bold';
@@ -449,8 +468,8 @@
 
         window.saveDataToFirebase = function() {
             const payload = { entries, specialNumbers, maxLimits, bigBossItems };
-            localStorage.setItem('smart_lotto_backup_v1', JSON.stringify(payload));
-            set(ref(db, 'lotto_data'), payload).catch(err => {});
+            localStorage.setItem('smart_lotto_backup_v2', JSON.stringify(payload));
+            set(ref(db, 'lotto_data_v2'), payload).catch(err => {});
         }
 
         window.addEventListener('DOMContentLoaded', () => {
@@ -544,62 +563,116 @@
             insertText(inputId, ' ' + amt, btnId);
         }
 
-        // --- Parser ปรับปรุงให้รองรับ 3 ตัวโต๊ดอย่างแม่นยำ ---
-        function parseSmartText(rawText, customer, discountPct) {
+        // --- ฟังก์ชันสร้างตัวกลับสำหรับ 3 ตัว (3 กลับ และ 6 กลับ) ---
+        function getPermutations(str, length) {
+            const results = new Set();
+            const arr = str.split('');
+            function permute(current, remaining) {
+                if (current.length === length) {
+                    results.add(current);
+                    return;
+                }
+                for (let i = 0; i < remaining.length; i++) {
+                    const nextRem = [...remaining];
+                    nextRem.splice(i, 1);
+                    permute(current + remaining[i], nextRem);
+                }
+            }
+            permute('', arr);
+            return Array.from(results);
+        }
+
+        // --- ตัวแยกข้อความ (Parser) รองรับตัวอย่างที่คุณต้องการ ---
+        function parseSmartText(rawText, customer, discountPct, forcedType = 'auto') {
             const lines = rawText.split(/\r?\n/);
             const results = [];
+
             lines.forEach(line => {
                 let clean = line.trim();
                 if (!clean) return;
-                clean = clean.replace(/=/g, ' ');
 
-                const isBottom = /(ล่าง|\bล\b)/i.test(clean);
-                // ตรวจสอบคำว่า โต๊ด หรือ ต ให้ชัดเจน
-                const isTod = /(โต๊ด|\bต\b)/i.test(clean);
+                // ตัวอย่าง: 674=50*50 หรือ 675=50 หรือ 675=50 โต๊ด
+                let num = '', amt1 = 0, amt2 = 0, hasSecondAmt = false;
+                let detectedType = forcedType;
 
-                let stripped = clean.replace(/(วิ่งบน|วิ่งล่าง|วิ่ง|ล่าง|โต๊ด|บน|\bล\b|\bต\b)/gi, ' ').trim();
-                const amountMatch = stripped.match(/(\d+(?:\s*[x*\/]\s*[0-9]+)?)\s*$/i);
-                
-                let amt1 = 0, amt2 = 0, hasSecondAmt = false;
-                let rawNumbers = [];
+                // แยกด้วยเครื่องหมาย = ถ้ามี
+                if (clean.includes('=')) {
+                    const parts = clean.split('=');
+                    num = parts[0].trim();
+                    const rightPart = parts[1].trim();
 
-                if (amountMatch) {
-                    const amountPart = amountMatch[1].replace(/\s+/g, '');
-                    const numbersPart = stripped.slice(0, amountMatch.index).trim();
-                    rawNumbers = numbersPart.split(/[\s,.-]+/).filter(n => /^\d{1,3}$/.test(n));
-
-                    if (/[x*\/]/i.test(amountPart)) {
-                        const parts = amountPart.split(/[x*\/]/i);
-                        amt1 = parseInt(parts[0], 10) || 0;
-                        amt2 = parseInt(parts[1], 10) || 0;
+                    if (rightPart.includes('*')) {
+                        const amtParts = rightPart.split('*');
+                        amt1 = parseInt(amtParts[0], 10) || 0;
+                        amt2 = parseInt(amtParts[1], 10) || 0;
                         hasSecondAmt = true;
                     } else {
-                        amt1 = parseInt(amountPart, 10) || 0;
+                        amt1 = parseInt(rightPart, 10) || 0;
                     }
                 } else {
+                    // แยกด้วยเว้นวรรค
                     const parts = clean.split(/\s+/);
+                    num = parts[0];
                     if (parts.length >= 2) {
-                        rawNumbers = [parts[0]].filter(n => /^\d{1,3}$/.test(n));
-                        amt1 = parseInt(parts[1].replace(/[^\d]/g, ''), 10) || 0;
+                        const rightStr = parts.slice(1).join(' ');
+                        if (rightStr.includes('*')) {
+                            const amtParts = rightStr.split('*');
+                            amt1 = parseInt(amtParts[0], 10) || 0;
+                            amt2 = parseInt(amtParts[1], 10) || 0;
+                            hasSecondAmt = true;
+                        } else {
+                            amt1 = parseInt(rightStr.replace(/[^\d]/g, ''), 10) || 0;
+                        }
                     }
                 }
 
-                rawNumbers.forEach(num => {
-                    const len = num.length;
-                    if (len === 2) {
-                        const type = isBottom ? '2ตัวล่าง' : '2ตัวบน';
-                        if (amt1 > 0) results.push({ id: Math.random().toString(36).substr(2, 9), number: num, type, amount: amt1, customer, discountPct, sentToDealer: false });
-                        if (hasSecondAmt && amt2 > 0) results.push({ id: Math.random().toString(36).substr(2, 9), number: num, type: type === '2ตัวบน' ? '2ตัวล่าง' : '2ตัวบน', amount: amt2, customer, discountPct, sentToDealer: false });
-                    } else if (len === 3) {
-                        // บันทึกเป็น 3 ตัวโต๊ดทันทีหากมีคำว่าโต๊ด
-                        const type = isTod ? '3ตัวโต๊ด' : '3ตัวตรง';
-                        if (amt1 > 0) results.push({ id: Math.random().toString(36).substr(2, 9), number: num, type, amount: amt1, customer, discountPct, sentToDealer: false });
-                    } else if (len === 1) {
-                        const type = isBottom ? 'วิ่งล่าง' : 'วิ่งบน';
-                        if (amt1 > 0) results.push({ id: Math.random().toString(36).substr(2, 9), number: num, type, amount: amt1, customer, discountPct, sentToDealer: false });
+                if (!/^\d{1,3}$/.test(num)) return;
+                const len = num.length;
+
+                // ตรวจจับคำสั่งพิเศษจากข้อความหรือ Dropdown
+                if (forcedType === 'auto') {
+                    if (/โต๊ด/i.test(clean)) detectedType = '3ตัวโต๊ด';
+                    else if (/ล่าง/i.test(clean) && len === 2) detectedType = '2ตัวล่าง';
+                    else if (hasSecondAmt && len === 3) detectedType = '3ตัวตรงโต๊ด';
+                    else if (hasSecondAmt && len === 2) detectedType = '2ตัวบนล่าง';
+                    else {
+                        if (len === 3) detectedType = '3ตัวตรง';
+                        else if (len === 2) detectedType = '2ตัวบน';
+                        else if (len === 1) detectedType = 'วิ่งบน';
                     }
-                });
+                }
+
+                // บันทึกตามประเภท
+                if (detectedType === '3ตัวตรงโต๊ด' && len === 3) {
+                    if (amt1 > 0) results.push({ id: Math.random().toString(36).substr(2, 9), number: num, type: '3ตัวตรง', amount: amt1, customer, discountPct, sentToDealer: false });
+                    if (amt2 > 0) results.push({ id: Math.random().toString(36).substr(2, 9), number: num, type: '3ตัวโต๊ด', amount: amt2, customer, discountPct, sentToDealer: false });
+                } else if (detectedType === '2ตัวบนล่าง' && len === 2) {
+                    if (amt1 > 0) results.push({ id: Math.random().toString(36).substr(2, 9), number: num, type: '2ตัวบน', amount: amt1, customer, discountPct, sentToDealer: false });
+                    if (amt2 > 0) results.push({ id: Math.random().toString(36).substr(2, 9), number: num, type: '2ตัวล่าง', amount: amt2, customer, discountPct, sentToDealer: false });
+                } else if (detectedType === '3กลับ' && len === 3) {
+                    // 3 กลับ (เฉพาะเลขโต๊ดหรือสลับ 3 ตัวไม่ซ้ำ)
+                    const perms = getPermutations(num, 3);
+                    perms.forEach(p => {
+                        if (amt1 > 0) results.push({ id: Math.random().toString(36).substr(2, 9), number: p, type: '3ตัวโต๊ด', amount: amt1, customer, discountPct, sentToDealer: false });
+                    });
+                } else if (detectedType === '6กลับ' && len === 3) {
+                    // 6 กลับ (ตรง + โต๊ด ทุกตัวที่สลับได้)
+                    const perms = getPermutations(num, 3);
+                    perms.forEach(p => {
+                        if (amt1 > 0) results.push({ id: Math.random().toString(36).substr(2, 9), number: p, type: '3ตัวตรง', amount: amt1, customer, discountPct, sentToDealer: false });
+                        if (amt2 > 0) results.push({ id: Math.random().toString(36).substr(2, 9), number: p, type: '3ตัวโต๊ด', amount: amt2, customer, discountPct, sentToDealer: false });
+                    });
+                } else {
+                    let finalType = '2ตัวบน';
+                    if (len === 3) finalType = '3ตัวตรง';
+                    if (len === 1) finalType = 'วิ่งบน';
+                    if (detectedType.includes('ล่าง')) finalType = len === 2 ? '2ตัวล่าง' : (len === 1 ? 'วิ่งล่าง' : '3ตัวล่าง');
+                    if (detectedType.includes('โต๊ด')) finalType = '3ตัวโต๊ด';
+
+                    if (amt1 > 0) results.push({ id: Math.random().toString(36).substr(2, 9), number: num, type: finalType, amount: amt1, customer, discountPct, sentToDealer: false });
+                }
             });
+
             return results;
         }
 
@@ -608,7 +681,9 @@
             if (!rawText) return;
             const customer = document.getElementById('customer-note').value.trim() || 'ทั่วไป';
             const discPct = parseFloat(document.getElementById('customer-discount-pct').value) || 0;
-            const parsed = parseSmartText(rawText, customer, discPct);
+            const forcedType = document.getElementById('quick-bet-type').value;
+
+            const parsed = parseSmartText(rawText, customer, discPct, forcedType);
 
             let hasClosed = false;
             parsed.forEach(p => {
@@ -669,7 +744,7 @@
             showToast('ลบรายการแล้ว', 'info');
         }
 
-        // --- เพิ่มฟังก์ชันอั้นเลข (รองรับทั้ง 3 ตัว ตรง*โต๊ด* และ 2 ตัว บน*ล่าง) ---
+        // --- เพิ่มเลขอั้น พร้อมแสดง (พร้อมตัวกลับ)(บน*ล่าง) ---
         function addSpecialNumber() {
             const rawNums = document.getElementById('new-limit-numbers').value.trim().split(/\s+/);
             const status = document.getElementById('new-limit-status').value;
@@ -684,7 +759,7 @@
 
                     let displayLabel = num;
                     if (autoRev && num.length === 3) {
-                        displayLabel = `${num} (ตรง*โต๊ด*ทุกกลับ)`;
+                        displayLabel = `${num} (พร้อมตัวกลับ)(บน*ล่าง)`;
                     } else if (autoTwoUpDown && num.length === 2) {
                         displayLabel = `${num} (บน*ล่าง)`;
                     }
@@ -769,6 +844,7 @@
                 '2ตัวล่าง': parseInt(document.getElementById('limit-2down').value) || 0,
                 '3ตัวตรง': parseInt(document.getElementById('limit-3straight').value) || 0,
                 '3ตัวโต๊ด': parseInt(document.getElementById('limit-3tod').value) || 0,
+                '3ตัวล่าง': 500,
                 'วิ่งบน': parseInt(document.getElementById('limit-runup').value) || 0,
                 'วิ่งล่าง': parseInt(document.getElementById('limit-rundown').value) || 0
             };
@@ -852,7 +928,7 @@
         function addManualBigBossItem() {
             const raw = document.getElementById('bigboss-input').value.trim();
             if (!raw) return;
-            const parsed = parseSmartText(raw, 'เจ้าใหญ่', 0);
+            const parsed = parseSmartText(raw, 'เจ้าใหญ่', 0, 'auto');
             const { bigBossItems } = window.getFirebaseData();
             parsed.forEach(p => bigBossItems.push({ id: p.id, number: p.number, type: p.type, amount: p.amount }));
             window.setFirebaseData(null, null, null, bigBossItems);
@@ -1013,7 +1089,7 @@
 
         function confirmClearAll() {
             if (confirm('ต้องการล้างข้อมูลทั้งหมดหรือไม่?')) {
-                window.setFirebaseData([], [], { '2ตัวบน': 1000, '2ตัวล่าง': 1000, '3ตัวตรง': 500, '3ตัวโต๊ด': 500, 'วิ่งบน': 5000, 'วิ่งล่าง': 5000 }, []);
+                window.setFirebaseData([], [], { '2ตัวบน': 1000, '2ตัวล่าง': 1000, '3ตัวตรง': 500, '3ตัวโต๊ด': 500, '3ตัวล่าง': 500, 'วิ่งบน': 5000, 'วิ่งล่าง': 5000 }, []);
                 showToast('ล้างข้อมูลเรียบร้อย', 'info');
             }
         }
