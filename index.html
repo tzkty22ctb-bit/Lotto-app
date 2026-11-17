@@ -128,7 +128,7 @@
                 </div>
 
                 <div class="flex items-center justify-between">
-                    <h2 class="text-base font-bold text-slate-800"><i class="fa-solid fa-bolt text-teal-600 mr-1.5"></i>ช่องคีย์ด่วน / วางโพย</h2>
+                    <h2 class="text-base font-bold text-slate-800"><i class="fa-solid fa-bolt text-teal-600 mr-1.5"></i>ช่องคีย์ด่วน / วางโพย (รองรับเครื่องหมายคูณ *)</h2>
                 </div>
 
                 <div class="relative">
@@ -280,6 +280,7 @@
                 <button id="dlr-subtab-limits" onclick="switchDealerSubTab('limits')" class="px-4 py-2.5 rounded-2xl text-xs font-bold text-slate-600 hover:bg-slate-100 transition">เลขอั้น & เลขปิด</button>
                 <button id="dlr-subtab-rates" onclick="switchDealerSubTab('rates')" class="px-4 py-2.5 rounded-2xl text-xs font-bold text-slate-600 hover:bg-slate-100 transition">ตั้งค่าอัตราจ่าย</button>
                 <button id="dlr-subtab-payout" onclick="switchDealerSubTab('payout')" class="px-4 py-2.5 rounded-2xl text-xs font-bold text-slate-600 hover:bg-slate-100 transition">ตรวจรางวัล & กำไรขาดทุน</button>
+                <button id="dlr-subtab-report" onclick="switchDealerSubTab('report')" class="px-4 py-2.5 rounded-2xl text-xs font-bold text-slate-600 hover:bg-slate-100 transition">📊 ออกรายงานประจำงวด</button>
             </div>
         </div>
 
@@ -380,6 +381,30 @@
                 <div id="winners-by-customer-list" class="space-y-4 text-xs"></div>
             </div>
         </div>
+
+        <!-- แท็บออกรายงานสรุปยอดประจำงวด -->
+        <div id="dlr-panel-report" class="hidden space-y-5">
+            <div class="bg-white rounded-3xl border p-6 shadow-sm space-y-5">
+                <div class="flex justify-between items-center flex-wrap gap-3">
+                    <div>
+                        <h3 class="text-base font-bold text-purple-950">📊 รายงานสรุปยอดประจำงวด (Period Summary Report)</h3>
+                        <p class="text-xs text-slate-500">งวดประจำวันที่: <span id="report-date-val" class="font-bold text-amber-600">--</span></p>
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="copyPeriodReport()" class="px-4 py-2.5 rounded-xl text-xs font-bold text-white bg-sky-600 hover:bg-sky-700 shadow flex items-center gap-1.5">
+                            <i class="fa-regular fa-copy"></i> คัดลอกรายงานสรุป
+                        </button>
+                        <button onclick="downloadPeriodReport()" class="px-4 py-2.5 rounded-xl text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 shadow flex items-center gap-1.5">
+                            <i class="fa-solid fa-download"></i> ดาวน์โหลดรายงาน (.txt)
+                        </button>
+                    </div>
+                </div>
+
+                <div id="period-report-content" class="bg-slate-50 p-5 rounded-2xl border font-mono text-xs space-y-4 text-slate-700 whitespace-pre-line leading-relaxed">
+                    กำลังประมวลผลรายงาน...
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- =====================================================================
@@ -417,14 +442,14 @@
         </div>
 
         <div class="bg-white rounded-3xl border shadow-sm overflow-hidden flex flex-col">
-            <div class="p-5 border-b bg-slate-50 flex justify-between items-center">
-                <h4 class="font-bold text-slate-800 text-sm">รายการที่ส่งเจ้าใหญ่ & สรุปเคลียร์เงิน (จัดการเพิ่ม/ลบได้จากหน้าเจ้ามือ)</h4>
+            <div class="p-5 border-b bg-slate-50 flex justify-between items-center flex-wrap gap-3">
+                <h4 class="font-bold text-slate-800 text-sm">รายการที่ส่งเจ้าใหญ่ & สรุปเคลียร์เงิน (รวมยอดตัวที่ซ้ำกันอัตโนมัติ)</h4>
                 <button onclick="copyBigBossSlip()" class="px-4 py-2 rounded-xl bg-indigo-600 text-white text-xs font-bold">คัดลอกบิลส่งเจ้าใหญ่</button>
             </div>
             <div class="overflow-x-auto max-h-[460px] overflow-y-auto">
                 <table class="w-full text-left border-collapse">
                     <thead class="bg-slate-50 border-b text-xs text-slate-500 uppercase sticky top-0">
-                        <tr><th class="py-3.5 px-4">ตัวเลข</th><th class="py-3.5 px-4">ประเภท</th><th class="py-3.5 px-4 text-right">ยอดเต็ม</th><th class="py-3.5 px-4 text-right">หลังหัก %</th><th class="py-3.5 px-4 w-14 text-center">ลบ</th></tr>
+                        <tr><th class="py-3.5 px-4">ตัวเลข</th><th class="py-3.5 px-4">ประเภท</th><th class="py-3.5 px-4 text-right">ยอดเต็มรวม</th><th class="py-3.5 px-4 text-right">หลังหัก %</th><th class="py-3.5 px-4 w-14 text-center">จัดการ</th></tr>
                     </thead>
                     <tbody id="bigboss-tbody" class="divide-y text-sm"></tbody>
                 </table>
@@ -464,7 +489,7 @@
 
         function loadFromLocalStorage() {
             try {
-                const local = localStorage.getItem('smart_lotto_backup_v10');
+                const local = localStorage.getItem('smart_lotto_backup_v11');
                 if (local) {
                     const data = JSON.parse(local);
                     entries = data.entries || [];
@@ -481,7 +506,7 @@
 
         window.initAppFirebase = function() {
             const statusEl = document.getElementById('db-status');
-            onValue(ref(db, 'lotto_data_v10'), (snapshot) => {
+            onValue(ref(db, 'lotto_data_v11'), (snapshot) => {
                 const data = snapshot.val();
                 if (data) {
                     entries = data.entries || [];
@@ -491,7 +516,7 @@
                     bigBossItems = data.bigBossItems || [];
                     isDealerClosed = !!data.isDealerClosed;
                     lottoDate = data.lottoDate || '2026-11-16';
-                    localStorage.setItem('smart_lotto_backup_v10', JSON.stringify(data));
+                    localStorage.setItem('smart_lotto_backup_v11', JSON.stringify(data));
                 }
                 statusEl.textContent = 'ออนไลน์';
                 statusEl.className = 'text-emerald-400 font-bold';
@@ -505,8 +530,8 @@
 
         window.saveDataToFirebase = function() {
             const payload = { entries, specialNumbers, maxLimits, payoutRates, bigBossItems, isDealerClosed, lottoDate };
-            localStorage.setItem('smart_lotto_backup_v10', JSON.stringify(payload));
-            set(ref(db, 'lotto_data_v10'), payload).catch(err => {});
+            localStorage.setItem('smart_lotto_backup_v11', JSON.stringify(payload));
+            set(ref(db, 'lotto_data_v11'), payload).catch(err => {});
         }
 
         window.addEventListener('DOMContentLoaded', () => {
@@ -549,10 +574,11 @@
             else badge.textContent = '3. หน้าเจ้าใหญ่';
 
             if (mode === 'bigboss') renderBigBossView();
+            if (mode === 'dealer') generatePeriodReportText();
         }
 
         function switchDealerSubTab(subtab) {
-            ['risk', 'limits', 'rates', 'payout'].forEach(t => {
+            ['risk', 'limits', 'rates', 'payout', 'report'].forEach(t => {
                 const isMatch = (t === subtab);
                 document.getElementById(`dlr-panel-${t}`).classList.toggle('hidden', !isMatch);
                 const btn = document.getElementById(`dlr-subtab-${t}`);
@@ -564,6 +590,7 @@
                     }
                 }
             });
+            if (subtab === 'report') generatePeriodReportText();
         }
 
         function toggleDealerCloseStatus() {
@@ -641,8 +668,8 @@
                     num = parts[0].trim();
                     const rightPart = parts[1].trim();
 
-                    if (rightPart.includes('*')) {
-                        const amtParts = rightPart.split('*');
+                    if (rightPart.includes('*') || rightPart.includes('×')) {
+                        const amtParts = rightPart.split(/[\*×]/);
                         amt1 = parseInt(amtParts[0], 10) || 0;
                         amt2 = parseInt(amtParts[1], 10) || 0;
                         hasSecondAmt = true;
@@ -654,8 +681,8 @@
                     num = parts[0];
                     if (parts.length >= 2) {
                         const rightStr = parts.slice(1).join(' ');
-                        if (rightStr.includes('*')) {
-                            const amtParts = rightStr.split('*');
+                        if (rightStr.includes('*') || rightStr.includes('×')) {
+                            const amtParts = rightStr.split(/[\*×]/);
                             amt1 = parseInt(amtParts[0], 10) || 0;
                             amt2 = parseInt(amtParts[1], 10) || 0;
                             hasSecondAmt = true;
@@ -1032,8 +1059,15 @@
             const { payoutRates, bigBossItems } = window.getFirebaseData();
             const discPct = parseFloat(document.getElementById('bigboss-discount-pct').value) || 0;
 
-            let totalGross = 0, totalBossPayout = 0;
+            const mergedBossMap = {};
             bigBossItems.forEach(item => {
+                const key = `${item.number}|${item.type}`;
+                if (!mergedBossMap[key]) mergedBossMap[key] = { number: item.number, type: item.type, amount: 0 };
+                mergedBossMap[key].amount += item.amount;
+            });
+
+            let totalGross = 0, totalBossPayout = 0;
+            Object.values(mergedBossMap).forEach(item => {
                 totalGross += item.amount;
                 let rate = 0;
                 if (item.type === '3ตัวตรง' && item.number === win3Top) rate = payoutRates['3ตัวตรง'];
@@ -1093,11 +1127,21 @@
         function renderBigBossView() {
             const { bigBossItems } = window.getFirebaseData();
             const discPct = parseFloat(document.getElementById('bigboss-discount-pct').value) || 0;
+            
+            const mergedMap = {};
+            bigBossItems.forEach(item => {
+                const key = `${item.number}|${item.type}`;
+                if (!mergedMap[key]) mergedMap[key] = { number: item.number, type: item.type, amount: 0, originalIds: [] };
+                mergedMap[key].amount += item.amount;
+                mergedMap[key].originalIds.push(item.id);
+            });
+
+            const mergedList = Object.values(mergedMap);
             let totalGross = 0;
             const tbody = document.getElementById('bigboss-tbody');
             const empty = document.getElementById('bigboss-empty');
 
-            if (bigBossItems.length === 0) {
+            if (mergedList.length === 0) {
                 tbody.innerHTML = '';
                 empty.classList.remove('hidden');
                 document.getElementById('bigboss-sum-gross').textContent = '0';
@@ -1105,7 +1149,7 @@
                 return;
             }
             empty.classList.add('hidden');
-            tbody.innerHTML = bigBossItems.map((item, idx) => {
+            tbody.innerHTML = mergedList.map((item) => {
                 totalGross += item.amount;
                 const netItem = item.amount - (item.amount * (discPct / 100));
                 return `
@@ -1114,7 +1158,7 @@
                         <td class="py-3 px-4 text-xs font-medium">${item.type}</td>
                         <td class="py-3 px-4 text-right font-bold number-font">${item.amount.toLocaleString('th-TH')}</td>
                         <td class="py-3 px-4 text-right font-bold text-indigo-600 number-font">${netItem.toLocaleString('th-TH')}</td>
-                        <td class="py-3 px-4 text-center"><button onclick="deleteBigBossItem(${idx})" class="text-rose-500 font-bold hover:underline">ลบ</button></td>
+                        <td class="py-3 px-4 text-center"><button onclick="deleteBigBossGroup('${item.number}', '${item.type}')" class="text-rose-500 font-bold hover:underline">ลบ</button></td>
                     </tr>
                 `;
             }).join('');
@@ -1123,11 +1167,58 @@
             document.getElementById('bigboss-sum-net').textContent = totalNet.toLocaleString('th-TH');
         }
 
-        window.deleteBigBossItem = function(idx) {
+        window.deleteBigBossGroup = function(num, type) {
             const { bigBossItems } = window.getFirebaseData();
-            bigBossItems.splice(idx, 1);
-            window.setFirebaseData(null, null, null, null, bigBossItems, undefined, undefined);
+            const newBigBoss = bigBossItems.filter(i => !(i.number === num && i.type === type));
+            window.setFirebaseData(null, null, null, null, newBigBoss, undefined, undefined);
             showToast('ลบรายการแล้ว', 'info');
+        }
+
+        function generatePeriodReportText() {
+            const { lottoDate, entries, bigBossItems } = window.getFirebaseData();
+            const { totalKept, totalCutoff } = computeRiskAggregates();
+            let totalGross = 0;
+            entries.forEach(e => totalGross += e.amount);
+
+            const reportStr = [
+                `===================================`,
+                `📊 รายงานสรุปยอดประจำงวด: ${lottoDate}`,
+                `===================================`,
+                `• ยอดรับโพยรวมทั้งหมด: ${totalGross.toLocaleString('th-TH')} บาท`,
+                `• ยอดรับเอง (สู้ความเสี่ยง): ${totalKept.toLocaleString('th-TH')} บาท`,
+                `• ยอดส่งตัดเจ้าใหญ่: ${totalCutoff.toLocaleString('th-TH')} บาท`,
+                `• จำนวนรายการโพยทั้งหมด: ${entries.length} รายการ`,
+                `• จำนวนรายการส่งเจ้าใหญ่: ${bigBossItems.length} รายการ`,
+                `===================================`,
+                `ออกรายงาน ณ วันที่: ${new Date().toLocaleString('th-TH')}`,
+                `Smart Lotto Pro - ระบบจัดการหวยครบวงจร`
+            ].join('\n');
+
+            const reportBox = document.getElementById('period-report-content');
+            if (reportBox) reportBox.textContent = reportStr;
+            const dateVal = document.getElementById('report-date-val');
+            if (dateVal) dateVal.textContent = lottoDate;
+        }
+
+        function copyPeriodReport() {
+            const reportBox = document.getElementById('period-report-content');
+            if (!reportBox) return;
+            navigator.clipboard.writeText(reportBox.textContent);
+            showToast('คัดลอกรายงานสรุปยอดเรียบร้อย', 'success');
+        }
+
+        function downloadPeriodReport() {
+            const reportBox = document.getElementById('period-report-content');
+            if (!reportBox) return;
+            const blob = new Blob([reportBox.textContent], { type: 'text/plain;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `Lotto_Report_${window.getFirebaseData().lottoDate}.txt`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            showToast('ดาวน์โหลดไฟล์รายงานสำเร็จ', 'success');
         }
 
         function refreshAllViews() {
@@ -1264,6 +1355,7 @@
             renderDealerRiskTable();
             renderDealerLimitsTable();
             renderBigBossView();
+            generatePeriodReportText();
         }
 
         function copyCustomerSlip() {
@@ -1282,14 +1374,23 @@
         function copyBigBossSlip() {
             const { bigBossItems } = window.getFirebaseData();
             if (bigBossItems.length === 0) return showToast('ไม่มีรายการส่งเจ้าใหญ่', 'warning');
+            
+            const mergedMap = {};
+            bigBossItems.forEach(item => {
+                const key = `${item.number}|${item.type}`;
+                if (!mergedMap[key]) mergedMap[key] = { number: item.number, type: item.type, amount: 0 };
+                mergedMap[key].amount += item.amount;
+            });
+            const mergedList = Object.values(mergedMap);
+
             let total = 0;
-            const lines = bigBossItems.map((item, i) => {
+            const lines = mergedList.map((item, i) => {
                 total += item.amount;
                 return `${i + 1}. [${item.number}] ${item.type} = ${item.amount} บ.`;
             });
             const discPct = document.getElementById('bigboss-discount-pct').value;
             const net = total - (total * (discPct / 100));
-            const text = [`🏛️ บิลตัดส่งเจ้าใหญ่`, `------------------------`, ...lines, `------------------------`, `ยอดเต็ม: ${total.toLocaleString()} บ.`, `หักส่วนลด ${discPct}%: สุทธิ ${net.toLocaleString()} บ.`].join('\n');
+            const text = [`🏛️ บิลตัดส่งเจ้าใหญ่ (สรุปยอดรวม)`, `------------------------`, ...lines, `------------------------`, `ยอดเต็ม: ${total.toLocaleString()} บ.`, `หักส่วนลด ${discPct}%: สุทธิ ${net.toLocaleString()} บ.`].join('\n');
             navigator.clipboard.writeText(text);
             showToast('คัดลอกบิลส่งเจ้าใหญ่แล้ว!', 'success');
         }
