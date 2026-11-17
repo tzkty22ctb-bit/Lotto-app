@@ -50,7 +50,7 @@
                 </div>
             </div>
 
-            <!-- 3 Mode Switcher (ไม่มีการใส่รหัสแล้ว) -->
+            <!-- 3 Mode Switcher -->
             <div class="flex items-center justify-between gap-2">
                 <div class="bg-black/30 p-1.5 rounded-2xl flex items-center gap-1.5 border border-white/10 w-full md:w-auto">
                     <button id="btn-mode-recorder" onclick="switchAppMode('recorder')" class="px-4 py-2 rounded-xl text-xs sm:text-sm font-bold bg-white text-teal-900 shadow-md flex items-center gap-2 transition">
@@ -222,7 +222,47 @@
             <div class="bg-white rounded-3xl p-4 border shadow-sm"><div class="text-xs text-slate-400">วิ่งบน/ล่าง</div><div class="text-sm font-bold number-font mt-1"><span id="dlr-sum-runup">0</span>/<span id="dlr-sum-rundown">0</span></div></div>
         </section>
 
-        <!-- ย้ายส่วนสรุปยอดคนจดส่งรวม % มาไว้ที่หน้าเจ้ามือ -->
+        <!-- ย้ายช่องกรอกส่งเจ้าใหญ่มาไว้หน้าเจ้ามือ -->
+        <div class="bg-white rounded-3xl border p-6 shadow-sm space-y-4">
+            <h3 class="text-base font-bold text-purple-950 flex items-center gap-2">
+                <i class="fa-solid fa-pen-to-square text-purple-600"></i> ช่องกรอกเลขส่งเจ้าใหญ่จากหน้าเจ้ามือ (Smart Format)
+            </h3>
+            <p class="text-xs text-slate-500">พิมพ์หรือวางโพยส่งเจ้าใหญ่เพื่อหักออกจากยอดรับรวม เหลือเป็นยอดรับเอง (สู้)</p>
+            
+            <div class="relative">
+                <textarea id="dealer-bigboss-input" rows="3" class="w-full border-2 border-purple-200 rounded-2xl p-4 text-sm focus:border-purple-600 resize-none number-font" placeholder="เช่น 674=50*50 หรือ 675=100"></textarea>
+                <button type="button" onclick="clearInputBox('dealer-bigboss-input', 'clear-dealer-bb-btn')" id="clear-dealer-bb-btn" class="hidden absolute top-3 right-3 text-slate-400 bg-slate-100 w-7 h-7 rounded-full flex items-center justify-center text-xs">✕</button>
+            </div>
+
+            <!-- ปุ่มช่วยพิมพ์ -->
+            <div class="space-y-2">
+                <div class="grid grid-cols-5 gap-1.5">
+                    <button type="button" onclick="insertText('dealer-bigboss-input', ' ', 'clear-dealer-bb-btn')" class="py-2.5 bg-slate-100 rounded-xl font-bold text-xs">เว้นวรรค</button>
+                    <button type="button" onclick="insertText('dealer-bigboss-input', '=', 'clear-dealer-bb-btn')" class="py-2.5 bg-purple-50 text-purple-700 rounded-xl font-bold">=</button>
+                    <button type="button" onclick="insertText('dealer-bigboss-input', '*', 'clear-dealer-bb-btn')" class="py-2.5 bg-purple-50 text-purple-700 rounded-xl font-bold">*</button>
+                    <button type="button" onclick="insertText('dealer-bigboss-input', ' บน ', 'clear-dealer-bb-btn')" class="py-2.5 bg-sky-50 text-sky-700 rounded-xl font-semibold text-xs">บน</button>
+                    <button type="button" onclick="insertText('dealer-bigboss-input', ' ล่าง ', 'clear-dealer-bb-btn')" class="py-2.5 bg-emerald-50 text-emerald-700 rounded-xl font-semibold text-xs">ล่าง</button>
+                </div>
+                <div class="grid grid-cols-3 gap-1.5">
+                    <button type="button" onclick="insertText('dealer-bigboss-input', ' โต๊ด ', 'clear-dealer-bb-btn')" class="py-2.5 bg-purple-50 text-purple-700 rounded-xl font-semibold text-xs">โต๊ด</button>
+                    <button type="button" onclick="insertText('dealer-bigboss-input', ' วิ่งบน ', 'clear-dealer-bb-btn')" class="py-2.5 bg-rose-50 text-rose-700 rounded-xl font-semibold text-xs">วิ่งบน</button>
+                    <button type="button" onclick="insertText('dealer-bigboss-input', ' วิ่งล่าง ', 'clear-dealer-bb-btn')" class="py-2.5 bg-pink-50 text-pink-700 rounded-xl font-semibold text-xs">วิ่งล่าง</button>
+                </div>
+                <div class="grid grid-cols-5 gap-1.5">
+                    <button type="button" onclick="insertAmount('dealer-bigboss-input', '10', 'clear-dealer-bb-btn')" class="py-2.5 bg-amber-50 text-amber-800 rounded-xl font-bold text-xs number-font">+10</button>
+                    <button type="button" onclick="insertAmount('dealer-bigboss-input', '50', 'clear-dealer-bb-btn')" class="py-2.5 bg-amber-50 text-amber-800 rounded-xl font-bold text-xs number-font">+50</button>
+                    <button type="button" onclick="insertAmount('dealer-bigboss-input', '100', 'clear-dealer-bb-btn')" class="py-2.5 bg-amber-50 text-amber-800 rounded-xl font-bold text-xs number-font">+100</button>
+                    <button type="button" onclick="insertAmount('dealer-bigboss-input', '500', 'clear-dealer-bb-btn')" class="py-2.5 bg-amber-50 text-amber-800 rounded-xl font-bold text-xs number-font">+500</button>
+                    <button type="button" onclick="insertAmount('dealer-bigboss-input', '1000', 'clear-dealer-bb-btn')" class="py-2.5 bg-amber-50 text-amber-800 rounded-xl font-bold text-xs number-font">+1000</button>
+                </div>
+            </div>
+
+            <div class="flex gap-2">
+                <button onclick="addManualBigBossItemFromDealer()" class="flex-1 py-3 rounded-2xl bg-purple-700 hover:bg-purple-800 text-white text-xs font-bold shadow">ส่งเข้าหน้าเจ้าใหญ่ (ตัดยอดออก)</button>
+                <button onclick="autoImportCutoffToBigBoss()" class="flex-1 py-3 rounded-2xl bg-slate-800 hover:bg-slate-900 text-white text-xs font-bold shadow">ดึงยอดเกินเพดานอัตโนมัติ</button>
+            </div>
+        </div>
+
         <div class="bg-white rounded-3xl border p-6 shadow-sm space-y-4">
             <h3 class="text-base font-bold text-purple-950 flex items-center gap-2">
                 <i class="fa-solid fa-users text-purple-600"></i> สรุปยอดคนจดส่งรวม % (Dealer Net Summary)
@@ -344,7 +384,7 @@
             </div>
         </section>
 
-        <!-- หน้าเจ้าใหญ่: เพิ่มช่องตรวจรางวัลและสรุปยอด -->
+        <!-- หน้าเจ้าใหญ่: ตรวจรางวัลและสรุปยอด -->
         <div class="bg-white rounded-3xl border p-6 shadow-sm space-y-4">
             <h3 class="text-base font-bold text-indigo-950 flex items-center gap-2">
                 <i class="fa-solid fa-trophy text-indigo-600"></i> ตรวจรางวัลและสรุปยอดส่งเจ้าใหญ่
@@ -364,61 +404,19 @@
             <div id="bigboss-customer-breakdown-list" class="grid grid-cols-1 sm:grid-cols-3 gap-4"></div>
         </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-            <div class="lg:col-span-5 bg-white rounded-3xl border p-6 space-y-4 shadow-sm">
-                <h3 class="text-base font-bold text-indigo-950 flex items-center gap-2">
-                    <i class="fa-solid fa-pen-to-square text-indigo-600"></i> ช่องกรอกเลขส่งเจ้าใหญ่ (Smart Format)
-                </h3>
-                <p class="text-xs text-slate-500">พิมพ์หรือวางโพยส่งเจ้าใหญ่ได้ทันที พร้อมปุ่มช่วยคีย์ด้านล่าง</p>
-                
-                <div class="relative">
-                    <textarea id="bigboss-input" rows="4" class="w-full border-2 border-indigo-200 rounded-2xl p-4 text-sm focus:border-indigo-600 resize-none number-font" placeholder="เช่น 674=50*50 หรือ 675=100"></textarea>
-                    <button type="button" onclick="clearInputBox('bigboss-input', 'clear-bigboss-btn')" id="clear-bigboss-btn" class="hidden absolute top-3 right-3 text-slate-400 bg-slate-100 w-7 h-7 rounded-full flex items-center justify-center text-xs">✕</button>
-                </div>
-
-                <!-- ปุ่มช่วยพิมพ์หน้าเจ้าใหญ่ -->
-                <div class="space-y-2">
-                    <div class="grid grid-cols-5 gap-1.5">
-                        <button type="button" onclick="insertText('bigboss-input', ' ', 'clear-bigboss-btn')" class="py-2.5 bg-slate-100 rounded-xl font-bold text-xs">เว้นวรรค</button>
-                        <button type="button" onclick="insertText('bigboss-input', '=', 'clear-bigboss-btn')" class="py-2.5 bg-indigo-50 text-indigo-700 rounded-xl font-bold">=</button>
-                        <button type="button" onclick="insertText('bigboss-input', '*', 'clear-bigboss-btn')" class="py-2.5 bg-indigo-50 text-indigo-700 rounded-xl font-bold">*</button>
-                        <button type="button" onclick="insertText('bigboss-input', ' บน ', 'clear-bigboss-btn')" class="py-2.5 bg-sky-50 text-sky-700 rounded-xl font-semibold text-xs">บน</button>
-                        <button type="button" onclick="insertText('bigboss-input', ' ล่าง ', 'clear-bigboss-btn')" class="py-2.5 bg-emerald-50 text-emerald-700 rounded-xl font-semibold text-xs">ล่าง</button>
-                    </div>
-                    <div class="grid grid-cols-3 gap-1.5">
-                        <button type="button" onclick="insertText('bigboss-input', ' โต๊ด ', 'clear-bigboss-btn')" class="py-2.5 bg-purple-50 text-purple-700 rounded-xl font-semibold text-xs">โต๊ด</button>
-                        <button type="button" onclick="insertText('bigboss-input', ' วิ่งบน ', 'clear-bigboss-btn')" class="py-2.5 bg-rose-50 text-rose-700 rounded-xl font-semibold text-xs">วิ่งบน</button>
-                        <button type="button" onclick="insertText('bigboss-input', ' วิ่งล่าง ', 'clear-bigboss-btn')" class="py-2.5 bg-pink-50 text-pink-700 rounded-xl font-semibold text-xs">วิ่งล่าง</button>
-                    </div>
-                    <div class="grid grid-cols-5 gap-1.5">
-                        <button type="button" onclick="insertAmount('bigboss-input', '10', 'clear-bigboss-btn')" class="py-2.5 bg-amber-50 text-amber-800 rounded-xl font-bold text-xs number-font">+10</button>
-                        <button type="button" onclick="insertAmount('bigboss-input', '50', 'clear-bigboss-btn')" class="py-2.5 bg-amber-50 text-amber-800 rounded-xl font-bold text-xs number-font">+50</button>
-                        <button type="button" onclick="insertAmount('bigboss-input', '100', 'clear-bigboss-btn')" class="py-2.5 bg-amber-50 text-amber-800 rounded-xl font-bold text-xs number-font">+100</button>
-                        <button type="button" onclick="insertAmount('bigboss-input', '500', 'clear-bigboss-btn')" class="py-2.5 bg-amber-50 text-amber-800 rounded-xl font-bold text-xs number-font">+500</button>
-                        <button type="button" onclick="insertAmount('bigboss-input', '1000', 'clear-bigboss-btn')" class="py-2.5 bg-amber-50 text-amber-800 rounded-xl font-bold text-xs number-font">+1000</button>
-                    </div>
-                </div>
-
-                <button onclick="addManualBigBossItem()" class="w-full py-3 rounded-2xl bg-slate-800 hover:bg-slate-900 text-white text-xs font-bold shadow">เพิ่มรายการส่งเจ้าใหญ่</button>
-                <button onclick="autoImportCutoffToBigBoss()" class="w-full py-3.5 rounded-2xl bg-indigo-700 hover:bg-indigo-800 text-white font-bold text-sm shadow flex items-center justify-center gap-2">
-                    <i class="fa-solid fa-download"></i> ดึงยอดเกินเพดานจากหน้าเจ้ามือ
-                </button>
+        <div class="bg-white rounded-3xl border shadow-sm overflow-hidden flex flex-col">
+            <div class="p-5 border-b bg-slate-50 flex justify-between items-center">
+                <h4 class="font-bold text-slate-800 text-sm">รายการที่ส่งเจ้าใหญ่ & สรุปเคลียร์เงิน (จัดการเพิ่ม/ลบได้จากหน้าเจ้ามือ)</h4>
+                <button onclick="copyBigBossSlip()" class="px-4 py-2 rounded-xl bg-indigo-600 text-white text-xs font-bold">คัดลอกบิลส่งเจ้าใหญ่</button>
             </div>
-
-            <div class="lg:col-span-7 bg-white rounded-3xl border shadow-sm overflow-hidden flex flex-col">
-                <div class="p-5 border-b bg-slate-50 flex justify-between items-center">
-                    <h4 class="font-bold text-slate-800 text-sm">รายการที่ส่งเจ้าใหญ่ & สรุปเคลียร์เงิน</h4>
-                    <button onclick="copyBigBossSlip()" class="px-4 py-2 rounded-xl bg-indigo-600 text-white text-xs font-bold">คัดลอกบิลส่งเจ้าใหญ่</button>
-                </div>
-                <div class="overflow-x-auto max-h-[460px] overflow-y-auto">
-                    <table class="w-full text-left border-collapse">
-                        <thead class="bg-slate-50 border-b text-xs text-slate-500 uppercase sticky top-0">
-                            <tr><th class="py-3.5 px-4">ตัวเลข</th><th class="py-3.5 px-4">ประเภท</th><th class="py-3.5 px-4 text-right">ยอดเต็ม</th><th class="py-3.5 px-4 text-right">หลังหัก %</th><th class="py-3.5 px-4 w-14 text-center">ลบ</th></tr>
-                        </thead>
-                        <tbody id="bigboss-tbody" class="divide-y text-sm"></tbody>
-                    </table>
-                    <div id="bigboss-empty" class="py-16 text-center text-slate-400">ยังไม่มีรายการส่งเจ้าใหญ่</div>
-                </div>
+            <div class="overflow-x-auto max-h-[460px] overflow-y-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead class="bg-slate-50 border-b text-xs text-slate-500 uppercase sticky top-0">
+                        <tr><th class="py-3.5 px-4">ตัวเลข</th><th class="py-3.5 px-4">ประเภท</th><th class="py-3.5 px-4 text-right">ยอดเต็ม</th><th class="py-3.5 px-4 text-right">หลังหัก %</th><th class="py-3.5 px-4 w-14 text-center">ลบ</th></tr>
+                    </thead>
+                    <tbody id="bigboss-tbody" class="divide-y text-sm"></tbody>
+                </table>
+                <div id="bigboss-empty" class="py-16 text-center text-slate-400">ยังไม่มีรายการส่งเจ้าใหญ่</div>
             </div>
         </div>
     </div>
@@ -452,7 +450,7 @@
 
         function loadFromLocalStorage() {
             try {
-                const local = localStorage.getItem('smart_lotto_backup_v4');
+                const local = localStorage.getItem('smart_lotto_backup_v5');
                 if (local) {
                     const data = JSON.parse(local);
                     entries = data.entries || [];
@@ -467,7 +465,7 @@
 
         window.initAppFirebase = function() {
             const statusEl = document.getElementById('db-status');
-            onValue(ref(db, 'lotto_data_v4'), (snapshot) => {
+            onValue(ref(db, 'lotto_data_v5'), (snapshot) => {
                 const data = snapshot.val();
                 if (data) {
                     entries = data.entries || [];
@@ -475,7 +473,7 @@
                     if (data.maxLimits) maxLimits = data.maxLimits;
                     bigBossItems = data.bigBossItems || [];
                     isDealerClosed = !!data.isDealerClosed;
-                    localStorage.setItem('smart_lotto_backup_v4', JSON.stringify(data));
+                    localStorage.setItem('smart_lotto_backup_v5', JSON.stringify(data));
                 }
                 statusEl.textContent = 'ออนไลน์';
                 statusEl.className = 'text-emerald-400 font-bold';
@@ -489,8 +487,8 @@
 
         window.saveDataToFirebase = function() {
             const payload = { entries, specialNumbers, maxLimits, bigBossItems, isDealerClosed };
-            localStorage.setItem('smart_lotto_backup_v4', JSON.stringify(payload));
-            set(ref(db, 'lotto_data_v4'), payload).catch(err => {});
+            localStorage.setItem('smart_lotto_backup_v5', JSON.stringify(payload));
+            set(ref(db, 'lotto_data_v5'), payload).catch(err => {});
         }
 
         window.addEventListener('DOMContentLoaded', () => {
@@ -814,13 +812,22 @@
         }
 
         function computeRiskAggregates() {
-            const { entries, maxLimits } = window.getFirebaseData();
+            const { entries, maxLimits, bigBossItems } = window.getFirebaseData();
             const map = {};
             entries.forEach(e => {
                 const key = `${e.number}|${e.type}`;
                 if (!map[key]) map[key] = { number: e.number, type: e.type, total: 0 };
                 map[key].total += e.amount;
             });
+
+            // หักยอดที่ส่งเจ้าใหญ่ออกจากยอดรับรวมของตัวเลขนั้นๆ เพื่อให้เหลือยอดรับเอง
+            bigBossItems.forEach(bb => {
+                const key = `${bb.number}|${bb.type}`;
+                if (map[key]) {
+                    map[key].total = Math.max(0, map[key].total - bb.amount);
+                }
+            });
+
             let totalKept = 0, totalCutoff = 0;
             const rows = Object.values(map).map(item => {
                 const limit = maxLimits[item.type] || 1000;
@@ -879,27 +886,41 @@
 
             let totalKeptIn = 0, totalPayout = 0;
             const customerWinners = {};
-            const { entries, maxLimits } = window.getFirebaseData();
+            const { entries, maxLimits, bigBossItems } = window.getFirebaseData();
 
+            // คำนวณยอดรับเองหลังหักส่งเจ้าใหญ่แล้ว
+            const netAmountMap = {};
             entries.forEach(e => {
-                const limit = maxLimits[e.type] || 1000;
-                const keptAmt = Math.min(e.amount, limit);
+                const key = `${e.number}|${e.type}`;
+                if (!netAmountMap[key]) netAmountMap[key] = { amount: 0, customer: e.customer, number: e.number, type: e.type };
+                netAmountMap[key].amount += e.amount;
+            });
+            bigBossItems.forEach(bb => {
+                const key = `${bb.number}|${bb.type}`;
+                if (netAmountMap[key]) {
+                    netAmountMap[key].amount = Math.max(0, netAmountMap[key].amount - bb.amount);
+                }
+            });
+
+            Object.values(netAmountMap).forEach(item => {
+                const limit = maxLimits[item.type] || 1000;
+                const keptAmt = Math.min(item.amount, limit);
                 totalKeptIn += keptAmt;
 
                 let rate = 0;
-                if (e.type === '3ตัวตรง' && e.number === win3Top) rate = payoutRates['3ตัวตรง'];
-                else if (e.type === '3ตัวโต๊ด' && isTodMatch(e.number, win3Top)) rate = payoutRates['3ตัวโต๊ด'];
-                else if (e.type === '2ตัวบน' && e.number === win2Top) rate = payoutRates['2ตัว'];
-                else if (e.type === '2ตัวล่าง' && e.number === rawBottom2) rate = payoutRates['2ตัว'];
+                if (item.type === '3ตัวตรง' && item.number === win3Top) rate = payoutRates['3ตัวตรง'];
+                else if (item.type === '3ตัวโต๊ด' && isTodMatch(item.number, win3Top)) rate = payoutRates['3ตัวโต๊ด'];
+                else if (item.type === '2ตัวบน' && item.number === win2Top) rate = payoutRates['2ตัว'];
+                else if (item.type === '2ตัวล่าง' && item.number === rawBottom2) rate = payoutRates['2ตัว'];
 
                 if (rate > 0) {
-                    const restriction = checkNumberRestriction(e.number, e.type);
+                    const restriction = checkNumberRestriction(item.number, item.type);
                     const multiplier = restriction === 'half' ? 0.5 : 1;
                     const prize = keptAmt * rate * multiplier;
                     totalPayout += prize;
 
-                    if (!customerWinners[e.customer]) customerWinners[e.customer] = 0;
-                    customerWinners[e.customer] += prize;
+                    if (!customerWinners[item.customer]) customerWinners[item.customer] = 0;
+                    customerWinners[item.customer] += prize;
                 }
             });
 
@@ -981,16 +1002,16 @@
             showToast(`ดึงยอดส่งเจ้าใหญ่สำเร็จ ${addedCount} รายการ`, 'success');
         }
 
-        function addManualBigBossItem() {
-            const raw = document.getElementById('bigboss-input').value.trim();
+        function addManualBigBossItemFromDealer() {
+            const raw = document.getElementById('dealer-bigboss-input').value.trim();
             if (!raw) return;
             const parsed = parseSmartText(raw, 'เจ้าใหญ่', 0, 'auto');
             const { bigBossItems } = window.getFirebaseData();
             parsed.forEach(p => bigBossItems.push({ id: p.id, number: p.number, type: p.type, amount: p.amount }));
             window.setFirebaseData(null, null, null, bigBossItems);
-            document.getElementById('bigboss-input').value = '';
-            clearInputBox('bigboss-input', 'clear-bigboss-btn');
-            showToast('เพิ่มรายการส่งเจ้าใหญ่สำเร็จ', 'success');
+            document.getElementById('dealer-bigboss-input').value = '';
+            clearInputBox('dealer-bigboss-input', 'clear-dealer-bb-btn');
+            showToast('ส่งรายการเข้าหน้าเจ้าใหญ่ & หักออกจากยอดรับแล้ว', 'success');
         }
 
         function renderBigBossView() {
@@ -1057,9 +1078,8 @@
         }
 
         function refreshAllViews() {
-            const { entries, specialNumbers, isDealerClosed } = window.getFirebaseData();
+            const { entries, specialNumbers, isDealerClosed, bigBossItems } = window.getFirebaseData();
 
-            // Status Dealer Toggle UI
             const badge = document.getElementById('dealer-status-badge');
             const btnClose = document.getElementById('btn-toggle-dealer');
             if (isDealerClosed) {
@@ -1084,6 +1104,10 @@
                 else if (e.type === 'วิ่งล่าง') sumRunDown += e.amount;
             });
 
+            // คำนวณยอดส่งเจ้าใหญ่รวมเพื่อหักออกจากยอดรวมเจ้ามือ
+            let totalBigBossSent = 0;
+            bigBossItems.forEach(bb => totalBigBossSent += bb.amount);
+
             document.getElementById('dlr-sum-total').textContent = totalAll.toLocaleString('th-TH');
             document.getElementById('rec-sum-total').textContent = totalAll.toLocaleString('th-TH');
             document.getElementById('rec-count-badge').textContent = `${entries.length} รายการ`;
@@ -1100,7 +1124,6 @@
             document.getElementById('dlr-sum-runup').textContent = sumRunUp.toLocaleString('th-TH');
             document.getElementById('dlr-sum-rundown').textContent = sumRunDown.toLocaleString('th-TH');
 
-            // Populate Customer Filter Dropdown
             const custNames = [...new Set(entries.map(e => e.customer || 'ทั่วไป'))];
             const filterSelect = document.getElementById('filter-customer-select');
             const currentFilter = filterSelect.value;
@@ -1117,7 +1140,6 @@
                 custMap[name].total += e.amount;
             });
 
-            // แสดงสรุปยอดคนจดส่งรวม % ที่หน้าเจ้ามือ
             const dealerSummaryBox = document.getElementById('dealer-customer-summary-box');
             const custKeys = Object.keys(custMap);
             if (custKeys.length === 0) {
