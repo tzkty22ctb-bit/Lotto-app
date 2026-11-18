@@ -507,7 +507,7 @@
 
         function loadFromLocalStorage() {
             try {
-                const local = localStorage.getItem('smart_lotto_backup_v20');
+                const local = localStorage.getItem('smart_lotto_backup_v21');
                 if (local) {
                     const data = JSON.parse(local);
                     entries = data.entries || [];
@@ -525,7 +525,7 @@
 
         window.initAppFirebase = function() {
             const statusEl = document.getElementById('db-status');
-            onValue(ref(db, 'lotto_data_v20'), (snapshot) => {
+            onValue(ref(db, 'lotto_data_v21'), (snapshot) => {
                 const data = snapshot.val();
                 if (data) {
                     entries = data.entries || [];
@@ -536,7 +536,7 @@
                     bigBossItems = data.bigBossItems || [];
                     isDealerClosed = !!data.isDealerClosed;
                     lottoDate = data.lottoDate || '2026-11-16';
-                    localStorage.setItem('smart_lotto_backup_v20', JSON.stringify(data));
+                    localStorage.setItem('smart_lotto_backup_v21', JSON.stringify(data));
                 }
                 statusEl.textContent = 'ออนไลน์';
                 statusEl.className = 'text-emerald-400 font-bold';
@@ -550,8 +550,8 @@
 
         window.saveDataToFirebase = function() {
             const payload = { entries, specialNumbers, maxLimits, payoutRates, bossRates, bigBossItems, isDealerClosed, lottoDate };
-            localStorage.setItem('smart_lotto_backup_v20', JSON.stringify(payload));
-            set(ref(db, 'lotto_data_v20'), payload).catch(err => {});
+            localStorage.setItem('smart_lotto_backup_v21', JSON.stringify(payload));
+            set(ref(db, 'lotto_data_v21'), payload).catch(err => {});
         }
 
         window.addEventListener('DOMContentLoaded', () => {
@@ -961,7 +961,7 @@
             window.setFirebaseData(null, null, limits, null, null, null, undefined, undefined);
         }
 
-        // ฟังก์ชันคำนวณผลรางวัลหน้าเจ้ามือ (แก้ไขให้ช่องยอดจ่ายรางวัล แสดงเฉพาะยอดที่เจ้ามือต้องจ่ายเอง)
+        // ฟังก์ชันคำนวณผลรางวัลหน้าเจ้ามือ (แก้ไขให้ดึงยอดรับเอง (สู้) มาคำนวณถูกต้อง 100%)
         function calculateWinnersAndProfit() {
             const rawTop = document.getElementById('res-top3').value.trim();
             const rawBottom2 = document.getElementById('res-bottom2').value.trim();
@@ -998,7 +998,7 @@
                 }
             });
 
-            let totalKeptInAll = 0; // ยอดรับเองรวมทั้งหมด
+            let totalKeptInAll = 0; // ยอดรับเองรวมทั้งหมด (คำนวณจากสัดส่วนสู้จริง)
             let grandTotalPrizeAll = 0; // ยอดถูกรางวัลรวมทั้งหมดของลูกค้า
             let grandTotalBossPrize = 0; // ยอดถูกรางวัลที่เจ้าใหญ่ต้องจ่าย
             let dealerPayOwnPrize = 0; // ยอดถูกรางวัลที่เจ้ามือต้องจ่ายเองจากยอดรับเอง
@@ -1060,7 +1060,6 @@
             const netProfit = totalKeptInAll - dealerPayOwnPrize;
 
             document.getElementById('pay-kept-in').textContent = Math.round(totalKeptInAll).toLocaleString('th-TH');
-            // ใช้ dealerPayOwnPrize (ยอดที่เจ้ามือต้องจ่ายเอง) แสดงในกล่องยอดจ่ายรางวัล
             document.getElementById('pay-total-out').textContent = Math.round(dealerPayOwnPrize).toLocaleString('th-TH');
             document.getElementById('pay-net-amount').textContent = (netProfit >= 0 ? '+' : '') + Math.round(netProfit).toLocaleString('th-TH') + ' ฿';
 
@@ -1071,6 +1070,7 @@
             } else {
                 listDiv.innerHTML = `
                     <div class="bg-purple-50 p-4 rounded-2xl border border-purple-200 mb-4 text-xs text-purple-950 space-y-1">
+                        <div>• ยอดรับเองรวม (สู้): <b class="number-font">${Math.round(totalKeptInAll).toLocaleString()}</b> บาท</div>
                         <div>• ยอดถูกรางวัลรวมทั้งหมดของลูกค้า: <b class="number-font">${Math.round(grandTotalPrizeAll).toLocaleString()}</b> บาท</div>
                         <div>• ยอดถูกรางวัลส่วนที่ส่งเจ้าใหญ่: <b class="text-indigo-700 number-font">${Math.round(grandTotalBossPrize).toLocaleString()}</b> บาท</div>
                         <div>• ยอดถูกรางวัลที่เจ้ามือต้องจ่ายเอง: <b class="text-rose-600 number-font">${Math.round(dealerPayOwnPrize).toLocaleString()}</b> บาท</div>
@@ -1186,7 +1186,7 @@
             const parsed = parseSmartText(raw, 'เจ้าใหญ่', 0, 'auto');
             const { bigBossItems } = window.getFirebaseData();
             parsed.forEach(p => bigBossItems.push({ id: p.id, number: p.number, type: p.type, amount: p.amount }));
-            window.setFirebaseData(null, null, null, null, null, newBigBoss = bigBossItems, undefined, undefined);
+            window.setFirebaseData(null, null, null, null, null, bigBossItems, undefined, undefined);
             document.getElementById('dealer-bigboss-input').value = '';
             clearInputBox('dealer-bigboss-input', 'clear-dealer-bb-btn');
             showToast('ส่งรายการเข้าหน้าเจ้าใหญ่ & หักออกจากยอดรับแล้ว', 'success');
