@@ -375,7 +375,7 @@
                 <div class="lg:col-span-7 bg-white rounded-3xl border p-6 shadow-sm space-y-4">
                     <div class="grid grid-cols-3 gap-3 text-center">
                         <div class="p-4 bg-slate-50 rounded-2xl border"><div class="text-xs text-slate-500">ยอดรับเอง (สู้)</div><div id="pay-kept-in" class="font-extrabold text-xl number-font text-purple-900 mt-1">0</div></div>
-                        <div class="p-4 bg-rose-50 rounded-2xl border border-rose-100"><div class="text-xs text-rose-600">ยอดจ่ายรางวัล</div><div id="pay-total-out" class="font-extrabold text-xl text-rose-600 number-font mt-1">0</div></div>
+                        <div class="p-4 bg-rose-50 rounded-2xl border border-rose-100"><div class="text-xs text-rose-600">ยอดจ่ายรางวัล (ที่เจ้ามือจ่ายเอง)</div><div id="pay-total-out" class="font-extrabold text-xl text-rose-600 number-font mt-1">0</div></div>
                         <div class="p-4 bg-emerald-50 rounded-2xl border border-emerald-100"><div class="text-xs text-emerald-700 font-bold">กำไร/ขาดทุนสุทธิ</div><div id="pay-net-amount" class="font-extrabold text-xl text-emerald-700 number-font mt-1">0</div></div>
                     </div>
                 </div>
@@ -452,7 +452,7 @@
             </h3>
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 items-end">
                 <div><label class="text-xs text-slate-500 block mb-1">ผล 3 ตัวบน</label><input type="text" id="boss-res-top3" placeholder="เช่น 456" class="w-full px-4 py-2.5 border rounded-2xl font-bold text-center number-font"></div>
-                <div><label class="text-xs text-slate-500 block mb-1">ผล 2 ตัวล่าง</label><input type="text" id="boss-res-bottom2" placeholder="เช่น 89" class="w-full px-4 py-2.5 border rounded-2xl font-bold text-center number-font"></div>
+                <div><label class="text-xs text-slate-500 block mb-1">ผล 2 ตัวล่าง</label><input type="text" id="boss-res-bottom2" placeholder="เช่น 89" class="w-full px-4 py-3 border rounded-2xl font-bold text-center number-font"></div>
                 <button onclick="calculateBossPayout()" class="py-3 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm shadow">คำนวณเงินรางวัลเจ้าใหญ่</button>
             </div>
             <div id="boss-payout-result-box" class="pt-2 text-xs text-slate-600 space-y-2"></div>
@@ -507,7 +507,7 @@
 
         function loadFromLocalStorage() {
             try {
-                const local = localStorage.getItem('smart_lotto_backup_v19');
+                const local = localStorage.getItem('smart_lotto_backup_v20');
                 if (local) {
                     const data = JSON.parse(local);
                     entries = data.entries || [];
@@ -525,7 +525,7 @@
 
         window.initAppFirebase = function() {
             const statusEl = document.getElementById('db-status');
-            onValue(ref(db, 'lotto_data_v19'), (snapshot) => {
+            onValue(ref(db, 'lotto_data_v20'), (snapshot) => {
                 const data = snapshot.val();
                 if (data) {
                     entries = data.entries || [];
@@ -536,7 +536,7 @@
                     bigBossItems = data.bigBossItems || [];
                     isDealerClosed = !!data.isDealerClosed;
                     lottoDate = data.lottoDate || '2026-11-16';
-                    localStorage.setItem('smart_lotto_backup_v19', JSON.stringify(data));
+                    localStorage.setItem('smart_lotto_backup_v20', JSON.stringify(data));
                 }
                 statusEl.textContent = 'ออนไลน์';
                 statusEl.className = 'text-emerald-400 font-bold';
@@ -550,8 +550,8 @@
 
         window.saveDataToFirebase = function() {
             const payload = { entries, specialNumbers, maxLimits, payoutRates, bossRates, bigBossItems, isDealerClosed, lottoDate };
-            localStorage.setItem('smart_lotto_backup_v19', JSON.stringify(payload));
-            set(ref(db, 'lotto_data_v19'), payload).catch(err => {});
+            localStorage.setItem('smart_lotto_backup_v20', JSON.stringify(payload));
+            set(ref(db, 'lotto_data_v20'), payload).catch(err => {});
         }
 
         window.addEventListener('DOMContentLoaded', () => {
@@ -961,7 +961,7 @@
             window.setFirebaseData(null, null, limits, null, null, null, undefined, undefined);
         }
 
-        // ฟังก์ชันคำนวณผลรางวัลหน้าเจ้ามือ (แก้ไขสูตรกำไรสุทธิให้นำยอดรับเองมาหักกับยอดถูกที่เจ้ามือต้องจ่ายเอง)
+        // ฟังก์ชันคำนวณผลรางวัลหน้าเจ้ามือ (แก้ไขให้ช่องยอดจ่ายรางวัล แสดงเฉพาะยอดที่เจ้ามือต้องจ่ายเอง)
         function calculateWinnersAndProfit() {
             const rawTop = document.getElementById('res-top3').value.trim();
             const rawBottom2 = document.getElementById('res-bottom2').value.trim();
@@ -1060,7 +1060,8 @@
             const netProfit = totalKeptInAll - dealerPayOwnPrize;
 
             document.getElementById('pay-kept-in').textContent = Math.round(totalKeptInAll).toLocaleString('th-TH');
-            document.getElementById('pay-total-out').textContent = Math.round(grandTotalPrizeAll).toLocaleString('th-TH');
+            // ใช้ dealerPayOwnPrize (ยอดที่เจ้ามือต้องจ่ายเอง) แสดงในกล่องยอดจ่ายรางวัล
+            document.getElementById('pay-total-out').textContent = Math.round(dealerPayOwnPrize).toLocaleString('th-TH');
             document.getElementById('pay-net-amount').textContent = (netProfit >= 0 ? '+' : '') + Math.round(netProfit).toLocaleString('th-TH') + ' ฿';
 
             const listDiv = document.getElementById('winners-by-customer-list');
@@ -1070,7 +1071,7 @@
             } else {
                 listDiv.innerHTML = `
                     <div class="bg-purple-50 p-4 rounded-2xl border border-purple-200 mb-4 text-xs text-purple-950 space-y-1">
-                        <div>• ยอดถูกรางวัลรวมทั้งหมด: <b class="number-font">${Math.round(grandTotalPrizeAll).toLocaleString()}</b> บาท</div>
+                        <div>• ยอดถูกรางวัลรวมทั้งหมดของลูกค้า: <b class="number-font">${Math.round(grandTotalPrizeAll).toLocaleString()}</b> บาท</div>
                         <div>• ยอดถูกรางวัลส่วนที่ส่งเจ้าใหญ่: <b class="text-indigo-700 number-font">${Math.round(grandTotalBossPrize).toLocaleString()}</b> บาท</div>
                         <div>• ยอดถูกรางวัลที่เจ้ามือต้องจ่ายเอง: <b class="text-rose-600 number-font">${Math.round(dealerPayOwnPrize).toLocaleString()}</b> บาท</div>
                     </div>
@@ -1185,7 +1186,7 @@
             const parsed = parseSmartText(raw, 'เจ้าใหญ่', 0, 'auto');
             const { bigBossItems } = window.getFirebaseData();
             parsed.forEach(p => bigBossItems.push({ id: p.id, number: p.number, type: p.type, amount: p.amount }));
-            window.setFirebaseData(null, null, null, null, null, bigBossItems, undefined, undefined);
+            window.setFirebaseData(null, null, null, null, null, newBigBoss = bigBossItems, undefined, undefined);
             document.getElementById('dealer-bigboss-input').value = '';
             clearInputBox('dealer-bigboss-input', 'clear-dealer-bb-btn');
             showToast('ส่งรายการเข้าหน้าเจ้าใหญ่ & หักออกจากยอดรับแล้ว', 'success');
