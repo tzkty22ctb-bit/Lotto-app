@@ -646,24 +646,6 @@
             insertText(inputId, ' ' + amt, btnId);
         }
 
-        function getPermutations(str, length) {
-            const results = new Set();
-            const arr = str.split('');
-            function permute(current, remaining) {
-                if (current.length === length) {
-                    results.add(current);
-                    return;
-                }
-                for (let i = 0; i < remaining.length; i++) {
-                    const nextRem = [...remaining];
-                    nextRem.splice(i, 1);
-                    permute(current + remaining[i], nextRem);
-                }
-            }
-            permute('', arr);
-            return Array.from(results);
-        }
-
         function parseSmartText(rawText, customer, discountPct, forcedType = 'auto') {
             const lines = rawText.split(/\r?\n/);
             const results = [];
@@ -952,7 +934,7 @@
             window.setFirebaseData(null, null, limits, null, null, undefined, undefined);
         }
 
-        // ฟังก์ชันคำนวณรางวัลและแยกยอดตามรายชื่อลูกค้าอย่างแม่นยำ (กระจายสัดส่วนยอดสู้จริง)
+        // ฟังก์ชันคำนวณผลรางวัลตาม 4 ขั้นตอนที่คุณต้องการ
         function calculateWinnersAndProfit() {
             const rawTop = document.getElementById('res-top3').value.trim();
             const rawBottom2 = document.getElementById('res-bottom2').value.trim();
@@ -962,7 +944,7 @@
             const win2Top = rawTop.slice(-2);
             const { payoutRates, entries, maxLimits, bigBossItems } = window.getFirebaseData();
 
-            // 1. คำนวณยอดรวมและหายอดสู้สุทธิ (หลังหักส่งเจ้าใหญ่) ต่อเลขแต่ละตัว
+            // 1. คำนวณยอดรวมและสัดส่วนการรับสู้ vs ส่งเจ้าใหญ่ต่อเลขแต่ละตัว
             const totalBetMap = {};
             entries.forEach(e => {
                 const key = `${e.number}|${e.type}`;
@@ -971,40 +953,48 @@
             });
 
             const netKeptMap = {};
+            const cutoffMap = {};
             Object.keys(totalBetMap).forEach(key => {
                 const [num, type] = key.split('|');
                 const total = totalBetMap[key];
                 const limit = maxLimits[type] || 1000;
-                const totalKeptForThisNum = Math.min(total, limit);
-                netKeptMap[key] = totalKeptForThisNum;
+                const kept = Math.min(total, limit);
+                netKeptMap[key] = kept;
+                cutoffMap[key] = Math.max(0, total - kept);
             });
 
+            // หักยอดที่ส่งเจ้าใหญ่เพิ่มจากหน้าเจ้ามือ
             bigBossItems.forEach(bb => {
                 const key = `${bb.number}|${bb.type}`;
                 if (netKeptMap[key] !== undefined) {
-                    netKeptMap[key] = Math.max(0, netKeptMap[key] - bb.amount);
+                    const reduceAmt = Math.min(netKeptMap[key], bb.amount);
+                    netKeptMap[key] -= reduceAmt;
+                    cutoffMap[key] = (cutoffMap[key] || 0) + reduceAmt;
                 }
             });
 
-            let totalKeptIn = 0;
-            let totalPayout = 0;
+            let totalKeptInAll = 0; // ยอดรับเองรวมทั้งหมด
+            let grandTotalPrizeAll = 0; // ยอดถูกรางวัลรวมทั้งหมดของลูกค้า
+            let grandTotalBossPrize = 0; // ยอดถูกรางวัลที่เจ้าใหญ่ต้องจ่าย (ส่วนที่ส่งเจ้าใหญ่)
+            let dealerPayOwnPrize = 0; // ยอดถูกรางวัลที่เจ้ามือต้องจ่ายเอง
+
             const customerDetails = {};
 
-            // 2. วนลูปรายรายการ (Entry) ของลูกค้าแต่ละคน เพื่อกระจายสัดส่วนยอดสู้และคำนวณเงินรางวัล
+            // 2. วนลูปตรวจรางวัลและคำนวณสัดส่วนแยกตามรายชื่อคนส่ง
             entries.forEach(e => {
                 const key = `${e.number}|${e.type}`;
                 const totalForThisNum = totalBetMap[key] || 1;
                 const netKeptForThisNum = netKeptMap[key] || 0;
+                const cutoffForThisNum = cutoffMap[key] || 0;
 
-                // สัดส่วนยอดสู้ของลูกค้ารายนี้เทียบกับยอดรวมทั้งหมดของเลขตัวนั้น
-                const customerShareRatio = e.amount / totalForThisNum;
-                const customerKeptAmt = netKeptForThisNum * customerShareRatio;
+                // สัดส่วนของลูกค้ารายนี้
+                const ratio = e.amount / totalForThisNum;
+                const custKeptAmt = netKeptForThisNum * ratio;
+                const custCutoffAmt = cutoffForThisNum * ratio;
 
-                if (customerKeptAmt > 0) {
-                    totalKeptIn += customerKeptAmt;
-                }
+                totalKeptInAll += custKeptAmt;
 
-                // ตรวจสอบว่าถูกรางวัลหรือไม่
+                // เช็คว่าถูกรางวัลหรือไม่
                 let rate = 0;
                 if (e.type === '3ตัวตรง' && e.number === win3Top) rate = payoutRates['3ตัวตรง'];
                 else if (e.type === '3ตัวโต๊ด' && isTodMatch(e.number, win3Top)) rate = payoutRates['3ตัวโต๊ด'];
@@ -1017,8 +1007,18 @@
                     const restriction = checkNumberRestriction(e.number, e.type);
                     const isHalf = (restriction === 'half');
                     const finalRate = isHalf ? (rate / 2) : rate;
-                    const prize = customerKeptAmt * finalRate;
-                    totalPayout += prize;
+
+                    // เงินรางวัลรวมที่ลูกค้ารายนี้ควรได้ทั้งหมดจากยอดแทงเต็ม
+                    const totalCustomerPrize = e.amount * finalRate;
+                    grandTotalPrizeAll += totalCustomerPrize;
+
+                    // ส่วนที่เจ้าใหญ่ต้องจ่าย (คิดจากสัดส่วนยอดที่ส่งเจ้าใหญ่)
+                    const bossSharePrize = custCutoffAmt * finalRate;
+                    grandTotalBossPrize += bossSharePrize;
+
+                    // ส่วนที่เจ้ามือต้องจ่ายเอง (ยอดถูกรวม - ส่วนที่ส่งเจ้าใหญ่จ่าย)
+                    const dealerSharePrize = totalCustomerPrize - bossSharePrize;
+                    dealerPayOwnPrize += dealerSharePrize;
 
                     const custName = e.customer || 'ทั่วไป';
                     if (!customerDetails[custName]) {
@@ -1028,26 +1028,36 @@
                         number: e.number,
                         type: e.type,
                         rawAmount: e.amount,
-                        keptAmount: customerKeptAmt,
+                        keptAmount: custKeptAmt,
+                        cutoffAmount: custCutoffAmt,
                         rate: finalRate,
                         isHalf,
-                        prize
+                        prize: totalCustomerPrize
                     });
-                    customerDetails[custName].totalPrize += prize;
+                    customerDetails[custName].totalPrize += totalCustomerPrize;
                 }
             });
 
-            const netProfit = totalKeptIn - totalPayout;
-            document.getElementById('pay-kept-in').textContent = Math.round(totalKeptIn).toLocaleString('th-TH');
-            document.getElementById('pay-total-out').textContent = Math.round(totalPayout).toLocaleString('th-TH');
+            // 4. นำยอดรับเอง มาหักลบกับยอดถูกที่เจ้ามือต้องจ่ายเอง เพื่อหากำไร/ขาดทุนสุทธิ
+            const netProfit = totalKeptInAll - dealerPayOwnPrize;
+
+            // แสดงผลบนหน้าจอ
+            document.getElementById('pay-kept-in').textContent = Math.round(totalKeptInAll).toLocaleString('th-TH');
+            document.getElementById('pay-total-out').textContent = Math.round(grandTotalPrizeAll).toLocaleString('th-TH');
             document.getElementById('pay-net-amount').textContent = (netProfit >= 0 ? '+' : '') + Math.round(netProfit).toLocaleString('th-TH') + ' ฿';
 
             const listDiv = document.getElementById('winners-by-customer-list');
             const custEntries = Object.entries(customerDetails);
             if (custEntries.length === 0) {
-                listDiv.innerHTML = '<p class="text-slate-400">ไม่มีผู้ถูกรางวัลจากยอดรับเองในงวดนี้</p>';
+                listDiv.innerHTML = '<p class="text-slate-400 text-center py-4">ไม่มีผู้ถูกรางวัลในงวดนี้</p>';
             } else {
-                listDiv.innerHTML = custEntries.map(([cust, data]) => `
+                listDiv.innerHTML = `
+                    <div class="bg-purple-50 p-4 rounded-2xl border border-purple-200 mb-4 text-xs text-purple-950 space-y-1">
+                        <div>• ยอดถูกรางวัลรวมทั้งหมด: <b class="number-font">${Math.round(grandTotalPrizeAll).toLocaleString()}</b> บาท</div>
+                        <div>• ยอดถูกรางวัลส่วนที่ส่งเจ้าใหญ่: <b class="text-indigo-700 number-font">${Math.round(grandTotalBossPrize).toLocaleString()}</b> บาท</div>
+                        <div>• ยอดถูกรางวัลที่เจ้ามือจ่ายเอง: <b class="text-rose-600 number-font">${Math.round(dealerPayOwnPrize).toLocaleString()}</b> บาท</div>
+                    </div>
+                ` + custEntries.map(([cust, data]) => `
                     <div class="bg-slate-50 p-4 rounded-2xl border space-y-2">
                         <div class="flex justify-between items-center border-b pb-2">
                             <span class="font-bold text-slate-800 text-sm">👤 ${cust}</span>
@@ -1056,7 +1066,7 @@
                         <div class="space-y-1.5 pt-1">
                             ${data.wins.map(w => `
                                 <div class="flex justify-between items-center text-slate-600 text-xs bg-white p-2.5 rounded-xl border">
-                                    <span>• ถูกเลข <b class="text-slate-900">${w.number}</b> (${w.type}) แทง ${w.rawAmount.toLocaleString()} บ. (สู้รับ ${w.keptAmount.toLocaleString('th-TH', {maximumFractionDigits: 0})} บ.) ${w.isHalf ? '<span class="text-amber-600 font-bold">(จ่ายครึ่ง บาทละ ' + w.rate + ')</span>' : '(จ่ายบาทละ ' + w.rate + ')'}</span>
+                                    <span>• ถูกเลข <b class="text-slate-900">${w.number}</b> (${w.type}) แทง ${w.rawAmount.toLocaleString()} บ. ${w.isHalf ? '<span class="text-amber-600 font-bold">(จ่ายครึ่ง บาทละ ' + w.rate + ')</span>' : '(จ่ายบาทละ ' + w.rate + ')'}</span>
                                     <span class="font-bold text-rose-500 number-font text-sm">+${w.prize.toLocaleString('th-TH', {maximumFractionDigits: 2})} ฿</span>
                                 </div>
                             `).join('')}
@@ -1064,7 +1074,7 @@
                     </div>
                 `).join('');
             }
-            showToast('คำนวณผลรางวัลแยกตามรายชื่อลูกค้าเรียบร้อย', 'success');
+            showToast('คำนวณผลรางวัลและหักส่วนเจ้าใหญ่เรียบร้อย', 'success');
         }
 
         function calculateBossPayout() {
