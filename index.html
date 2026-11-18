@@ -375,12 +375,12 @@
                 <div class="lg:col-span-7 bg-white rounded-3xl border p-6 shadow-sm space-y-4">
                     <div class="grid grid-cols-3 gap-3 text-center">
                         <div class="p-4 bg-slate-50 rounded-2xl border"><div class="text-xs text-slate-500">ยอดรับเอง (สู้)</div><div id="pay-kept-in" class="font-extrabold text-xl number-font text-purple-900 mt-1">0</div></div>
-                        <div class="p-4 bg-rose-50 rounded-2xl border border-rose-100"><div class="text-xs text-rose-600">ยอดจ่ายรางวัลรวม</div><div id="pay-total-out" class="font-extrabold text-xl text-rose-600 number-font mt-1">0</div></div>
+                        <div class="p-4 bg-rose-50 rounded-2xl border border-rose-100"><div class="text-xs text-rose-600">ยอดจ่ายรางวัล</div><div id="pay-total-out" class="font-extrabold text-xl text-rose-600 number-font mt-1">0</div></div>
                         <div class="p-4 bg-emerald-50 rounded-2xl border border-emerald-100"><div class="text-xs text-emerald-700 font-bold">กำไร/ขาดทุนสุทธิ</div><div id="pay-net-amount" class="font-extrabold text-xl text-emerald-700 number-font mt-1">0</div></div>
                     </div>
                 </div>
             </div>
-            <!-- รายละเอียดการถูกรางวัลแยกตามรายคนแบบแม่นยำ -->
+            <!-- รายละเอียดการถูกรางวัลแยกตามรายชื่อคนส่ง -->
             <div class="bg-white rounded-3xl border shadow-sm p-6 space-y-4">
                 <h4 class="font-bold text-slate-800 text-sm">รายละเอียดการถูกรางวัลแยกตามรายชื่อคนส่ง (กระจายสัดส่วนสู้จริง)</h4>
                 <div id="winners-by-customer-list" class="space-y-4 text-xs"></div>
@@ -432,6 +432,19 @@
                 <div class="text-3xl font-extrabold number-font text-amber-300" id="bigboss-sum-net">0 <span class="text-sm">฿</span></div>
             </div>
         </section>
+
+        <!-- ตั้งค่าอัตราจ่ายหน้าเจ้าใหญ่ -->
+        <div class="bg-white rounded-3xl border p-6 shadow-sm space-y-4">
+            <h3 class="text-base font-bold text-indigo-950 flex items-center gap-2">
+                <i class="fa-solid fa-sliders text-indigo-600"></i> ตั้งค่าอัตราจ่ายเจ้าใหญ่ (บาทละ)
+            </h3>
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                <div><label class="text-xs text-slate-500 block mb-1">3 ตัวตรง (เจ้าใหญ่)</label><input type="number" id="boss-rate-3straight" oninput="saveBossRates()" class="w-full px-3.5 py-2.5 border rounded-2xl text-sm font-bold number-font" value="900"></div>
+                <div><label class="text-xs text-slate-500 block mb-1">3 ตัวโต๊ด (เจ้าใหญ่)</label><input type="number" id="boss-rate-3tod" oninput="saveBossRates()" class="w-full px-3.5 py-2.5 border rounded-2xl text-sm font-bold number-font" value="150"></div>
+                <div><label class="text-xs text-slate-500 block mb-1">2 ตัว บน/ล่าง (เจ้าใหญ่)</label><input type="number" id="boss-rate-2updown" oninput="saveBossRates()" class="w-full px-3.5 py-2.5 border rounded-2xl text-sm font-bold number-font" value="90"></div>
+                <div><label class="text-xs text-slate-500 block mb-1">วิ่ง บน/ล่าง (เจ้าใหญ่)</label><input type="number" id="boss-rate-run" oninput="saveBossRates()" class="w-full px-3.5 py-2.5 border rounded-2xl text-sm font-bold number-font" value="3"></div>
+            </div>
+        </div>
 
         <div class="bg-white rounded-3xl border p-6 shadow-sm space-y-4">
             <h3 class="text-base font-bold text-indigo-950 flex items-center gap-2">
@@ -487,19 +500,21 @@
         let specialNumbers = [];
         let maxLimits = { '2ตัวบน': 1000, '2ตัวล่าง': 1000, '3ตัวตรง': 500, '3ตัวโต๊ด': 500, '3ตัวล่าง': 500, 'วิ่งบน': 5000, 'วิ่งล่าง': 5000 };
         let payoutRates = { '3ตัวตรง': 900, '3ตัวโต๊ด': 150, '2ตัว': 90, 'วิ่ง': 3 };
+        let bossRates = { '3ตัวตรง': 900, '3ตัวโต๊ด': 150, '2ตัว': 90, 'วิ่ง': 3 };
         let bigBossItems = [];
         let isDealerClosed = false;
         let lottoDate = '2026-11-16';
 
         function loadFromLocalStorage() {
             try {
-                const local = localStorage.getItem('smart_lotto_backup_v18');
+                const local = localStorage.getItem('smart_lotto_backup_v19');
                 if (local) {
                     const data = JSON.parse(local);
                     entries = data.entries || [];
                     specialNumbers = data.specialNumbers || [];
                     if (data.maxLimits) maxLimits = data.maxLimits;
                     if (data.payoutRates) payoutRates = data.payoutRates;
+                    if (data.bossRates) bossRates = data.bossRates;
                     bigBossItems = data.bigBossItems || [];
                     isDealerClosed = !!data.isDealerClosed;
                     lottoDate = data.lottoDate || '2026-11-16';
@@ -510,17 +525,18 @@
 
         window.initAppFirebase = function() {
             const statusEl = document.getElementById('db-status');
-            onValue(ref(db, 'lotto_data_v18'), (snapshot) => {
+            onValue(ref(db, 'lotto_data_v19'), (snapshot) => {
                 const data = snapshot.val();
                 if (data) {
                     entries = data.entries || [];
                     specialNumbers = data.specialNumbers || [];
                     if (data.maxLimits) maxLimits = data.maxLimits;
                     if (data.payoutRates) payoutRates = data.payoutRates;
+                    if (data.bossRates) bossRates = data.bossRates;
                     bigBossItems = data.bigBossItems || [];
                     isDealerClosed = !!data.isDealerClosed;
                     lottoDate = data.lottoDate || '2026-11-16';
-                    localStorage.setItem('smart_lotto_backup_v18', JSON.stringify(data));
+                    localStorage.setItem('smart_lotto_backup_v19', JSON.stringify(data));
                 }
                 statusEl.textContent = 'ออนไลน์';
                 statusEl.className = 'text-emerald-400 font-bold';
@@ -533,9 +549,9 @@
         };
 
         window.saveDataToFirebase = function() {
-            const payload = { entries, specialNumbers, maxLimits, payoutRates, bigBossItems, isDealerClosed, lottoDate };
-            localStorage.setItem('smart_lotto_backup_v18', JSON.stringify(payload));
-            set(ref(db, 'lotto_data_v18'), payload).catch(err => {});
+            const payload = { entries, specialNumbers, maxLimits, payoutRates, bossRates, bigBossItems, isDealerClosed, lottoDate };
+            localStorage.setItem('smart_lotto_backup_v19', JSON.stringify(payload));
+            set(ref(db, 'lotto_data_v19'), payload).catch(err => {});
         }
 
         window.addEventListener('DOMContentLoaded', () => {
@@ -543,12 +559,13 @@
             window.initAppFirebase();
         });
 
-        window.getFirebaseData = () => ({ entries, specialNumbers, maxLimits, payoutRates, bigBossItems, isDealerClosed, lottoDate });
-        window.setFirebaseData = (newEntries, newSpecial, newLimits, newRates, newBigBoss, newClosed, newDate) => {
+        window.getFirebaseData = () => ({ entries, specialNumbers, maxLimits, payoutRates, bossRates, bigBossItems, isDealerClosed, lottoDate });
+        window.setFirebaseData = (newEntries, newSpecial, newLimits, newRates, newBossRates, newBigBoss, newClosed, newDate) => {
             if (newEntries !== null) entries = newEntries;
             if (newSpecial !== null) specialNumbers = newSpecial;
             if (newLimits !== null) maxLimits = newLimits;
             if (newRates !== null) payoutRates = newRates;
+            if (newBossRates !== null) bossRates = newBossRates;
             if (newBigBoss !== null) bigBossItems = newBigBoss;
             if (newClosed !== undefined) isDealerClosed = newClosed;
             if (newDate !== undefined) lottoDate = newDate;
@@ -568,7 +585,7 @@
 
         function updateLottoDate() {
             const val = document.getElementById('lotto-date-picker').value;
-            window.setFirebaseData(null, null, null, null, null, undefined, val);
+            window.setFirebaseData(null, null, null, null, null, null, undefined, val);
             showToast('อัปเดตวันที่งวดประจำเรียบร้อย', 'success');
         }
 
@@ -608,7 +625,7 @@
         function toggleDealerCloseStatus() {
             const { isDealerClosed } = window.getFirebaseData();
             const nextState = !isDealerClosed;
-            window.setFirebaseData(null, null, null, null, null, nextState, undefined);
+            window.setFirebaseData(null, null, null, null, null, null, nextState, undefined);
             showToast(nextState ? '🔴 ปิดรับแทงแล้ว' : '🟢 เปิดรับแทงปกติ', nextState ? 'warning' : 'success');
         }
 
@@ -755,7 +772,7 @@
             if (parsed.length > 0) {
                 const { entries } = window.getFirebaseData();
                 const newEntries = [...parsed.reverse(), ...entries];
-                window.setFirebaseData(newEntries, null, null, null, null, undefined, undefined);
+                window.setFirebaseData(newEntries, null, null, null, null, null, undefined, undefined);
                 document.getElementById('smart-input').value = '';
                 clearInputBox('smart-input', 'clear-input-btn');
                 showToast(`เพิ่มสำเร็จ ${parsed.length} รายการ`, 'success');
@@ -768,7 +785,7 @@
             const { entries } = window.getFirebaseData();
             if (entries.length === 0) return showToast('ไม่มีรายการโพยให้ส่ง', 'warning');
             entries.forEach(e => e.sentToDealer = true);
-            window.setFirebaseData(entries, null, null, null, null, undefined, undefined);
+            window.setFirebaseData(entries, null, null, null, null, null, undefined, undefined);
             showToast('ส่งโพยเข้าสู่หน้าเจ้ามือเรียบร้อย', 'success');
         }
 
@@ -797,7 +814,7 @@
 
                 item.number = num;
                 item.amount = amt;
-                window.setFirebaseData(entries, null, null, null, null, undefined, undefined);
+                window.setFirebaseData(entries, null, null, null, null, null, undefined, undefined);
                 toggleModal('edit-modal', false);
                 showToast('แก้ไขรายการสำเร็จ', 'success');
             }
@@ -806,7 +823,7 @@
         function deleteEntry(id) {
             const { entries } = window.getFirebaseData();
             const newEntries = entries.filter(e => e.id !== id);
-            window.setFirebaseData(newEntries, null, null, null, null, undefined, undefined);
+            window.setFirebaseData(newEntries, null, null, null, null, null, undefined, undefined);
             showToast('ลบรายการแล้ว', 'info');
         }
 
@@ -833,7 +850,7 @@
                 }
             });
 
-            window.setFirebaseData(null, specialNumbers, null, null, null, undefined, undefined);
+            window.setFirebaseData(null, specialNumbers, null, null, null, null, undefined, undefined);
             document.getElementById('new-limit-numbers').value = '';
             showToast('บันทึกเลขอั้นเรียบร้อย', 'success');
         }
@@ -857,7 +874,7 @@
         window.deleteSpecialRule = function(i) {
             const { specialNumbers } = window.getFirebaseData();
             specialNumbers.splice(i, 1);
-            window.setFirebaseData(null, specialNumbers, null, null, null, undefined, undefined);
+            window.setFirebaseData(null, specialNumbers, null, null, null, null, undefined, undefined);
             showToast('ลบเลขอั้นแล้ว', 'info');
         }
 
@@ -868,7 +885,17 @@
                 '2ตัว': parseInt(document.getElementById('rate-2updown').value) || 0,
                 'วิ่ง': parseInt(document.getElementById('rate-run').value) || 0
             };
-            window.setFirebaseData(null, null, null, rates, null, undefined, undefined);
+            window.setFirebaseData(null, null, null, rates, null, null, undefined, undefined);
+        }
+
+        function saveBossRates() {
+            const rates = {
+                '3ตัวตรง': parseInt(document.getElementById('boss-rate-3straight').value) || 0,
+                '3ตัวโต๊ด': parseInt(document.getElementById('boss-rate-3tod').value) || 0,
+                '2ตัว': parseInt(document.getElementById('boss-rate-2updown').value) || 0,
+                'วิ่ง': parseInt(document.getElementById('boss-rate-run').value) || 0
+            };
+            window.setFirebaseData(null, null, null, null, rates, null, undefined, undefined);
         }
 
         function computeRiskAggregates() {
@@ -931,10 +958,10 @@
                 'วิ่งบน': parseInt(document.getElementById('limit-runup').value) || 0,
                 'วิ่งล่าง': parseInt(document.getElementById('limit-rundown').value) || 0
             };
-            window.setFirebaseData(null, null, limits, null, null, undefined, undefined);
+            window.setFirebaseData(null, null, limits, null, null, null, undefined, undefined);
         }
 
-        // ฟังก์ชันคำนวณผลรางวัลตาม 4 ขั้นตอนที่คุณต้องการ
+        // ฟังก์ชันคำนวณผลรางวัลหน้าเจ้ามือ (แก้ไขสูตรกำไรสุทธิให้นำยอดรับเองมาหักกับยอดถูกที่เจ้ามือต้องจ่ายเอง)
         function calculateWinnersAndProfit() {
             const rawTop = document.getElementById('res-top3').value.trim();
             const rawBottom2 = document.getElementById('res-bottom2').value.trim();
@@ -944,7 +971,6 @@
             const win2Top = rawTop.slice(-2);
             const { payoutRates, entries, maxLimits, bigBossItems } = window.getFirebaseData();
 
-            // 1. คำนวณยอดรวมและสัดส่วนการรับสู้ vs ส่งเจ้าใหญ่ต่อเลขแต่ละตัว
             const totalBetMap = {};
             entries.forEach(e => {
                 const key = `${e.number}|${e.type}`;
@@ -963,7 +989,6 @@
                 cutoffMap[key] = Math.max(0, total - kept);
             });
 
-            // หักยอดที่ส่งเจ้าใหญ่เพิ่มจากหน้าเจ้ามือ
             bigBossItems.forEach(bb => {
                 const key = `${bb.number}|${bb.type}`;
                 if (netKeptMap[key] !== undefined) {
@@ -975,26 +1000,23 @@
 
             let totalKeptInAll = 0; // ยอดรับเองรวมทั้งหมด
             let grandTotalPrizeAll = 0; // ยอดถูกรางวัลรวมทั้งหมดของลูกค้า
-            let grandTotalBossPrize = 0; // ยอดถูกรางวัลที่เจ้าใหญ่ต้องจ่าย (ส่วนที่ส่งเจ้าใหญ่)
-            let dealerPayOwnPrize = 0; // ยอดถูกรางวัลที่เจ้ามือต้องจ่ายเอง
+            let grandTotalBossPrize = 0; // ยอดถูกรางวัลที่เจ้าใหญ่ต้องจ่าย
+            let dealerPayOwnPrize = 0; // ยอดถูกรางวัลที่เจ้ามือต้องจ่ายเองจากยอดรับเอง
 
             const customerDetails = {};
 
-            // 2. วนลูปตรวจรางวัลและคำนวณสัดส่วนแยกตามรายชื่อคนส่ง
             entries.forEach(e => {
                 const key = `${e.number}|${e.type}`;
                 const totalForThisNum = totalBetMap[key] || 1;
                 const netKeptForThisNum = netKeptMap[key] || 0;
                 const cutoffForThisNum = cutoffMap[key] || 0;
 
-                // สัดส่วนของลูกค้ารายนี้
                 const ratio = e.amount / totalForThisNum;
                 const custKeptAmt = netKeptForThisNum * ratio;
                 const custCutoffAmt = cutoffForThisNum * ratio;
 
                 totalKeptInAll += custKeptAmt;
 
-                // เช็คว่าถูกรางวัลหรือไม่
                 let rate = 0;
                 if (e.type === '3ตัวตรง' && e.number === win3Top) rate = payoutRates['3ตัวตรง'];
                 else if (e.type === '3ตัวโต๊ด' && isTodMatch(e.number, win3Top)) rate = payoutRates['3ตัวโต๊ด'];
@@ -1008,16 +1030,14 @@
                     const isHalf = (restriction === 'half');
                     const finalRate = isHalf ? (rate / 2) : rate;
 
-                    // เงินรางวัลรวมที่ลูกค้ารายนี้ควรได้ทั้งหมดจากยอดแทงเต็ม
                     const totalCustomerPrize = e.amount * finalRate;
                     grandTotalPrizeAll += totalCustomerPrize;
 
-                    // ส่วนที่เจ้าใหญ่ต้องจ่าย (คิดจากสัดส่วนยอดที่ส่งเจ้าใหญ่)
                     const bossSharePrize = custCutoffAmt * finalRate;
                     grandTotalBossPrize += bossSharePrize;
 
-                    // ส่วนที่เจ้ามือต้องจ่ายเอง (ยอดถูกรวม - ส่วนที่ส่งเจ้าใหญ่จ่าย)
-                    const dealerSharePrize = totalCustomerPrize - bossSharePrize;
+                    // ยอดถูกที่เจ้ามือต้องจ่ายเอง (คำนวณจากสัดส่วนยอดรับเองที่สู้)
+                    const dealerSharePrize = custKeptAmt * finalRate;
                     dealerPayOwnPrize += dealerSharePrize;
 
                     const custName = e.customer || 'ทั่วไป';
@@ -1028,8 +1048,6 @@
                         number: e.number,
                         type: e.type,
                         rawAmount: e.amount,
-                        keptAmount: custKeptAmt,
-                        cutoffAmount: custCutoffAmt,
                         rate: finalRate,
                         isHalf,
                         prize: totalCustomerPrize
@@ -1038,10 +1056,9 @@
                 }
             });
 
-            // 4. นำยอดรับเอง มาหักลบกับยอดถูกที่เจ้ามือต้องจ่ายเอง เพื่อหากำไร/ขาดทุนสุทธิ
+            // กำไร/ขาดทุนสุทธิ = ยอดรับเอง (สู้) - ยอดถูกรางวัลที่เจ้ามือจ่ายเอง
             const netProfit = totalKeptInAll - dealerPayOwnPrize;
 
-            // แสดงผลบนหน้าจอ
             document.getElementById('pay-kept-in').textContent = Math.round(totalKeptInAll).toLocaleString('th-TH');
             document.getElementById('pay-total-out').textContent = Math.round(grandTotalPrizeAll).toLocaleString('th-TH');
             document.getElementById('pay-net-amount').textContent = (netProfit >= 0 ? '+' : '') + Math.round(netProfit).toLocaleString('th-TH') + ' ฿';
@@ -1055,7 +1072,7 @@
                     <div class="bg-purple-50 p-4 rounded-2xl border border-purple-200 mb-4 text-xs text-purple-950 space-y-1">
                         <div>• ยอดถูกรางวัลรวมทั้งหมด: <b class="number-font">${Math.round(grandTotalPrizeAll).toLocaleString()}</b> บาท</div>
                         <div>• ยอดถูกรางวัลส่วนที่ส่งเจ้าใหญ่: <b class="text-indigo-700 number-font">${Math.round(grandTotalBossPrize).toLocaleString()}</b> บาท</div>
-                        <div>• ยอดถูกรางวัลที่เจ้ามือจ่ายเอง: <b class="text-rose-600 number-font">${Math.round(dealerPayOwnPrize).toLocaleString()}</b> บาท</div>
+                        <div>• ยอดถูกรางวัลที่เจ้ามือต้องจ่ายเอง: <b class="text-rose-600 number-font">${Math.round(dealerPayOwnPrize).toLocaleString()}</b> บาท</div>
                     </div>
                 ` + custEntries.map(([cust, data]) => `
                     <div class="bg-slate-50 p-4 rounded-2xl border space-y-2">
@@ -1074,7 +1091,7 @@
                     </div>
                 `).join('');
             }
-            showToast('คำนวณผลรางวัลและหักส่วนเจ้าใหญ่เรียบร้อย', 'success');
+            showToast('คำนวณผลรางวัลและกำไรสุทธิเรียบร้อย', 'success');
         }
 
         function calculateBossPayout() {
@@ -1084,7 +1101,7 @@
 
             const win3Top = rawTop.slice(-3);
             const win2Top = rawTop.slice(-2);
-            const { payoutRates, bigBossItems } = window.getFirebaseData();
+            const { bossRates, bigBossItems } = window.getFirebaseData();
             const discPct = parseFloat(document.getElementById('bigboss-discount-pct').value) || 0;
 
             const mergedBossMap = {};
@@ -1100,10 +1117,12 @@
             Object.values(mergedBossMap).forEach(item => {
                 totalGross += item.amount;
                 let rate = 0;
-                if (item.type === '3ตัวตรง' && item.number === win3Top) rate = payoutRates['3ตัวตรง'];
-                else if (item.type === '3ตัวโต๊ด' && isTodMatch(item.number, win3Top)) rate = payoutRates['3ตัวโต๊ด'];
-                else if (item.type === '2ตัวบน' && item.number === win2Top) rate = payoutRates['2ตัว'];
-                else if (item.type === '2ตัวล่าง' && item.number === rawBottom2) rate = payoutRates['2ตัว'];
+                if (item.type === '3ตัวตรง' && item.number === win3Top) rate = bossRates['3ตัวตรง'];
+                else if (item.type === '3ตัวโต๊ด' && isTodMatch(item.number, win3Top)) rate = bossRates['3ตัวโต๊ด'];
+                else if (item.type === '2ตัวบน' && item.number === win2Top) rate = bossRates['2ตัว'];
+                else if (item.type === '2ตัวล่าง' && item.number === rawBottom2) rate = bossRates['2ตัว'];
+                else if (item.type === 'วิ่งบน' && win3Top.includes(item.number)) rate = bossRates['วิ่ง'];
+                else if (item.type === 'วิ่งล่าง' && rawBottom2.includes(item.number)) rate = bossRates['วิ่ง'];
 
                 if (rate > 0) {
                     const prize = item.amount * rate;
@@ -1156,7 +1175,7 @@
                     addedCount++;
                 }
             });
-            window.setFirebaseData(null, null, null, null, bigBossItems, undefined, undefined);
+            window.setFirebaseData(null, null, null, null, null, bigBossItems, undefined, undefined);
             showToast(`ดึงยอดส่งเจ้าใหญ่สำเร็จ ${addedCount} รายการ`, 'success');
         }
 
@@ -1166,7 +1185,7 @@
             const parsed = parseSmartText(raw, 'เจ้าใหญ่', 0, 'auto');
             const { bigBossItems } = window.getFirebaseData();
             parsed.forEach(p => bigBossItems.push({ id: p.id, number: p.number, type: p.type, amount: p.amount }));
-            window.setFirebaseData(null, null, null, null, bigBossItems, undefined, undefined);
+            window.setFirebaseData(null, null, null, null, null, bigBossItems, undefined, undefined);
             document.getElementById('dealer-bigboss-input').value = '';
             clearInputBox('dealer-bigboss-input', 'clear-dealer-bb-btn');
             showToast('ส่งรายการเข้าหน้าเจ้าใหญ่ & หักออกจากยอดรับแล้ว', 'success');
@@ -1218,7 +1237,7 @@
         window.deleteBigBossGroup = function(num, type) {
             const { bigBossItems } = window.getFirebaseData();
             const newBigBoss = bigBossItems.filter(i => !(i.number === num && i.type === type));
-            window.setFirebaseData(null, null, null, null, newBigBoss, undefined, undefined);
+            window.setFirebaseData(null, null, null, null, null, newBigBoss, undefined, undefined);
             showToast('ลบรายการแล้ว', 'info');
         }
 
@@ -1288,7 +1307,7 @@
         }
 
         function refreshAllViews() {
-            const { entries, isDealerClosed, bigBossItems, lottoDate, payoutRates } = window.getFirebaseData();
+            const { entries, isDealerClosed, bigBossItems, lottoDate, payoutRates, bossRates } = window.getFirebaseData();
             const formattedDate = formatThaiDate(lottoDate);
 
             document.getElementById('lotto-date-picker').value = lottoDate;
@@ -1299,6 +1318,11 @@
             document.getElementById('rate-3tod').value = payoutRates['3ตัวโต๊ด'];
             document.getElementById('rate-2updown').value = payoutRates['2ตัว'];
             document.getElementById('rate-run').value = payoutRates['วิ่ง'];
+
+            document.getElementById('boss-rate-3straight').value = bossRates['3ตัวตรง'];
+            document.getElementById('boss-rate-3tod').value = bossRates['3ตัวโต๊ด'];
+            document.getElementById('boss-rate-2updown').value = bossRates['2ตัว'];
+            document.getElementById('boss-rate-run').value = bossRates['วิ่ง'];
 
             const badge = document.getElementById('dealer-status-badge');
             const btnClose = document.getElementById('btn-toggle-dealer');
@@ -1323,9 +1347,6 @@
                 else if (e.type === 'วิ่งบน') sumRunUp += e.amount;
                 else if (e.type === 'วิ่งล่าง') sumRunDown += e.amount;
             });
-
-            let totalBigBossSent = 0;
-            bigBossItems.forEach(bb => totalBigBossSent += bb.amount);
 
             document.getElementById('dlr-sum-total').textContent = totalAll.toLocaleString('th-TH');
             document.getElementById('rec-sum-total').textContent = totalAll.toLocaleString('th-TH');
@@ -1404,40 +1425,30 @@
                 if (threeDigitsHalf.length > 0) {
                     const numsStr = threeDigitsHalf.map(r => r.number).join(', ');
                     groupsHtml += `
-                        <div class="bg-white/90 backdrop-blur-sm border border-amber-200/90 rounded-2xl p-4 shadow-sm space-y-2.5">
-                            <div class="flex items-center justify-between flex-wrap gap-2">
-                                <span class="text-xs md:text-sm font-bold text-slate-800">สามตัวตรง ' โต๊ด ' 6กลับ</span>
-                                <span class="text-xs font-bold text-amber-800 bg-amber-100/80 px-3 py-1 rounded-full border border-amber-300/60 shadow-xs">จ่ายครึ่ง</span>
-                            </div>
-                            <div class="font-extrabold number-font text-purple-950 text-base md:text-lg tracking-wider pt-0.5">${numsStr}</div>
+                        <div class="bg-white/95 backdrop-blur-sm border border-amber-200 rounded-2xl p-4 shadow-sm space-y-2">
+                            <div class="flex justify-between items-center"><span class="text-xs font-bold text-slate-800">อั้น 3 ตัว (ตรง/โต๊ด/6กลับ)</span><span class="text-[10px] font-bold bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full">จ่ายครึ่ง</span></div>
+                            <div class="font-extrabold number-font text-purple-950 text-sm tracking-wider">${numsStr}</div>
                         </div>
                     `;
                 }
                 if (twoDigitsHalf.length > 0) {
                     const numsStr = twoDigitsHalf.map(r => r.number).join(', ');
                     groupsHtml += `
-                        <div class="bg-white/90 backdrop-blur-sm border border-amber-200/90 rounded-2xl p-4 shadow-sm space-y-2.5">
-                            <div class="flex items-center justify-between flex-wrap gap-2">
-                                <span class="text-xs md:text-sm font-bold text-slate-800">สองตัว บน ' ล่าง (พร้อมตัวกลับ)</span>
-                                <span class="text-xs font-bold text-amber-800 bg-amber-100/80 px-3 py-1 rounded-full border border-amber-300/60 shadow-xs">จ่ายครึ่ง</span>
-                            </div>
-                            <div class="font-extrabold number-font text-purple-950 text-base md:text-lg tracking-wider pt-0.5">${numsStr}</div>
+                        <div class="bg-white/95 backdrop-blur-sm border border-amber-200 rounded-2xl p-4 shadow-sm space-y-2">
+                            <div class="flex justify-between items-center"><span class="text-xs font-bold text-slate-800">อั้น 2 ตัว (บน/ล่าง/กลับ)</span><span class="text-[10px] font-bold bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full">จ่ายครึ่ง</span></div>
+                            <div class="font-extrabold number-font text-purple-950 text-sm tracking-wider">${numsStr}</div>
                         </div>
                     `;
                 }
                 if (closedList.length > 0) {
                     const numsStr = closedList.map(r => r.number).join(', ');
                     groupsHtml += `
-                        <div class="bg-rose-50/90 backdrop-blur-sm border border-rose-200 rounded-2xl p-4 shadow-sm space-y-2.5">
-                            <div class="flex items-center justify-between flex-wrap gap-2">
-                                <span class="text-xs md:text-sm font-bold text-rose-900">เลขปิดรับ (ห้ามแทง)</span>
-                                <span class="text-xs font-bold text-rose-800 bg-rose-100/80 px-3 py-1 rounded-full border border-rose-300/60 shadow-xs">ปิดรับ</span>
-                            </div>
-                            <div class="font-extrabold number-font text-rose-950 text-base md:text-lg tracking-wider pt-0.5">${numsStr}</div>
+                        <div class="bg-rose-50/95 backdrop-blur-sm border border-rose-200 rounded-2xl p-4 shadow-sm space-y-2">
+                            <div class="flex justify-between items-center"><span class="text-xs font-bold text-rose-900">เลขปิดรับ (ห้ามแทง)</span><span class="text-[10px] font-bold bg-rose-100 text-rose-800 px-2 py-0.5 rounded-full">ปิดรับ</span></div>
+                            <div class="font-extrabold number-font text-rose-950 text-sm tracking-wider">${numsStr}</div>
                         </div>
                     `;
                 }
-
                 document.getElementById('recorder-limits-groups').innerHTML = groupsHtml;
             } else {
                 banner.classList.add('hidden');
@@ -1487,7 +1498,7 @@
 
         function confirmClearAll() {
             if (confirm('ต้องการล้างข้อมูลทั้งหมดหรือไม่?')) {
-                window.setFirebaseData([], [], { '2ตัวบน': 1000, '2ตัวล่าง': 1000, '3ตัวตรง': 500, '3ตัวโต๊ด': 500, '3ตัวล่าง': 500, 'วิ่งบน': 5000, 'วิ่งล่าง': 5000 }, { '3ตัวตรง': 900, '3ตัวโต๊ด': 150, '2ตัว': 90, 'วิ่ง': 3 }, [], false, '2026-11-16');
+                window.setFirebaseData([], [], { '2ตัวบน': 1000, '2ตัวล่าง': 1000, '3ตัวตรง': 500, '3ตัวโต๊ด': 500, '3ตัวล่าง': 500, 'วิ่งบน': 5000, 'วิ่งล่าง': 5000 }, { '3ตัวตรง': 900, '3ตัวโต๊ด': 150, '2ตัว': 90, 'วิ่ง': 3 }, { '3ตัวตรง': 900, '3ตัวโต๊ด': 150, '2ตัว': 90, 'วิ่ง': 3 }, [], false, '2026-11-16');
                 showToast('ล้างข้อมูลเรียบร้อย', 'info');
             }
         }
