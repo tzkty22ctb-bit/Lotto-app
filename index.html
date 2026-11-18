@@ -89,10 +89,10 @@
             <div class="bg-white rounded-3xl p-4 border shadow-sm flex flex-col justify-center"><span class="text-xs text-slate-400 font-medium">3 ตัว & วิ่ง</span><div class="text-base font-bold number-font mt-1"><span id="rec-sum-3all" class="text-amber-600">0</span> / <span id="rec-sum-run" class="text-rose-600">0</span></div></div>
         </section>
 
-        <!-- ประกาศเลขอั้นดีไซน์ใหม่ โมเดิร์น พรีเมียม -->
+        <!-- ประกาศเลขอั้นดีไซน์ใหม่ ปรับตำแหน่ง "ปิดรับ 13.00 น." และป้ายสถานะ -->
         <div id="recorder-limits-banner" class="hidden bg-gradient-to-br from-amber-50 via-yellow-50 to-orange-50 border-2 border-amber-300/80 rounded-3xl p-6 space-y-5 shadow-lg relative overflow-hidden">
             <div class="absolute -right-6 -bottom-6 w-32 h-32 bg-amber-200/20 rounded-full blur-xl pointer-events-none"></div>
-            <div class="flex items-center justify-between border-b border-amber-200/80 pb-3">
+            <div class="flex items-center justify-between border-b border-amber-200/80 pb-3 flex-wrap gap-3">
                 <div class="flex items-center gap-2.5">
                     <div class="w-9 h-9 rounded-xl bg-amber-500 text-white flex items-center justify-center shadow-md shadow-amber-300">
                         <i class="fa-solid fa-bullhorn"></i>
@@ -102,7 +102,7 @@
                         <p class="text-xs text-amber-800">งวดประจำวันที่ <span id="banner-date-text" class="number-font font-bold">--/--/----</span></p>
                     </div>
                 </div>
-                <span class="px-3 py-1 bg-amber-200/60 text-amber-900 font-bold text-xs rounded-full border border-amber-300/60">อัปเดตล่าสุด</span>
+                <span class="px-3.5 py-1.5 bg-white text-amber-900 font-bold text-xs rounded-full border border-amber-300/80 shadow-sm">ปิดรับ 13.00 น.</span>
             </div>
             <div id="recorder-limits-groups" class="space-y-4"></div>
         </div>
@@ -498,7 +498,7 @@
 
         function loadFromLocalStorage() {
             try {
-                const local = localStorage.getItem('smart_lotto_backup_v16');
+                const local = localStorage.getItem('smart_lotto_backup_v17');
                 if (local) {
                     const data = JSON.parse(local);
                     entries = data.entries || [];
@@ -515,7 +515,7 @@
 
         window.initAppFirebase = function() {
             const statusEl = document.getElementById('db-status');
-            onValue(ref(db, 'lotto_data_v16'), (snapshot) => {
+            onValue(ref(db, 'lotto_data_v17'), (snapshot) => {
                 const data = snapshot.val();
                 if (data) {
                     entries = data.entries || [];
@@ -525,7 +525,7 @@
                     bigBossItems = data.bigBossItems || [];
                     isDealerClosed = !!data.isDealerClosed;
                     lottoDate = data.lottoDate || '2026-11-16';
-                    localStorage.setItem('smart_lotto_backup_v16', JSON.stringify(data));
+                    localStorage.setItem('smart_lotto_backup_v17', JSON.stringify(data));
                 }
                 statusEl.textContent = 'ออนไลน์';
                 statusEl.className = 'text-emerald-400 font-bold';
@@ -539,8 +539,8 @@
 
         window.saveDataToFirebase = function() {
             const payload = { entries, specialNumbers, maxLimits, payoutRates, bigBossItems, isDealerClosed, lottoDate };
-            localStorage.setItem('smart_lotto_backup_v16', JSON.stringify(payload));
-            set(ref(db, 'lotto_data_v16'), payload).catch(err => {});
+            localStorage.setItem('smart_lotto_backup_v17', JSON.stringify(payload));
+            set(ref(db, 'lotto_data_v17'), payload).catch(err => {});
         }
 
         window.addEventListener('DOMContentLoaded', () => {
@@ -1373,7 +1373,7 @@
                 }).join('');
             }
 
-            // แสดงผลประกาศเลขอั้นดีไซน์พรีเมียม สไตล์การ์ดแยกหมวดหมู่
+            // แสดงผลประกาศเลขอั้นสไตล์การ์ดย่อย จัดวางตำแหน่งป้าย "จ่ายครึ่ง" / "เลขปิดรับ" ไว้ขวาบนตรงหัวข้อ
             const banner = document.getElementById('recorder-limits-banner');
             const { specialNumbers } = window.getFirebaseData();
             if (specialNumbers.length > 0) {
@@ -1386,35 +1386,36 @@
                 if (threeDigitsHalf.length > 0) {
                     const numsStr = threeDigitsHalf.map(r => r.number).join(', ');
                     groupsHtml += `
-                        <div class="bg-white/80 backdrop-blur-sm border border-amber-200/80 rounded-2xl p-4 shadow-sm space-y-2">
-                            <div class="flex items-center justify-between">
-                                <span class="text-xs font-bold text-amber-900 bg-amber-100 px-3 py-1 rounded-xl">สามตัวตรง ' โต๊ด ' 6กลับ</span>
-                                <span class="text-xs font-bold text-amber-700 bg-amber-50 px-2.5 py-0.5 rounded-lg border border-amber-200">จ่ายครึ่ง</span>
+                        <div class="bg-white/90 backdrop-blur-sm border border-amber-200/90 rounded-2xl p-4 shadow-sm space-y-2.5">
+                            <div class="flex items-center justify-between flex-wrap gap-2">
+                                <span class="text-xs md:text-sm font-bold text-slate-800">สามตัวตรง ' โต๊ด ' 6กลับ</span>
+                                <span class="text-xs font-bold text-amber-800 bg-amber-100/80 px-3 py-1 rounded-full border border-amber-300/60 shadow-xs">จ่ายครึ่ง</span>
                             </div>
-                            <div class="font-extrabold number-font text-purple-950 text-lg md:text-xl tracking-wider pt-1">${numsStr}</div>
+                            <div class="font-extrabold number-font text-purple-950 text-base md:text-lg tracking-wider pt-0.5">${numsStr}</div>
                         </div>
                     `;
                 }
                 if (twoDigitsHalf.length > 0) {
                     const numsStr = twoDigitsHalf.map(r => r.number).join(', ');
                     groupsHtml += `
-                        <div class="bg-white/80 backdrop-blur-sm border border-amber-200/80 rounded-2xl p-4 shadow-sm space-y-2">
-                            <div class="flex items-center justify-between">
-                                <span class="text-xs font-bold text-amber-900 bg-amber-100 px-3 py-1 rounded-xl">สองตัว บน ' ล่าง (พร้อมตัวกลับ)</span>
-                                <span class="text-xs font-bold text-amber-700 bg-amber-50 px-2.5 py-0.5 rounded-lg border border-amber-200">จ่ายครึ่ง</span>
+                        <div class="bg-white/90 backdrop-blur-sm border border-amber-200/90 rounded-2xl p-4 shadow-sm space-y-2.5">
+                            <div class="flex items-center justify-between flex-wrap gap-2">
+                                <span class="text-xs md:text-sm font-bold text-slate-800">สองตัว บน ' ล่าง (พร้อมตัวกลับ)</span>
+                                <span class="text-xs font-bold text-amber-800 bg-amber-100/80 px-3 py-1 rounded-full border border-amber-300/60 shadow-xs">จ่ายครึ่ง</span>
                             </div>
-                            <div class="font-extrabold number-font text-purple-950 text-lg md:text-xl tracking-wider pt-1">${numsStr}</div>
+                            <div class="font-extrabold number-font text-purple-950 text-base md:text-lg tracking-wider pt-0.5">${numsStr}</div>
                         </div>
                     `;
                 }
                 if (closedList.length > 0) {
                     const numsStr = closedList.map(r => r.number).join(', ');
                     groupsHtml += `
-                        <div class="bg-rose-50/90 backdrop-blur-sm border border-rose-200 rounded-2xl p-4 shadow-sm space-y-2">
-                            <div class="flex items-center justify-between">
-                                <span class="text-xs font-bold text-rose-900 bg-rose-100 px-3 py-1 rounded-xl">🚫 เลขปิดรับ (ห้ามแทง)</span>
+                        <div class="bg-rose-50/90 backdrop-blur-sm border border-rose-200 rounded-2xl p-4 shadow-sm space-y-2.5">
+                            <div class="flex items-center justify-between flex-wrap gap-2">
+                                <span class="text-xs md:text-sm font-bold text-rose-900">เลขปิดรับ (ห้ามแทง)</span>
+                                <span class="text-xs font-bold text-rose-800 bg-rose-100/80 px-3 py-1 rounded-full border border-rose-300/60 shadow-xs">ปิดรับ</span>
                             </div>
-                            <div class="font-extrabold number-font text-rose-950 text-lg md:text-xl tracking-wider pt-1">${numsStr}</div>
+                            <div class="font-extrabold number-font text-rose-950 text-base md:text-lg tracking-wider pt-0.5">${numsStr}</div>
                         </div>
                     `;
                 }
