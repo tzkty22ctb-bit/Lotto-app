@@ -89,13 +89,12 @@
             <div class="bg-white rounded-3xl p-4 border shadow-sm flex flex-col justify-center"><span class="text-xs text-slate-400 font-medium">3 ตัว & วิ่ง</span><div class="text-base font-bold number-font mt-1"><span id="rec-sum-3all" class="text-amber-600">0</span> / <span id="rec-sum-run" class="text-rose-600">0</span></div></div>
         </section>
 
-        <!-- ประกาศเลขอั้น 2 หัวข้อชัดเจน (วัน/เดือน/ปี) -->
-        <div id="recorder-limits-banner" class="hidden bg-amber-50 border border-amber-200 rounded-2xl p-4 space-y-3 text-xs shadow-sm">
-            <div class="flex items-center gap-2 text-amber-950 font-bold text-sm border-b border-amber-200/80 pb-2">
-                <i class="fa-solid fa-bullhorn text-amber-600"></i>
-                <span>ประกาศเลขอั้น/เลขปิดรับ งวดวันที่ <span id="banner-date-text" class="number-font text-amber-700">--/--/----</span></span>
+        <!-- ประกาศเลขอั้นสไตล์ป้ายเหลืองเหมือนภาพตัวอย่าง -->
+        <div id="recorder-limits-banner" class="hidden bg-[#fef08a] border-2 border-[#eab308] rounded-3xl p-5 space-y-4 text-slate-900 shadow-md">
+            <div class="text-center font-bold text-sm tracking-wide text-slate-800 pb-1 border-b border-[#eab308]/60">
+                📢 ประกาศเลขอั้น / เลขปิดรับ (งวดวันที่ <span id="banner-date-text" class="number-font text-purple-900">--/--/----</span>)
             </div>
-            <div id="recorder-limits-groups" class="space-y-2.5"></div>
+            <div id="recorder-limits-groups" class="space-y-4"></div>
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
@@ -367,7 +366,7 @@
                     </div>
                     <button onclick="calculateWinnersAndProfit()" class="w-full py-4 rounded-2xl bg-amber-500 hover:bg-amber-600 text-white font-bold text-sm shadow">คำนวณผลรางวัล & กำไรขาดทุน</button>
                 </div>
-                <div class="lg:col-span-7 bg-white rounded-3xl border p-6 space-y-4 shadow-sm">
+                <div class="lg:col-span-7 bg-white rounded-3xl border p-6 shadow-sm space-y-4">
                     <div class="grid grid-cols-3 gap-3 text-center">
                         <div class="p-4 bg-slate-50 rounded-2xl border"><div class="text-xs text-slate-500">ยอดรับเอง (สู้)</div><div id="pay-kept-in" class="font-extrabold text-xl number-font text-purple-900 mt-1">0</div></div>
                         <div class="p-4 bg-rose-50 rounded-2xl border border-rose-100"><div class="text-xs text-rose-600">ยอดจ่ายรางวัลรวม</div><div id="pay-total-out" class="font-extrabold text-xl text-rose-600 number-font mt-1">0</div></div>
@@ -489,7 +488,7 @@
 
         function loadFromLocalStorage() {
             try {
-                const local = localStorage.getItem('smart_lotto_backup_v14');
+                const local = localStorage.getItem('smart_lotto_backup_v15');
                 if (local) {
                     const data = JSON.parse(local);
                     entries = data.entries || [];
@@ -506,7 +505,7 @@
 
         window.initAppFirebase = function() {
             const statusEl = document.getElementById('db-status');
-            onValue(ref(db, 'lotto_data_v14'), (snapshot) => {
+            onValue(ref(db, 'lotto_data_v15'), (snapshot) => {
                 const data = snapshot.val();
                 if (data) {
                     entries = data.entries || [];
@@ -516,7 +515,7 @@
                     bigBossItems = data.bigBossItems || [];
                     isDealerClosed = !!data.isDealerClosed;
                     lottoDate = data.lottoDate || '2026-11-16';
-                    localStorage.setItem('smart_lotto_backup_v14', JSON.stringify(data));
+                    localStorage.setItem('smart_lotto_backup_v15', JSON.stringify(data));
                 }
                 statusEl.textContent = 'ออนไลน์';
                 statusEl.className = 'text-emerald-400 font-bold';
@@ -530,8 +529,8 @@
 
         window.saveDataToFirebase = function() {
             const payload = { entries, specialNumbers, maxLimits, payoutRates, bigBossItems, isDealerClosed, lottoDate };
-            localStorage.setItem('smart_lotto_backup_v14', JSON.stringify(payload));
-            set(ref(db, 'lotto_data_v14'), payload).catch(err => {});
+            localStorage.setItem('smart_lotto_backup_v15', JSON.stringify(payload));
+            set(ref(db, 'lotto_data_v15'), payload).catch(err => {});
         }
 
         window.addEventListener('DOMContentLoaded', () => {
@@ -847,18 +846,13 @@
                     const idx = specialNumbers.findIndex(r => r.number === num);
                     if(idx >= 0) specialNumbers.splice(idx, 1);
 
-                    let shortLabel = num;
-                    if (autoRev && num.length === 3) shortLabel = `${num} (3ตัว)`;
-                    else if (autoTwoUpDown && num.length === 2) shortLabel = `${num} (2ตัว)`;
-
                     specialNumbers.push({ 
                         number: num, 
                         status, 
                         baseNumber: num,
                         length: num.length,
                         isAutoReverse: autoRev && num.length === 3,
-                        isAutoTwoUpDown: autoTwoUpDown && num.length === 2,
-                        displayLabel: shortLabel
+                        isAutoTwoUpDown: autoTwoUpDown && num.length === 2
                     });
                 }
             });
@@ -877,7 +871,7 @@
             }
             tbody.innerHTML = specialNumbers.map((r, i) => `
                 <tr>
-                    <td class="py-3 px-4 font-bold number-font">${r.number} <span class="text-xs font-normal text-slate-500">(${r.length === 3 ? '3ตัว' : (r.length === 2 ? '2ตัว' : 'วิ่ง')})</span></td>
+                    <td class="py-3 px-4 font-bold number-font">${r.number} <span class="text-xs font-normal text-slate-500">(${r.length === 3 ? '3ตัวตรง*โต๊ด*6กลับ' : (r.length === 2 ? '2ตัว บน*ล่าง' : 'วิ่ง')})</span></td>
                     <td class="py-3 px-4"><span class="px-2.5 py-0.5 rounded-full text-xs font-semibold ${r.status === 'closed' ? 'bg-rose-100 text-rose-800' : 'bg-amber-100 text-amber-800'}">${r.status === 'closed' ? 'เลขปิดรับ' : 'อั้นจ่ายครึ่ง'}</span></td>
                     <td class="py-3 px-4 text-center"><button onclick="deleteSpecialRule(${i})" class="text-rose-500 font-bold hover:underline">ลบ</button></td>
                 </tr>
@@ -1369,22 +1363,42 @@
                 }).join('');
             }
 
-            // แสดงผลประกาศเลขอั้น 2 หัวข้อชัดเจน
+            // แสดงผลประกาศเลขอั้นแบบจัดหมวดหมู่สวยงามตามภาพตัวอย่าง
             const banner = document.getElementById('recorder-limits-banner');
             const { specialNumbers } = window.getFirebaseData();
             if (specialNumbers.length > 0) {
                 banner.classList.remove('hidden');
-                const halfList = specialNumbers.filter(r => r.status === 'half');
+                const threeDigitsHalf = specialNumbers.filter(r => r.length === 3 && r.status === 'half');
+                const twoDigitsHalf = specialNumbers.filter(r => r.length === 2 && r.status === 'half');
                 const closedList = specialNumbers.filter(r => r.status === 'closed');
 
                 let groupsHtml = '';
-                if (halfList.length > 0) {
-                    const numsText = halfList.map(r => `<span class="px-2 py-0.5 rounded bg-amber-100 text-amber-900 font-bold number-font border border-amber-300">${r.number} <span class="text-[10px] font-normal text-amber-700">(${r.length === 3 ? '3ตัว' : (r.length === 2 ? '2ตัว' : 'วิ่ง')})</span></span>`).join(' ');
-                    groupsHtml += `<div><span class="font-bold text-amber-900 block mb-1">🔸 1. เลขอั้น (จ่ายครึ่ง):</span><div class="flex flex-wrap gap-1.5">${numsText}</div></div>`;
+                if (threeDigitsHalf.length > 0) {
+                    const numsStr = threeDigitsHalf.map(r => r.number).join(', ');
+                    groupsHtml += `
+                        <div class="space-y-1">
+                            <div class="text-center font-bold text-slate-900 text-sm">สามตัวตรง ' โต๊ด ' 6กลับ ' (จ่ายครึ่ง)</div>
+                            <div class="text-center font-bold number-font text-purple-950 text-base tracking-wider">${numsStr}</div>
+                        </div>
+                    `;
+                }
+                if (twoDigitsHalf.length > 0) {
+                    const numsStr = twoDigitsHalf.map(r => r.number).join(', ');
+                    groupsHtml += `
+                        <div class="space-y-1 pt-2 border-t border-[#eab308]/40">
+                            <div class="text-center font-bold text-slate-900 text-sm">สองตัว บน ' ล่าง (พร้อมตัวกลับ) ' (จ่ายครึ่ง)</div>
+                            <div class="text-center font-bold number-font text-purple-950 text-base tracking-wider">${numsStr}</div>
+                        </div>
+                    `;
                 }
                 if (closedList.length > 0) {
-                    const numsText = closedList.map(r => `<span class="px-2 py-0.5 rounded bg-rose-100 text-rose-900 font-bold number-font border border-rose-300">${r.number} <span class="text-[10px] font-normal text-rose-700">(${r.length === 3 ? '3ตัว' : (r.length === 2 ? '2ตัว' : 'วิ่ง')})</span></span>`).join(' ');
-                    groupsHtml += `<div><span class="font-bold text-rose-800 block mb-1">🚫 2. เลขปิดรับ (ห้ามแทง):</span><div class="flex flex-wrap gap-1.5">${numsText}</div></div>`;
+                    const numsStr = closedList.map(r => r.number).join(', ');
+                    groupsHtml += `
+                        <div class="space-y-1 pt-2 border-t border-[#eab308]/40">
+                            <div class="text-center font-bold text-rose-700 text-sm">🚫 เลขปิดรับ (ห้ามแทง)</div>
+                            <div class="text-center font-bold number-font text-rose-900 text-base tracking-wider">${numsStr}</div>
+                        </div>
+                    `;
                 }
 
                 document.getElementById('recorder-limits-groups').innerHTML = groupsHtml;
