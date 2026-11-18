@@ -89,13 +89,13 @@
             <div class="bg-white rounded-3xl p-4 border shadow-sm flex flex-col justify-center"><span class="text-xs text-slate-400 font-medium">3 ตัว & วิ่ง</span><div class="text-base font-bold number-font mt-1"><span id="rec-sum-3all" class="text-amber-600">0</span> / <span id="rec-sum-run" class="text-rose-600">0</span></div></div>
         </section>
 
-        <!-- ประกาศเลขอั้น พร้อมแสดงงวดวันที่ -->
-        <div id="recorder-limits-banner" class="hidden bg-amber-50 border border-amber-200 rounded-2xl px-4 py-3 flex items-center justify-between text-xs shadow-sm">
-            <div class="flex items-center gap-2 text-amber-900 font-medium flex-wrap">
-                <i class="fa-solid fa-bullhorn text-amber-600 text-base"></i>
-                <span>ประกาศเลขอั้น/เลขปิดรับ (งวดประจำวันที่ <strong id="banner-date-text">--</strong>):</span>
-                <div id="recorder-limits-chips" class="flex flex-wrap gap-1.5"></div>
+        <!-- ประกาศเลขอั้น 2 หัวข้อชัดเจน (วัน/เดือน/ปี) -->
+        <div id="recorder-limits-banner" class="hidden bg-amber-50 border border-amber-200 rounded-2xl p-4 space-y-3 text-xs shadow-sm">
+            <div class="flex items-center gap-2 text-amber-950 font-bold text-sm border-b border-amber-200/80 pb-2">
+                <i class="fa-solid fa-bullhorn text-amber-600"></i>
+                <span>ประกาศเลขอั้น/เลขปิดรับ งวดวันที่ <span id="banner-date-text" class="number-font text-amber-700">--/--/----</span></span>
             </div>
+            <div id="recorder-limits-groups" class="space-y-2.5"></div>
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
@@ -310,7 +310,7 @@
             <div class="lg:col-span-5 bg-white rounded-3xl border p-6 space-y-4 shadow-sm">
                 <h3 class="text-base font-bold text-purple-950">กำหนดเลขอั้น & เลขปิดรับ</h3>
                 <div>
-                    <label class="text-xs font-bold text-slate-700 block mb-1">ตัวเลข (เช่น 674 หรือ 12)</label>
+                    <label class="text-xs font-bold text-slate-700 block mb-1">ตัวเลข (คั่นด้วยเว้นวรรค เช่น 728 674 25)</label>
                     <input type="text" id="new-limit-numbers" placeholder="ระบุตัวเลข..." class="w-full px-4 py-3 border-2 rounded-2xl font-bold number-font">
                 </div>
                 <div class="space-y-2 bg-purple-50 p-3.5 rounded-2xl border border-purple-200">
@@ -333,10 +333,10 @@
                 <button onclick="addSpecialNumber()" class="w-full py-3.5 rounded-2xl bg-purple-700 hover:bg-purple-800 text-white font-bold text-sm shadow">บันทึกเลขอั้น</button>
             </div>
             <div class="lg:col-span-7 bg-white rounded-3xl border shadow-sm overflow-hidden">
-                <div class="p-4 border-b bg-slate-50 font-bold text-sm text-slate-800">รายการเลขอั้นทั้งหมด (งวดประจำวันที่ <span id="table-date-text">--</span>)</div>
+                <div class="p-4 border-b bg-slate-50 font-bold text-sm text-slate-800">รายการเลขอั้นทั้งหมด (งวดวันที่ <span id="table-date-text" class="number-font">--/--/----</span>)</div>
                 <table class="w-full text-left border-collapse">
                     <thead class="bg-slate-50 border-b text-xs text-slate-500 uppercase">
-                        <tr><th class="py-3 px-4">ตัวเลข</th><th class="py-3 px-4">เงื่อนไข / รูปแบบ</th><th class="py-3 px-4 text-center">ลบ</th></tr>
+                        <tr><th class="py-3 px-4">ตัวเลข</th><th class="py-3 px-4">เงื่อนไข</th><th class="py-3 px-4 text-center">ลบ</th></tr>
                     </thead>
                     <tbody id="dlr-limits-tbody" class="divide-y text-sm"></tbody>
                 </table>
@@ -388,7 +388,7 @@
                 <div class="flex justify-between items-center flex-wrap gap-3">
                     <div>
                         <h3 class="text-base font-bold text-purple-950">📊 รายงานสรุปยอดประจำงวด (Period Summary Report)</h3>
-                        <p class="text-xs text-slate-500">งวดประจำวันที่: <span id="report-date-val" class="font-bold text-amber-600">--</span></p>
+                        <p class="text-xs text-slate-500">งวดประจำวันที่: <span id="report-date-val" class="font-bold text-amber-600 number-font">--/--/----</span></p>
                     </div>
                     <div class="flex gap-2">
                         <button onclick="copyPeriodReport()" class="px-4 py-2.5 rounded-xl text-xs font-bold text-white bg-sky-600 hover:bg-sky-700 shadow flex items-center gap-1.5">
@@ -489,7 +489,7 @@
 
         function loadFromLocalStorage() {
             try {
-                const local = localStorage.getItem('smart_lotto_backup_v13');
+                const local = localStorage.getItem('smart_lotto_backup_v14');
                 if (local) {
                     const data = JSON.parse(local);
                     entries = data.entries || [];
@@ -506,7 +506,7 @@
 
         window.initAppFirebase = function() {
             const statusEl = document.getElementById('db-status');
-            onValue(ref(db, 'lotto_data_v13'), (snapshot) => {
+            onValue(ref(db, 'lotto_data_v14'), (snapshot) => {
                 const data = snapshot.val();
                 if (data) {
                     entries = data.entries || [];
@@ -516,7 +516,7 @@
                     bigBossItems = data.bigBossItems || [];
                     isDealerClosed = !!data.isDealerClosed;
                     lottoDate = data.lottoDate || '2026-11-16';
-                    localStorage.setItem('smart_lotto_backup_v13', JSON.stringify(data));
+                    localStorage.setItem('smart_lotto_backup_v14', JSON.stringify(data));
                 }
                 statusEl.textContent = 'ออนไลน์';
                 statusEl.className = 'text-emerald-400 font-bold';
@@ -530,8 +530,8 @@
 
         window.saveDataToFirebase = function() {
             const payload = { entries, specialNumbers, maxLimits, payoutRates, bigBossItems, isDealerClosed, lottoDate };
-            localStorage.setItem('smart_lotto_backup_v13', JSON.stringify(payload));
-            set(ref(db, 'lotto_data_v13'), payload).catch(err => {});
+            localStorage.setItem('smart_lotto_backup_v14', JSON.stringify(payload));
+            set(ref(db, 'lotto_data_v14'), payload).catch(err => {});
         }
 
         window.addEventListener('DOMContentLoaded', () => {
@@ -554,6 +554,14 @@
     </script>
 
     <script>
+        function formatThaiDate(dateStr) {
+            if (!dateStr) return '--/--/----';
+            const parts = dateStr.split('-');
+            if (parts.length !== 3) return dateStr;
+            const year = parseInt(parts[0], 10) + 543;
+            return `${parts[2]}/${parts[1]}/${year}`;
+        }
+
         function updateLottoDate() {
             const val = document.getElementById('lotto-date-picker').value;
             window.setFirebaseData(null, null, null, null, null, undefined, val);
@@ -839,12 +847,9 @@
                     const idx = specialNumbers.findIndex(r => r.number === num);
                     if(idx >= 0) specialNumbers.splice(idx, 1);
 
-                    let displayLabel = num;
-                    if (autoRev && num.length === 3) {
-                        displayLabel = `${num} (ตรง*โต๊ด*6กลับ)`;
-                    } else if (autoTwoUpDown && num.length === 2) {
-                        displayLabel = `${num} (บน*ล่าง)(พร้อมตัวกลับ)`;
-                    }
+                    let shortLabel = num;
+                    if (autoRev && num.length === 3) shortLabel = `${num} (3ตัว)`;
+                    else if (autoTwoUpDown && num.length === 2) shortLabel = `${num} (2ตัว)`;
 
                     specialNumbers.push({ 
                         number: num, 
@@ -853,7 +858,7 @@
                         length: num.length,
                         isAutoReverse: autoRev && num.length === 3,
                         isAutoTwoUpDown: autoTwoUpDown && num.length === 2,
-                        displayLabel
+                        displayLabel: shortLabel
                     });
                 }
             });
@@ -872,8 +877,8 @@
             }
             tbody.innerHTML = specialNumbers.map((r, i) => `
                 <tr>
-                    <td class="py-3 px-4 font-bold number-font">${r.displayLabel || r.number}</td>
-                    <td class="py-3 px-4"><span class="px-2 py-0.5 rounded text-xs ${r.status === 'closed' ? 'bg-rose-100 text-rose-800' : 'bg-amber-100 text-amber-800'}">${r.status === 'closed' ? 'ปิดรับ' : 'อั้นจ่ายครึ่ง'}</span></td>
+                    <td class="py-3 px-4 font-bold number-font">${r.number} <span class="text-xs font-normal text-slate-500">(${r.length === 3 ? '3ตัว' : (r.length === 2 ? '2ตัว' : 'วิ่ง')})</span></td>
+                    <td class="py-3 px-4"><span class="px-2.5 py-0.5 rounded-full text-xs font-semibold ${r.status === 'closed' ? 'bg-rose-100 text-rose-800' : 'bg-amber-100 text-amber-800'}">${r.status === 'closed' ? 'เลขปิดรับ' : 'อั้นจ่ายครึ่ง'}</span></td>
                     <td class="py-3 px-4 text-center"><button onclick="deleteSpecialRule(${i})" class="text-rose-500 font-bold hover:underline">ลบ</button></td>
                 </tr>
             `).join('');
@@ -1200,9 +1205,11 @@
             let totalGross = 0;
             entries.forEach(e => totalGross += e.amount);
 
+            const formattedDate = formatThaiDate(lottoDate);
+
             const reportStr = [
                 `===================================`,
-                `📊 รายงานสรุปยอดประจำงวด: ${lottoDate}`,
+                `📊 รายงานสรุปยอดประจำงวด: ${formattedDate}`,
                 `===================================`,
                 `• ยอดรับโพยรวมทั้งหมด: ${totalGross.toLocaleString('th-TH')} บาท`,
                 `• ยอดรับเอง (สู้ความเสี่ยง): ${totalKept.toLocaleString('th-TH')} บาท`,
@@ -1217,7 +1224,7 @@
             const reportBox = document.getElementById('period-report-content');
             if (reportBox) reportBox.textContent = reportStr;
             const dateVal = document.getElementById('report-date-val');
-            if (dateVal) dateVal.textContent = lottoDate;
+            if (dateVal) dateVal.textContent = formattedDate;
         }
 
         function copyPeriodReport() {
@@ -1243,6 +1250,7 @@
 
         function copyCustomerSummary(name, total, discPct, netToDealer) {
             const discAmt = total * (discPct / 100);
+            const formattedDate = formatThaiDate(window.getFirebaseData().lottoDate);
             const text = [
                 `📋 สรุปยอดส่งโพย: คุณ${name}`,
                 `------------------------`,
@@ -1250,7 +1258,7 @@
                 `• ส่วนลด (${discPct}%): ${discAmt.toLocaleString('th-TH')} บาท`,
                 `• ยอดสุทธิส่งเจ้า: ${netToDealer.toLocaleString('th-TH')} บาท`,
                 `------------------------`,
-                `งวดประจำวันที่: ${window.getFirebaseData().lottoDate}`
+                `งวดประจำวันที่: ${formattedDate}`
             ].join('\n');
             navigator.clipboard.writeText(text);
             showToast(`คัดลอกยอดของ "${name}" เรียบร้อย`, 'success');
@@ -1258,10 +1266,11 @@
 
         function refreshAllViews() {
             const { entries, isDealerClosed, bigBossItems, lottoDate, payoutRates } = window.getFirebaseData();
+            const formattedDate = formatThaiDate(lottoDate);
 
             document.getElementById('lotto-date-picker').value = lottoDate;
-            document.getElementById('banner-date-text').textContent = lottoDate;
-            document.getElementById('table-date-text').textContent = lottoDate;
+            document.getElementById('banner-date-text').textContent = formattedDate;
+            document.getElementById('table-date-text').textContent = formattedDate;
 
             document.getElementById('rate-3straight').value = payoutRates['3ตัวตรง'];
             document.getElementById('rate-3tod').value = payoutRates['3ตัวโต๊ด'];
@@ -1360,11 +1369,25 @@
                 }).join('');
             }
 
+            // แสดงผลประกาศเลขอั้น 2 หัวข้อชัดเจน
             const banner = document.getElementById('recorder-limits-banner');
             const { specialNumbers } = window.getFirebaseData();
             if (specialNumbers.length > 0) {
                 banner.classList.remove('hidden');
-                document.getElementById('recorder-limits-chips').innerHTML = specialNumbers.map(r => `<span class="px-2.5 py-1 rounded-lg bg-amber-100 text-amber-800 font-bold number-font border border-amber-300">${r.displayLabel || r.number} (${r.status === 'closed' ? 'ปิดรับ' : 'จ่ายครึ่ง'})</span>`).join('');
+                const halfList = specialNumbers.filter(r => r.status === 'half');
+                const closedList = specialNumbers.filter(r => r.status === 'closed');
+
+                let groupsHtml = '';
+                if (halfList.length > 0) {
+                    const numsText = halfList.map(r => `<span class="px-2 py-0.5 rounded bg-amber-100 text-amber-900 font-bold number-font border border-amber-300">${r.number} <span class="text-[10px] font-normal text-amber-700">(${r.length === 3 ? '3ตัว' : (r.length === 2 ? '2ตัว' : 'วิ่ง')})</span></span>`).join(' ');
+                    groupsHtml += `<div><span class="font-bold text-amber-900 block mb-1">🔸 1. เลขอั้น (จ่ายครึ่ง):</span><div class="flex flex-wrap gap-1.5">${numsText}</div></div>`;
+                }
+                if (closedList.length > 0) {
+                    const numsText = closedList.map(r => `<span class="px-2 py-0.5 rounded bg-rose-100 text-rose-900 font-bold number-font border border-rose-300">${r.number} <span class="text-[10px] font-normal text-rose-700">(${r.length === 3 ? '3ตัว' : (r.length === 2 ? '2ตัว' : 'วิ่ง')})</span></span>`).join(' ');
+                    groupsHtml += `<div><span class="font-bold text-rose-800 block mb-1">🚫 2. เลขปิดรับ (ห้ามแทง):</span><div class="flex flex-wrap gap-1.5">${numsText}</div></div>`;
+                }
+
+                document.getElementById('recorder-limits-groups').innerHTML = groupsHtml;
             } else {
                 banner.classList.add('hidden');
             }
@@ -1406,7 +1429,7 @@
                 total += e.amount;
                 return `${i + 1}. [${e.number}] ${e.type} = ${e.amount} บ. (${e.customer})`;
             });
-            const text = [`📋 โพยหวยทั้งหมด`, `------------------------`, ...lines, `------------------------`, `ยอดรวม: ${total.toLocaleString()} บาท`].join('\n');
+            const text = [`📋 โพยหวยทั้งหมด (งวด ${formatThaiDate(window.getFirebaseData().lottoDate)})`, `------------------------`, ...lines, `------------------------`, `ยอดรวม: ${total.toLocaleString()} บาท`].join('\n');
             navigator.clipboard.writeText(text);
             showToast('คัดลอกโพยแล้ว', 'success');
         }
@@ -1430,7 +1453,7 @@
             });
             const discPct = document.getElementById('bigboss-discount-pct').value;
             const net = total - (total * (discPct / 100));
-            const text = [`🏛️ บิลตัดส่งเจ้าใหญ่ (สรุปยอดรวม)`, `------------------------`, ...lines, `------------------------`, `ยอดเต็ม: ${total.toLocaleString()} บ.`, `หักส่วนลด ${discPct}%: สุทธิ ${net.toLocaleString()} บ.`].join('\n');
+            const text = [`🏛️ บิลตัดส่งเจ้าใหญ่ (งวด ${formatThaiDate(window.getFirebaseData().lottoDate)})`, `------------------------`, ...lines, `------------------------`, `ยอดเต็ม: ${total.toLocaleString()} บ.`, `หักส่วนลด ${discPct}%: สุทธิ ${net.toLocaleString()} บ.`].join('\n');
             navigator.clipboard.writeText(text);
             showToast('คัดลอกบิลส่งเจ้าใหญ่แล้ว!', 'success');
         }
