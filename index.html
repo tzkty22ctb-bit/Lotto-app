@@ -961,7 +961,7 @@
             window.setFirebaseData(null, null, limits, null, null, null, undefined, undefined);
         }
 
-        // ฟังก์ชันคำนวณผลรางวัลหน้าเจ้ามือ (แก้ไขให้ดึงยอดรับเอง (สู้) มาคำนวณถูกต้อง 100%)
+        // ฟังก์ชันคำนวณผลรางวัลหน้าเจ้ามือ (แก้ไขให้ถูกต้อง ไม่ให้ค่าออกเป็น 0)
         function calculateWinnersAndProfit() {
             const rawTop = document.getElementById('res-top3').value.trim();
             const rawBottom2 = document.getElementById('res-bottom2').value.trim();
@@ -998,10 +998,10 @@
                 }
             });
 
-            let totalKeptInAll = 0; // ยอดรับเองรวมทั้งหมด (คำนวณจากสัดส่วนสู้จริง)
-            let grandTotalPrizeAll = 0; // ยอดถูกรางวัลรวมทั้งหมดของลูกค้า
-            let grandTotalBossPrize = 0; // ยอดถูกรางวัลที่เจ้าใหญ่ต้องจ่าย
-            let dealerPayOwnPrize = 0; // ยอดถูกรางวัลที่เจ้ามือต้องจ่ายเองจากยอดรับเอง
+            let totalKeptInAll = 0; 
+            let grandTotalPrizeAll = 0; 
+            let grandTotalBossPrize = 0; 
+            let dealerPayOwnPrize = 0; 
 
             const customerDetails = {};
 
@@ -1036,7 +1036,6 @@
                     const bossSharePrize = custCutoffAmt * finalRate;
                     grandTotalBossPrize += bossSharePrize;
 
-                    // ยอดถูกที่เจ้ามือต้องจ่ายเอง (คำนวณจากสัดส่วนยอดรับเองที่สู้)
                     const dealerSharePrize = custKeptAmt * finalRate;
                     dealerPayOwnPrize += dealerSharePrize;
 
@@ -1056,7 +1055,6 @@
                 }
             });
 
-            // กำไร/ขาดทุนสุทธิ = ยอดรับเอง (สู้) - ยอดถูกรางวัลที่เจ้ามือจ่ายเอง
             const netProfit = totalKeptInAll - dealerPayOwnPrize;
 
             document.getElementById('pay-kept-in').textContent = Math.round(totalKeptInAll).toLocaleString('th-TH');
