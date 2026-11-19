@@ -493,13 +493,26 @@
                 <div><label class="text-xs text-slate-500 block mb-1">2 ตัว บน/ล่าง (เจ้าใหญ่)</label><input type="number" id="boss-rate-2updown" oninput="saveBossRates()" class="w-full px-3.5 py-2.5 border rounded-2xl text-sm font-bold number-font" value="90"></div>
                 <div><label class="text-xs text-slate-500 block mb-1">วิ่ง บน/ล่าง (เจ้าใหญ่)</label><input type="number" id="boss-rate-run" oninput="saveBossRates()" class="w-full px-3.5 py-2.5 border rounded-2xl text-sm font-bold number-font" value="3"></div>
             </div>
+
+            <!-- กำหนดเรทจ่ายเลขอั้นเฉพาะหน้าเจ้าใหญ่ -->
+            <div class="pt-3 border-t border-slate-100 space-y-2.5">
+                <div class="text-xs font-bold text-amber-900 flex items-center gap-1.5">
+                    <i class="fa-solid fa-tag text-amber-600"></i> กำหนดเรทจ่ายเลขอั้นหน้าเจ้าใหญ่ (บาทละ)
+                </div>
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                    <div><label class="text-xs text-slate-500 block mb-1">อั้น 3 ตัวตรง</label><input type="number" id="boss-limit-rate-3straight" oninput="saveBossLimitRates()" class="w-full px-3.5 py-2 border border-amber-200 bg-amber-50/40 rounded-2xl text-sm font-bold number-font" value="250"></div>
+                    <div><label class="text-xs text-slate-500 block mb-1">อั้น 3 ตัวโต๊ด</label><input type="number" id="boss-limit-rate-3tod" oninput="saveBossLimitRates()" class="w-full px-3.5 py-2 border border-amber-200 bg-amber-50/40 rounded-2xl text-sm font-bold number-font" value="50"></div>
+                    <div><label class="text-xs text-slate-500 block mb-1">อั้น 2 ตัว บน/ล่าง</label><input type="number" id="boss-limit-rate-2updown" oninput="saveBossLimitRates()" class="w-full px-3.5 py-2 border border-amber-200 bg-amber-50/40 rounded-2xl text-sm font-bold number-font" value="35"></div>
+                    <div><label class="text-xs text-slate-500 block mb-1">อั้น วิ่ง บน/ล่าง</label><input type="number" id="boss-limit-rate-run" oninput="saveBossLimitRates()" class="w-full px-3.5 py-2 border border-amber-200 bg-amber-50/40 rounded-2xl text-sm font-bold number-font" value="2"></div>
+                </div>
+            </div>
         </div>
 
         <!-- เลขอั้นเฉพาะหน้าเจ้าใหญ่ (ไม่แสดงหรือกระทบหน้าอื่น) -->
         <div class="bg-white rounded-3xl border p-6 shadow-sm space-y-4">
             <div class="flex items-center justify-between flex-wrap gap-2">
                 <h3 class="text-base font-bold text-indigo-950 flex items-center gap-2">
-                    <i class="fa-solid fa-ban text-indigo-600"></i> เลขอั้นเฉพาะหน้าเจ้าใหญ่ (จ่ายครึ่ง)
+                    <i class="fa-solid fa-ban text-indigo-600"></i> เลขอั้นเฉพาะหน้าเจ้าใหญ่
                 </h3>
                 <span class="text-[11px] font-semibold px-2.5 py-1 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200">ใช้เฉพาะหน้าเจ้าใหญ่</span>
             </div>
@@ -588,6 +601,7 @@
         let maxLimits = { '2ตัวบน': 1000, '2ตัวล่าง': 1000, '3ตัวตรง': 500, '3ตัวโต๊ด': 500, '3ตัวล่าง': 500, 'วิ่งบน': 5000, 'วิ่งล่าง': 5000 };
         let payoutRates = { '3ตัวตรง': 500, '3ตัวโต๊ด': 100, '2ตัว': 70, 'วิ่ง': 3 };
         let bossRates = { '3ตัวตรง': 500, '3ตัวโต๊ด': 100, '2ตัว': 70, 'วิ่ง': 3 };
+        let bossLimitRates = { '3ตัวตรง': 250, '3ตัวโต๊ด': 50, '2ตัว': 35, 'วิ่ง': 2 };
         let bigBossItems = [];
         let isDealerClosed = false;
         let lottoDate = '2026-11-16';
@@ -604,6 +618,7 @@
                     if (data.maxLimits) maxLimits = data.maxLimits;
                     if (data.payoutRates) payoutRates = data.payoutRates;
                     if (data.bossRates) bossRates = data.bossRates;
+                    if (data.bossLimitRates) bossLimitRates = data.bossLimitRates;
                     bigBossItems = data.bigBossItems || [];
                     isDealerClosed = !!data.isDealerClosed;
                     lottoDate = data.lottoDate || '2026-11-16';
@@ -624,6 +639,7 @@
                     if (data.maxLimits) maxLimits = data.maxLimits;
                     if (data.payoutRates) payoutRates = data.payoutRates;
                     if (data.bossRates) bossRates = data.bossRates;
+                    if (data.bossLimitRates) bossLimitRates = data.bossLimitRates;
                     bigBossItems = data.bigBossItems || [];
                     isDealerClosed = !!data.isDealerClosed;
                     lottoDate = data.lottoDate || '2026-11-16';
@@ -641,7 +657,7 @@
         };
 
         window.saveDataToFirebase = function() {
-            const payload = { entries, specialNumbers, bigBossSpecialNumbers, maxLimits, payoutRates, bossRates, bigBossItems, isDealerClosed, lottoDate, maxPayoutBudget };
+            const payload = { entries, specialNumbers, bigBossSpecialNumbers, maxLimits, payoutRates, bossRates, bossLimitRates, bigBossItems, isDealerClosed, lottoDate, maxPayoutBudget };
             localStorage.setItem('smart_lotto_backup_v21', JSON.stringify(payload));
             set(ref(db, 'lotto_data_v21'), payload).catch(err => {});
         }
@@ -651,8 +667,8 @@
             window.initAppFirebase();
         });
 
-        window.getFirebaseData = () => ({ entries, specialNumbers, bigBossSpecialNumbers, maxLimits, payoutRates, bossRates, bigBossItems, isDealerClosed, lottoDate, maxPayoutBudget });
-        window.setFirebaseData = (newEntries, newSpecial, newLimits, newRates, newBossRates, newBigBoss, newClosed, newDate, newBudget, newBossSpecial) => {
+        window.getFirebaseData = () => ({ entries, specialNumbers, bigBossSpecialNumbers, maxLimits, payoutRates, bossRates, bossLimitRates, bigBossItems, isDealerClosed, lottoDate, maxPayoutBudget });
+        window.setFirebaseData = (newEntries, newSpecial, newLimits, newRates, newBossRates, newBigBoss, newClosed, newDate, newBudget, newBossSpecial, newBossLimitRates) => {
             if (newEntries !== null && newEntries !== undefined) entries = newEntries;
             if (newSpecial !== null && newSpecial !== undefined) specialNumbers = newSpecial;
             if (newLimits !== null && newLimits !== undefined) maxLimits = newLimits;
@@ -663,6 +679,7 @@
             if (newDate !== undefined) lottoDate = newDate;
             if (newBudget !== undefined) maxPayoutBudget = newBudget;
             if (newBossSpecial !== undefined) bigBossSpecialNumbers = newBossSpecial;
+            if (newBossLimitRates !== undefined) bossLimitRates = newBossLimitRates;
             window.saveDataToFirebase();
             refreshAllViews();
         };
@@ -791,7 +808,7 @@
             tbody.innerHTML = list.map((r, i) => `
                 <tr>
                     <td class="py-2.5 px-4 font-bold number-font">${r.number} <span class="text-[11px] font-normal text-slate-500">(${r.length === 3 ? '3ตัวตรง*โต๊ด*6กลับ' : (r.length === 2 ? '2ตัว บน*ล่าง' : 'วิ่ง')})</span></td>
-                    <td class="py-2.5 px-4"><span class="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-amber-100 text-amber-800">อั้นจ่ายครึ่ง</span></td>
+                    <td class="py-2.5 px-4"><span class="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-amber-100 text-amber-800">เลขอั้นเจ้าใหญ่</span></td>
                     <td class="py-2.5 px-4 text-center"><button type="button" onclick="deleteBigBossSpecialRule(${i})" class="text-rose-500 font-bold hover:underline">ลบ</button></td>
                 </tr>
             `).join('');
@@ -1060,6 +1077,16 @@
                 'วิ่ง': parseInt(document.getElementById('boss-rate-run').value) || 0
             };
             window.setFirebaseData(null, null, null, null, rates, null, undefined, undefined);
+        }
+
+        function saveBossLimitRates() {
+            const limitRates = {
+                '3ตัวตรง': parseInt(document.getElementById('boss-limit-rate-3straight').value) || 0,
+                '3ตัวโต๊ด': parseInt(document.getElementById('boss-limit-rate-3tod').value) || 0,
+                '2ตัว': parseInt(document.getElementById('boss-limit-rate-2updown').value) || 0,
+                'วิ่ง': parseInt(document.getElementById('boss-limit-rate-run').value) || 0
+            };
+            window.setFirebaseData(null, null, null, null, null, null, undefined, undefined, undefined, undefined, limitRates);
         }
 
         function saveMaxPayoutBudget() {
@@ -1372,7 +1399,7 @@
 
             const win3Top = rawTop.slice(-3);
             const win2Top = rawTop.slice(-2);
-            const { bossRates, bigBossItems, lottoDate } = window.getFirebaseData();
+            const { bossRates, bossLimitRates, bigBossItems, lottoDate } = window.getFirebaseData();
             const discPct = parseFloat(document.getElementById('bigboss-discount-pct').value) || 0;
 
             const mergedBossMap = {};
@@ -1387,20 +1414,34 @@
 
             Object.values(mergedBossMap).forEach(item => {
                 totalGross += item.amount;
-                let rate = 0;
-                if (item.type === '3ตัวตรง' && item.number === win3Top) rate = bossRates['3ตัวตรง'];
-                else if (item.type === '3ตัวโต๊ด' && isTodMatch(item.number, win3Top)) rate = bossRates['3ตัวโต๊ด'];
-                else if (item.type === '2ตัวบน' && item.number === win2Top) rate = bossRates['2ตัว'];
-                else if (item.type === '2ตัวล่าง' && item.number === rawBottom2) rate = bossRates['2ตัว'];
-                else if (item.type === 'วิ่งบน' && win3Top.includes(item.number)) rate = bossRates['วิ่ง'];
-                else if (item.type === 'วิ่งล่าง' && rawBottom2.includes(item.number)) rate = bossRates['วิ่ง'];
+                let normalRate = 0;
+                let limitRate = 0;
+                if (item.type === '3ตัวตรง' && item.number === win3Top) {
+                    normalRate = bossRates['3ตัวตรง'];
+                    limitRate = bossLimitRates?.['3ตัวตรง'] ?? Math.floor(normalRate / 2);
+                } else if (item.type === '3ตัวโต๊ด' && isTodMatch(item.number, win3Top)) {
+                    normalRate = bossRates['3ตัวโต๊ด'];
+                    limitRate = bossLimitRates?.['3ตัวโต๊ด'] ?? Math.floor(normalRate / 2);
+                } else if (item.type === '2ตัวบน' && item.number === win2Top) {
+                    normalRate = bossRates['2ตัว'];
+                    limitRate = bossLimitRates?.['2ตัว'] ?? Math.floor(normalRate / 2);
+                } else if (item.type === '2ตัวล่าง' && item.number === rawBottom2) {
+                    normalRate = bossRates['2ตัว'];
+                    limitRate = bossLimitRates?.['2ตัว'] ?? Math.floor(normalRate / 2);
+                } else if (item.type === 'วิ่งบน' && win3Top.includes(item.number)) {
+                    normalRate = bossRates['วิ่ง'];
+                    limitRate = bossLimitRates?.['วิ่ง'] ?? Math.floor(normalRate / 2);
+                } else if (item.type === 'วิ่งล่าง' && rawBottom2.includes(item.number)) {
+                    normalRate = bossRates['วิ่ง'];
+                    limitRate = bossLimitRates?.['วิ่ง'] ?? Math.floor(normalRate / 2);
+                }
 
-                if (rate > 0) {
-                    const isHalf = checkBigBossRestriction(item.number) === 'half';
-                    const finalRate = isHalf ? (rate / 2) : rate;
+                if (normalRate > 0) {
+                    const isBossLimited = checkBigBossRestriction(item.number) === 'half';
+                    const finalRate = isBossLimited ? limitRate : normalRate;
                     const prize = item.amount * finalRate;
                     totalBossPayout += prize;
-                    hitDetails.push({ number: item.number, type: item.type, amount: item.amount, rate: finalRate, isHalf, prize });
+                    hitDetails.push({ number: item.number, type: item.type, amount: item.amount, rate: finalRate, isBossLimited, prize });
                 }
             });
 
@@ -1420,7 +1461,7 @@
             if (hitDetails.length > 0) {
                 copyLines.push(`------------------------`, `🎯 รายการที่ถูกรางวัล:`);
                 hitDetails.forEach(h => {
-                    copyLines.push(`- เลข ${h.number} (${h.type}) ส่ง ${h.amount.toLocaleString('th-TH')} บ. ${h.isHalf ? '(อั้นเจ้าใหญ่ จ่ายครึ่ง) ' : ''}จ่าย ${h.prize.toLocaleString('th-TH')} บ.`);
+                    copyLines.push(`- เลข ${h.number} (${h.type}) ส่ง ${h.amount.toLocaleString('th-TH')} บ. ${h.isBossLimited ? `(อั้นเจ้าใหญ่ จ่ายบาทละ ${h.rate}) ` : `(จ่ายบาทละ ${h.rate}) `}จ่าย ${h.prize.toLocaleString('th-TH')} บ.`);
                 });
             }
             lastBossPayoutText = copyLines.join('\n');
@@ -1432,7 +1473,7 @@
                         <div class="font-bold text-slate-700 text-xs">🎯 รายการที่ถูกรางวัลจากเจ้าใหญ่:</div>
                         ${hitDetails.map(h => `
                             <div class="flex justify-between bg-white p-2 rounded-xl border text-xs">
-                                <span>• เลข <b class="text-indigo-900">${h.number}</b> (${h.type}) ส่งไป ${h.amount.toLocaleString()} บ. ${h.isHalf ? '<span class="text-amber-600 font-bold">(อั้นเจ้าใหญ่ จ่ายครึ่ง บาทละ ' + h.rate + ')</span>' : '(จ่ายบาทละ ' + h.rate + ')'}</span>
+                                <span>• เลข <b class="text-indigo-900">${h.number}</b> (${h.type}) ส่งไป ${h.amount.toLocaleString()} บ. ${h.isBossLimited ? '<span class="text-amber-600 font-bold">(อั้นเจ้าใหญ่ จ่ายบาทละ ' + h.rate + ')</span>' : '(จ่ายบาทละ ' + h.rate + ')'}</span>
                                 <span class="font-bold text-rose-600 number-font">+${h.prize.toLocaleString('th-TH')} ฿</span>
                             </div>
                         `).join('')}
@@ -1653,7 +1694,7 @@
         }
 
         function refreshAllViews() {
-            const { entries, isDealerClosed, bigBossItems, lottoDate, maxLimits, payoutRates, bossRates, maxPayoutBudget } = window.getFirebaseData();
+            const { entries, isDealerClosed, bigBossItems, lottoDate, maxLimits, payoutRates, bossRates, bossLimitRates, maxPayoutBudget } = window.getFirebaseData();
             const formattedDate = formatThaiDate(lottoDate);
 
             document.getElementById('lotto-date-picker').value = lottoDate;
@@ -1677,6 +1718,11 @@
             document.getElementById('boss-rate-3tod').value = bossRates['3ตัวโต๊ด'];
             document.getElementById('boss-rate-2updown').value = bossRates['2ตัว'];
             document.getElementById('boss-rate-run').value = bossRates['วิ่ง'];
+
+            document.getElementById('boss-limit-rate-3straight').value = bossLimitRates?.['3ตัวตรง'] ?? 250;
+            document.getElementById('boss-limit-rate-3tod').value = bossLimitRates?.['3ตัวโต๊ด'] ?? 50;
+            document.getElementById('boss-limit-rate-2updown').value = bossLimitRates?.['2ตัว'] ?? 35;
+            document.getElementById('boss-limit-rate-run').value = bossLimitRates?.['วิ่ง'] ?? 2;
 
             updatePresetLabels();
 
@@ -1854,7 +1900,7 @@
 
         function confirmClearAll() {
             if (confirm('ต้องการล้างข้อมูลทั้งหมดหรือไม่?')) {
-                window.setFirebaseData([], [], { '2ตัวบน': 1000, '2ตัวล่าง': 1000, '3ตัวตรง': 500, '3ตัวโต๊ด': 500, '3ตัวล่าง': 500, 'วิ่งบน': 5000, 'วิ่งล่าง': 5000 }, { '3ตัวตรง': 500, '3ตัวโต๊ด': 100, '2ตัว': 70, 'วิ่ง': 3 }, { '3ตัวตรง': 500, '3ตัวโต๊ด': 100, '2ตัว': 70, 'วิ่ง': 3 }, [], false, '2026-11-16', 250000, []);
+                window.setFirebaseData([], [], { '2ตัวบน': 1000, '2ตัวล่าง': 1000, '3ตัวตรง': 500, '3ตัวโต๊ด': 500, '3ตัวล่าง': 500, 'วิ่งบน': 5000, 'วิ่งล่าง': 5000 }, { '3ตัวตรง': 500, '3ตัวโต๊ด': 100, '2ตัว': 70, 'วิ่ง': 3 }, { '3ตัวตรง': 500, '3ตัวโต๊ด': 100, '2ตัว': 70, 'วิ่ง': 3 }, [], false, '2026-11-16', 250000, [], { '3ตัวตรง': 250, '3ตัวโต๊ด': 50, '2ตัว': 35, 'วิ่ง': 2 });
                 showToast('ล้างข้อมูลเรียบร้อย', 'info');
             }
         }
@@ -1882,6 +1928,7 @@
         window.applyRiskPreset = applyRiskPreset;
         window.saveMaxPayoutBudget = saveMaxPayoutBudget;
         window.addBigBossSpecialNumber = addBigBossSpecialNumber;
+        window.saveBossLimitRates = saveBossLimitRates;
     </script>
 </body>
 </html>
