@@ -898,30 +898,42 @@
             window.setFirebaseData(null, null, null, null, rates, null, undefined, undefined);
         }
 
+        // ฟังก์ชันคำนวณความเสี่ยง (รวมยอดแทง + หักยอดส่งเจ้าใหญ่ + คำนวณเพดานสู้)
         function computeRiskAggregates() {
             const { entries, maxLimits, bigBossItems } = window.getFirebaseData();
             const map = {};
+            
             entries.forEach(e => {
                 const key = `${e.number}|${e.type}`;
-                if (!map[key]) map[key] = { number: e.number, type: e.type, total: 0 };
-                map[key].total += e.amount;
+                if (!map[key]) map[key] = { number: e.number, type: e.type, grossTotal: 0, sentBoss: 0 };
+                map[key].grossTotal += e.amount;
             });
 
             bigBossItems.forEach(bb => {
                 const key = `${bb.number}|${bb.type}`;
-                if (map[key]) {
-                    map[key].total = Math.max(0, map[key].total - bb.amount);
-                }
+                if (!map[key]) map[key] = { number: bb.number, type: bb.type, grossTotal: 0, sentBoss: 0 };
+                map[key].sentBoss += bb.amount;
             });
 
             let totalKept = 0, totalCutoff = 0;
             const rows = Object.values(map).map(item => {
+                const remainingAfterManualSend = Math.max(0, item.grossTotal - item.sentBoss);
                 const limit = maxLimits[item.type] || 1000;
-                const kept = Math.min(item.total, limit);
-                const cutoff = Math.max(0, item.total - limit);
+                
+                const kept = Math.min(remainingAfterManualSend, limit);
+                const autoExcess = Math.max(0, remainingAfterManualSend - limit);
+                const cutoff = item.sentBoss + autoExcess;
+
                 totalKept += kept;
                 totalCutoff += cutoff;
-                return { ...item, limit, kept, cutoff };
+                return { 
+                    number: item.number, 
+                    type: item.type, 
+                    total: item.grossTotal, 
+                    limit, 
+                    kept, 
+                    cutoff 
+                };
             }).sort((a, b) => b.total - a.total);
             return { rows, totalKept, totalCutoff };
         }
@@ -961,7 +973,7 @@
             window.setFirebaseData(null, null, limits, null, null, null, undefined, undefined);
         }
 
-        // ฟังก์ชันคำนวณผลรางวัลหน้าเจ้ามือ (แก้ไขให้ถูกต้อง ไม่ให้ค่าออกเป็น 0)
+        // ฟังก์ชันตรวจรางวัล & คำนวณผลกำไรขาดทุน (ดึงข้อมูลจาก computeRiskAggregates ให้สอดคล้องกัน 100%)
         function calculateWinnersAndProfit() {
             const rawTop = document.getElementById('res-top3').value.trim();
             const rawBottom2 = document.getElementById('res-bottom2').value.trim();
@@ -969,33 +981,12 @@
 
             const win3Top = rawTop.slice(-3);
             const win2Top = rawTop.slice(-2);
-            const { payoutRates, entries, maxLimits, bigBossItems } = window.getFirebaseData();
+            const { payoutRates, entries } = window.getFirebaseData();
 
-            const totalBetMap = {};
-            entries.forEach(e => {
-                const key = `${e.number}|${e.type}`;
-                if (!totalBetMap[key]) totalBetMap[key] = 0;
-                totalBetMap[key] += e.amount;
-            });
-
-            const netKeptMap = {};
-            const cutoffMap = {};
-            Object.keys(totalBetMap).forEach(key => {
-                const [num, type] = key.split('|');
-                const total = totalBetMap[key];
-                const limit = maxLimits[type] || 1000;
-                const kept = Math.min(total, limit);
-                netKeptMap[key] = kept;
-                cutoffMap[key] = Math.max(0, total - kept);
-            });
-
-            bigBossItems.forEach(bb => {
-                const key = `${bb.number}|${bb.type}`;
-                if (netKeptMap[key] !== undefined) {
-                    const reduceAmt = Math.min(netKeptMap[key], bb.amount);
-                    netKeptMap[key] -= reduceAmt;
-                    cutoffMap[key] = (cutoffMap[key] || 0) + reduceAmt;
-                }
+            const { rows } = computeRiskAggregates();
+            const riskMap = {};
+            rows.forEach(r => {
+                riskMap[`${r.number}|${r.type}`] = r;
             });
 
             let totalKeptInAll = 0; 
@@ -1007,13 +998,13 @@
 
             entries.forEach(e => {
                 const key = `${e.number}|${e.type}`;
-                const totalForThisNum = totalBetMap[key] || 1;
-                const netKeptForThisNum = netKeptMap[key] || 0;
-                const cutoffForThisNum = cutoffMap[key] || 0;
-
+                const riskInfo = riskMap[key] || { total: e.amount, kept: e.amount, cutoff: 0 };
+                
+                const totalForThisNum = riskInfo.total || 1;
                 const ratio = e.amount / totalForThisNum;
-                const custKeptAmt = netKeptForThisNum * ratio;
-                const custCutoffAmt = cutoffForThisNum * ratio;
+                
+                const custKeptAmt = riskInfo.kept * ratio;
+                const custCutoffAmt = riskInfo.cutoff * ratio;
 
                 totalKeptInAll += custKeptAmt;
 
