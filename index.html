@@ -495,6 +495,43 @@
             </div>
         </div>
 
+        <!-- เลขอั้นเฉพาะหน้าเจ้าใหญ่ (ไม่แสดงหรือกระทบหน้าอื่น) -->
+        <div class="bg-white rounded-3xl border p-6 shadow-sm space-y-4">
+            <div class="flex items-center justify-between flex-wrap gap-2">
+                <h3 class="text-base font-bold text-indigo-950 flex items-center gap-2">
+                    <i class="fa-solid fa-ban text-indigo-600"></i> เลขอั้นเฉพาะหน้าเจ้าใหญ่ (จ่ายครึ่ง)
+                </h3>
+                <span class="text-[11px] font-semibold px-2.5 py-1 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200">ใช้เฉพาะหน้าเจ้าใหญ่</span>
+            </div>
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
+                <div class="lg:col-span-5 space-y-3">
+                    <div>
+                        <label class="text-xs font-bold text-slate-700 block mb-1">ตัวเลขที่เจ้าใหญ่อั้น (คั่นด้วยเว้นวรรค เช่น 728 674 25)</label>
+                        <input type="text" id="boss-limit-numbers" placeholder="ระบุตัวเลข..." class="w-full px-4 py-2.5 border-2 rounded-2xl font-bold number-font text-sm">
+                    </div>
+                    <div class="space-y-2 bg-indigo-50/80 p-3 rounded-2xl border border-indigo-200/80">
+                        <div class="flex items-center gap-2">
+                            <input type="checkbox" id="boss-auto-reverse-limit" class="w-4 h-4 text-indigo-600 rounded" checked>
+                            <label for="boss-auto-reverse-limit" class="text-xs font-bold text-indigo-950 cursor-pointer">อั้น 3 ตัว <span class="text-indigo-700 font-normal">(ตรง*โต๊ด*6กลับ)</span></label>
+                        </div>
+                        <div class="flex items-center gap-2 pt-1 border-t border-indigo-200/60">
+                            <input type="checkbox" id="boss-auto-twoupdown-limit" class="w-4 h-4 text-indigo-600 rounded" checked>
+                            <label for="boss-auto-twoupdown-limit" class="text-xs font-bold text-indigo-950 cursor-pointer">อั้น 2 ตัว <span class="text-indigo-700 font-normal">(บน*ล่าง)(พร้อมตัวกลับ)</span></label>
+                        </div>
+                    </div>
+                    <button type="button" onclick="addBigBossSpecialNumber()" class="w-full py-3 rounded-2xl bg-indigo-700 hover:bg-indigo-800 text-white font-bold text-xs shadow">บันทึกเลขอั้นเจ้าใหญ่</button>
+                </div>
+                <div class="lg:col-span-7 border rounded-2xl overflow-hidden">
+                    <table class="w-full text-left border-collapse">
+                        <thead class="bg-slate-50 border-b text-xs text-slate-500 uppercase">
+                            <tr><th class="py-2.5 px-4">ตัวเลข</th><th class="py-2.5 px-4">เงื่อนไข</th><th class="py-2.5 px-4 text-center">ลบ</th></tr>
+                        </thead>
+                        <tbody id="bigboss-limits-tbody" class="divide-y text-xs"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
         <div class="bg-white rounded-3xl border p-6 shadow-sm space-y-4">
             <h3 class="text-base font-bold text-indigo-950 flex items-center gap-2">
                 <i class="fa-solid fa-trophy text-indigo-600"></i> ตรวจรางวัลและสรุปยอดส่งเจ้าใหญ่
@@ -547,6 +584,7 @@
 
         let entries = [];
         let specialNumbers = [];
+        let bigBossSpecialNumbers = [];
         let maxLimits = { '2ตัวบน': 1000, '2ตัวล่าง': 1000, '3ตัวตรง': 500, '3ตัวโต๊ด': 500, '3ตัวล่าง': 500, 'วิ่งบน': 5000, 'วิ่งล่าง': 5000 };
         let payoutRates = { '3ตัวตรง': 500, '3ตัวโต๊ด': 100, '2ตัว': 70, 'วิ่ง': 3 };
         let bossRates = { '3ตัวตรง': 500, '3ตัวโต๊ด': 100, '2ตัว': 70, 'วิ่ง': 3 };
@@ -562,6 +600,7 @@
                     const data = JSON.parse(local);
                     entries = data.entries || [];
                     specialNumbers = data.specialNumbers || [];
+                    bigBossSpecialNumbers = data.bigBossSpecialNumbers || [];
                     if (data.maxLimits) maxLimits = data.maxLimits;
                     if (data.payoutRates) payoutRates = data.payoutRates;
                     if (data.bossRates) bossRates = data.bossRates;
@@ -581,6 +620,7 @@
                 if (data) {
                     entries = data.entries || [];
                     specialNumbers = data.specialNumbers || [];
+                    bigBossSpecialNumbers = data.bigBossSpecialNumbers || [];
                     if (data.maxLimits) maxLimits = data.maxLimits;
                     if (data.payoutRates) payoutRates = data.payoutRates;
                     if (data.bossRates) bossRates = data.bossRates;
@@ -601,7 +641,7 @@
         };
 
         window.saveDataToFirebase = function() {
-            const payload = { entries, specialNumbers, maxLimits, payoutRates, bossRates, bigBossItems, isDealerClosed, lottoDate, maxPayoutBudget };
+            const payload = { entries, specialNumbers, bigBossSpecialNumbers, maxLimits, payoutRates, bossRates, bigBossItems, isDealerClosed, lottoDate, maxPayoutBudget };
             localStorage.setItem('smart_lotto_backup_v21', JSON.stringify(payload));
             set(ref(db, 'lotto_data_v21'), payload).catch(err => {});
         }
@@ -611,17 +651,18 @@
             window.initAppFirebase();
         });
 
-        window.getFirebaseData = () => ({ entries, specialNumbers, maxLimits, payoutRates, bossRates, bigBossItems, isDealerClosed, lottoDate, maxPayoutBudget });
-        window.setFirebaseData = (newEntries, newSpecial, newLimits, newRates, newBossRates, newBigBoss, newClosed, newDate, newBudget) => {
-            if (newEntries !== null) entries = newEntries;
-            if (newSpecial !== null) specialNumbers = newSpecial;
-            if (newLimits !== null) maxLimits = newLimits;
-            if (newRates !== null) payoutRates = newRates;
-            if (newBossRates !== null) bossRates = newBossRates;
-            if (newBigBoss !== null) bigBossItems = newBigBoss;
+        window.getFirebaseData = () => ({ entries, specialNumbers, bigBossSpecialNumbers, maxLimits, payoutRates, bossRates, bigBossItems, isDealerClosed, lottoDate, maxPayoutBudget });
+        window.setFirebaseData = (newEntries, newSpecial, newLimits, newRates, newBossRates, newBigBoss, newClosed, newDate, newBudget, newBossSpecial) => {
+            if (newEntries !== null && newEntries !== undefined) entries = newEntries;
+            if (newSpecial !== null && newSpecial !== undefined) specialNumbers = newSpecial;
+            if (newLimits !== null && newLimits !== undefined) maxLimits = newLimits;
+            if (newRates !== null && newRates !== undefined) payoutRates = newRates;
+            if (newBossRates !== null && newBossRates !== undefined) bossRates = newBossRates;
+            if (newBigBoss !== null && newBigBoss !== undefined) bigBossItems = newBigBoss;
             if (newClosed !== undefined) isDealerClosed = newClosed;
             if (newDate !== undefined) lottoDate = newDate;
             if (newBudget !== undefined) maxPayoutBudget = newBudget;
+            if (newBossSpecial !== undefined) bigBossSpecialNumbers = newBossSpecial;
             window.saveDataToFirebase();
             refreshAllViews();
         };
@@ -694,6 +735,74 @@
             });
             if (hit) return hit.status;
             return 'normal';
+        }
+
+        function checkBigBossRestriction(num) {
+            const { bigBossSpecialNumbers } = window.getFirebaseData();
+            const hit = (bigBossSpecialNumbers || []).find(r => {
+                if (r.number === num) return true;
+                if (r.isAutoReverse && r.baseNumber && r.length === 3 && num.length === 3 && isTodMatch(r.baseNumber, num)) return true;
+                if (r.isAutoTwoUpDown && r.baseNumber && r.length === 2 && num.length === 2 && isTwoReverseMatch(r.baseNumber, num)) return true;
+                return false;
+            });
+            return hit ? hit.status : 'normal';
+        }
+
+        function addBigBossSpecialNumber() {
+            const rawNums = document.getElementById('boss-limit-numbers').value.trim().split(/\s+/);
+            const autoRev = document.getElementById('boss-auto-reverse-limit').checked;
+            const autoTwoUpDown = document.getElementById('boss-auto-twoupdown-limit').checked;
+            const { bigBossSpecialNumbers } = window.getFirebaseData();
+            const nextList = [...(bigBossSpecialNumbers || [])];
+            let added = 0;
+
+            rawNums.forEach(num => {
+                if (/^\d{1,3}$/.test(num)) {
+                    const idx = nextList.findIndex(r => r.number === num);
+                    if (idx >= 0) nextList.splice(idx, 1);
+
+                    nextList.push({
+                        number: num,
+                        status: 'half',
+                        baseNumber: num,
+                        length: num.length,
+                        isAutoReverse: autoRev && num.length === 3,
+                        isAutoTwoUpDown: autoTwoUpDown && num.length === 2
+                    });
+                    added++;
+                }
+            });
+
+            if (added === 0) return showToast('กรุณาระบุตัวเลข 1-3 หลัก', 'warning');
+            window.setFirebaseData(null, null, null, null, null, null, undefined, undefined, undefined, nextList);
+            document.getElementById('boss-limit-numbers').value = '';
+            showToast('บันทึกเลขอั้นเฉพาะหน้าเจ้าใหญ่เรียบร้อย', 'success');
+        }
+
+        function renderBigBossLimitsTable() {
+            const { bigBossSpecialNumbers } = window.getFirebaseData();
+            const tbody = document.getElementById('bigboss-limits-tbody');
+            if (!tbody) return;
+            const list = bigBossSpecialNumbers || [];
+            if (list.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="3" class="py-6 text-center text-slate-400">ยังไม่มีเลขอั้นของเจ้าใหญ่</td></tr>`;
+                return;
+            }
+            tbody.innerHTML = list.map((r, i) => `
+                <tr>
+                    <td class="py-2.5 px-4 font-bold number-font">${r.number} <span class="text-[11px] font-normal text-slate-500">(${r.length === 3 ? '3ตัวตรง*โต๊ด*6กลับ' : (r.length === 2 ? '2ตัว บน*ล่าง' : 'วิ่ง')})</span></td>
+                    <td class="py-2.5 px-4"><span class="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-amber-100 text-amber-800">อั้นจ่ายครึ่ง</span></td>
+                    <td class="py-2.5 px-4 text-center"><button type="button" onclick="deleteBigBossSpecialRule(${i})" class="text-rose-500 font-bold hover:underline">ลบ</button></td>
+                </tr>
+            `).join('');
+        }
+
+        window.deleteBigBossSpecialRule = function(i) {
+            const { bigBossSpecialNumbers } = window.getFirebaseData();
+            const nextList = [...(bigBossSpecialNumbers || [])];
+            nextList.splice(i, 1);
+            window.setFirebaseData(null, null, null, null, null, null, undefined, undefined, undefined, nextList);
+            showToast('ลบเลขอั้นเจ้าใหญ่แล้ว', 'info');
         }
 
         function isTwoReverseMatch(n1, n2) {
@@ -1287,9 +1396,11 @@
                 else if (item.type === 'วิ่งล่าง' && rawBottom2.includes(item.number)) rate = bossRates['วิ่ง'];
 
                 if (rate > 0) {
-                    const prize = item.amount * rate;
+                    const isHalf = checkBigBossRestriction(item.number) === 'half';
+                    const finalRate = isHalf ? (rate / 2) : rate;
+                    const prize = item.amount * finalRate;
                     totalBossPayout += prize;
-                    hitDetails.push({ number: item.number, type: item.type, amount: item.amount, rate, prize });
+                    hitDetails.push({ number: item.number, type: item.type, amount: item.amount, rate: finalRate, isHalf, prize });
                 }
             });
 
@@ -1309,7 +1420,7 @@
             if (hitDetails.length > 0) {
                 copyLines.push(`------------------------`, `🎯 รายการที่ถูกรางวัล:`);
                 hitDetails.forEach(h => {
-                    copyLines.push(`- เลข ${h.number} (${h.type}) ส่ง ${h.amount.toLocaleString('th-TH')} บ. จ่าย ${h.prize.toLocaleString('th-TH')} บ.`);
+                    copyLines.push(`- เลข ${h.number} (${h.type}) ส่ง ${h.amount.toLocaleString('th-TH')} บ. ${h.isHalf ? '(อั้นเจ้าใหญ่ จ่ายครึ่ง) ' : ''}จ่าย ${h.prize.toLocaleString('th-TH')} บ.`);
                 });
             }
             lastBossPayoutText = copyLines.join('\n');
@@ -1321,7 +1432,7 @@
                         <div class="font-bold text-slate-700 text-xs">🎯 รายการที่ถูกรางวัลจากเจ้าใหญ่:</div>
                         ${hitDetails.map(h => `
                             <div class="flex justify-between bg-white p-2 rounded-xl border text-xs">
-                                <span>• เลข <b class="text-indigo-900">${h.number}</b> (${h.type}) ส่งไป ${h.amount.toLocaleString()} บ. (จ่ายบาทละ ${h.rate})</span>
+                                <span>• เลข <b class="text-indigo-900">${h.number}</b> (${h.type}) ส่งไป ${h.amount.toLocaleString()} บ. ${h.isHalf ? '<span class="text-amber-600 font-bold">(อั้นเจ้าใหญ่ จ่ายครึ่ง บาทละ ' + h.rate + ')</span>' : '(จ่ายบาทละ ' + h.rate + ')'}</span>
                                 <span class="font-bold text-rose-600 number-font">+${h.prize.toLocaleString('th-TH')} ฿</span>
                             </div>
                         `).join('')}
@@ -1399,6 +1510,7 @@
         }
 
         function renderBigBossView() {
+            renderBigBossLimitsTable();
             const { bigBossItems } = window.getFirebaseData();
             const discPct = parseFloat(document.getElementById('bigboss-discount-pct').value) || 0;
             
@@ -1742,7 +1854,7 @@
 
         function confirmClearAll() {
             if (confirm('ต้องการล้างข้อมูลทั้งหมดหรือไม่?')) {
-                window.setFirebaseData([], [], { '2ตัวบน': 1000, '2ตัวล่าง': 1000, '3ตัวตรง': 500, '3ตัวโต๊ด': 500, '3ตัวล่าง': 500, 'วิ่งบน': 5000, 'วิ่งล่าง': 5000 }, { '3ตัวตรง': 500, '3ตัวโต๊ด': 100, '2ตัว': 70, 'วิ่ง': 3 }, { '3ตัวตรง': 500, '3ตัวโต๊ด': 100, '2ตัว': 70, 'วิ่ง': 3 }, [], false, '2026-11-16', 250000);
+                window.setFirebaseData([], [], { '2ตัวบน': 1000, '2ตัวล่าง': 1000, '3ตัวตรง': 500, '3ตัวโต๊ด': 500, '3ตัวล่าง': 500, 'วิ่งบน': 5000, 'วิ่งล่าง': 5000 }, { '3ตัวตรง': 500, '3ตัวโต๊ด': 100, '2ตัว': 70, 'วิ่ง': 3 }, { '3ตัวตรง': 500, '3ตัวโต๊ด': 100, '2ตัว': 70, 'วิ่ง': 3 }, [], false, '2026-11-16', 250000, []);
                 showToast('ล้างข้อมูลเรียบร้อย', 'info');
             }
         }
@@ -1769,6 +1881,7 @@
         window.copyBossPayoutSummary = copyBossPayoutSummary;
         window.applyRiskPreset = applyRiskPreset;
         window.saveMaxPayoutBudget = saveMaxPayoutBudget;
+        window.addBigBossSpecialNumber = addBigBossSpecialNumber;
     </script>
 </body>
 </html>
