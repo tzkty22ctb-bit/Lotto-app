@@ -297,7 +297,6 @@
                         <h3 class="text-base font-bold text-purple-950">ตั้งเพดานรับสู้สูงสุด (Max Limit ต่อตัวเลข)</h3>
                         <p class="text-xs text-slate-500">กำหนดกรอบจ่ายสูงสุดที่รับไหว แล้วกดเลือกพรีเซ็ตตามระดับความเสี่ยง หรือกรอกตัวเลขเองได้ทันที</p>
                     </div>
-                    <!-- ช่องกำหนดกรอบจ่ายสูงสุดเอง -->
                     <div class="flex items-center gap-2 bg-purple-50 border-2 border-purple-200 px-3.5 py-2 rounded-2xl">
                         <label for="max-payout-budget" class="text-xs font-bold text-purple-900 whitespace-nowrap">กรอบจ่ายสูงสุด:</label>
                         <input type="number" id="max-payout-budget" value="250000" step="10000" oninput="saveMaxPayoutBudget()" class="w-28 px-2.5 py-1 bg-white border border-purple-300 rounded-xl text-sm font-extrabold text-purple-950 text-right number-font focus:outline-none focus:border-purple-600">
@@ -305,7 +304,6 @@
                     </div>
                 </div>
 
-                <!-- ปุ่มพรีเซ็ตระดับความเสี่ยง 4 แบบ (คำนวณตัวเลขตามกรอบที่เลือกอัตโนมัติ) -->
                 <div class="grid grid-cols-2 lg:grid-cols-4 gap-2.5">
                     <button type="button" onclick="applyRiskPreset('aggressive')" class="p-3 rounded-2xl border border-rose-200 bg-rose-50/60 hover:bg-rose-100/80 text-left transition space-y-1">
                         <div class="text-xs font-bold text-rose-900 flex items-center justify-between">
@@ -346,7 +344,6 @@
                     <div><label class="text-xs text-slate-500 block mb-1">วิ่งล่าง</label><input type="number" id="limit-rundown" oninput="saveMaxLimits()" class="w-full px-3 py-2.5 border rounded-2xl text-sm font-bold number-font" value="5000"></div>
                 </div>
 
-                <!-- กล่องเช็กความเสี่ยงสูงสุดต่อตัวเลขจากยอดรับสู้ปัจจุบัน -->
                 <div id="risk-budget-alert-box" class="p-3.5 rounded-2xl border bg-slate-50 border-slate-200 text-xs flex flex-wrap items-center justify-between gap-2">
                     <span class="text-slate-600">กำลังประเมินภาระจ่ายสูงสุดต่อตัวเลขจากยอดรับสู้...</span>
                 </div>
@@ -429,7 +426,6 @@
                     </div>
                 </div>
             </div>
-            <!-- รายละเอียดการถูกรางวัลแยกตามรายชื่อคนส่ง -->
             <div class="bg-white rounded-3xl border shadow-sm p-6 space-y-4">
                 <h4 class="font-bold text-slate-800 text-sm">รายละเอียดการถูกรางวัลแยกตามรายชื่อคนส่ง (กระจายสัดส่วนสู้จริง)</h4>
                 <div id="winners-by-customer-list" class="space-y-4 text-xs"></div>
@@ -494,7 +490,6 @@
                 <div><label class="text-xs text-slate-500 block mb-1">วิ่ง บน/ล่าง (เจ้าใหญ่)</label><input type="number" id="boss-rate-run" oninput="saveBossRates()" class="w-full px-3.5 py-2.5 border rounded-2xl text-sm font-bold number-font" value="3"></div>
             </div>
 
-            <!-- กำหนดเรทจ่ายเลขอั้นเฉพาะหน้าเจ้าใหญ่ -->
             <div class="pt-3 border-t border-slate-100 space-y-2.5">
                 <div class="text-xs font-bold text-amber-900 flex items-center gap-1.5">
                     <i class="fa-solid fa-tag text-amber-600"></i> กำหนดเรทจ่ายเลขอั้นหน้าเจ้าใหญ่ (บาทละ)
@@ -508,7 +503,7 @@
             </div>
         </div>
 
-        <!-- เลขอั้นเฉพาะหน้าเจ้าใหญ่ (ไม่แสดงหรือกระทบหน้าอื่น) -->
+        <!-- เลขอั้นเฉพาะหน้าเจ้าใหญ่ -->
         <div class="bg-white rounded-3xl border p-6 shadow-sm space-y-4">
             <div class="flex items-center justify-between flex-wrap gap-2">
                 <h3 class="text-base font-bold text-indigo-950 flex items-center gap-2">
@@ -592,7 +587,9 @@
         };
 
         const app = initializeApp(firebaseConfig);
-        const analytics = getAnalytics(app);
+        try {
+            getAnalytics(app);
+        } catch (e) {}
         const db = getDatabase(app);
 
         let entries = [];
@@ -1283,9 +1280,9 @@
             showToast(`ปรับเพดานเป็น "${chosen.label}" เรียบร้อย`, 'success');
         }
 
-        function computeBigBossPayoutForNumbers(win3Top, win2Top) {
+        function computeBigBossPayoutForNumbers(win3Top, win2Bottom) {
             const { bossRates, bossLimitRates, bigBossItems } = window.getFirebaseData();
-            const win2Top = win3Top.slice(-2);
+            const derivedWin2Top = win3Top.slice(-2);
             const discPct = parseFloat(document.getElementById('bigboss-discount-pct')?.value) || 0;
 
             const mergedBossMap = {};
@@ -1295,63 +1292,31 @@
                 mergedBossMap[key].amount += item.amount;
             });
 
-            let totalGross = 0, totalBossPayout = 0;
+            let totalGross = 0;
+            let totalBossPayout = 0;
             const hitDetails = [];
 
             Object.values(mergedBossMap).forEach(item => {
                 totalGross += item.amount;
                 let normalRate = 0;
                 let limitRate = 0;
+
                 if (item.type === '3ตัวตรง' && item.number === win3Top) {
                     normalRate = bossRates['3ตัวตรง'];
                     limitRate = bossLimitRates?.['3ตัวตรง'] ?? Math.floor(normalRate / 2);
                 } else if (item.type === '3ตัวโต๊ด' && isTodMatch(item.number, win3Top)) {
                     normalRate = bossRates['3ตัวโต๊ด'];
                     limitRate = bossLimitRates?.['3ตัวโต๊ด'] ?? Math.floor(normalRate / 2);
-                } else if (item.type === '2ตัวบน' && item.number === win2Top) {
+                } else if (item.type === '2ตัวบน' && item.number === derivedWin2Top) {
                     normalRate = bossRates['2ตัว'];
                     limitRate = bossLimitRates?.['2ตัว'] ?? Math.floor(normalRate / 2);
-                } else if (item.type === '2ตัวล่าง' && item.number === win2Top) {
-                    normalRate = bossRates['2ตัว'];
-                    limitRate = bossLimitRates?.['2ตัว'] ?? Math.floor(normalRate / 2);
-                } else if (item.type === 'วิ่งบน' && win3Top.includes(item.number)) {
-                    normalRate = bossRates['วิ่ง'];
-                    limitRate = bossLimitRates?.['วิ่ง'] ?? Math.floor(normalRate / 2);
-                } else if (item.type === 'วิ่งล่าง' && win2Top.includes(item.number)) {
-                    normalRate = bossRates['วิ่ง'];
-                    limitRate = bossLimitRates?.['วิ่ง'] ?? Math.floor(normalRate / 2);
-                }
-
-                if (item.type === '2ตัวล่าง' && item.number === win2Top) {
-                    // kept clean below
-                }
-            });
-
-            // คำนวณแม่นยำตาม win3Top และ win2Top
-            totalGross = 0;
-            totalBossPayout = 0;
-            hitDetails.length = 0;
-
-            Object.values(mergedBossMap).forEach(item => {
-                totalGross += item.amount;
-                let normalRate = 0;
-                let limitRate = 0;
-                if (item.type === '3ตัวตรง' && item.number === win3Top) {
-                    normalRate = bossRates['3ตัวตรง'];
-                    limitRate = bossLimitRates?.['3ตัวตรง'] ?? Math.floor(normalRate / 2);
-                } else if (item.type === '3ตัวโต๊ด' && isTodMatch(item.number, win3Top)) {
-                    normalRate = bossRates['3ตัวโต๊ด'];
-                    limitRate = bossLimitRates?.['3ตัวโต๊ด'] ?? Math.floor(normalRate / 2);
-                } else if (item.type === '2ตัวบน' && item.number === win3Top.slice(-2)) {
-                    normalRate = bossRates['2ตัว'];
-                    limitRate = bossLimitRates?.['2ตัว'] ?? Math.floor(normalRate / 2);
-                } else if (item.type === '2ตัวล่าง' && item.number === win2Top) {
+                } else if (item.type === '2ตัวล่าง' && item.number === win2Bottom) {
                     normalRate = bossRates['2ตัว'];
                     limitRate = bossLimitRates?.['2ตัว'] ?? Math.floor(normalRate / 2);
                 } else if (item.type === 'วิ่งบน' && win3Top.includes(item.number)) {
                     normalRate = bossRates['วิ่ง'];
                     limitRate = bossLimitRates?.['วิ่ง'] ?? Math.floor(normalRate / 2);
-                } else if (item.type === 'วิ่งล่าง' && win2Top.includes(item.number)) {
+                } else if (item.type === 'วิ่งล่าง' && win2Bottom.includes(item.number)) {
                     normalRate = bossRates['วิ่ง'];
                     limitRate = bossLimitRates?.['วิ่ง'] ?? Math.floor(normalRate / 2);
                 }
@@ -1361,14 +1326,30 @@
                     const finalRate = isBossLimited ? limitRate : normalRate;
                     const prize = item.amount * finalRate;
                     totalBossPayout += prize;
-                    hitDetails.push({ number: item.number, type: item.type, amount: item.amount, rate: finalRate, isBossLimited, prize });
+                    hitDetails.push({
+                        number: item.number,
+                        type: item.type,
+                        amount: item.amount,
+                        rate: finalRate,
+                        isBossLimited,
+                        prize
+                    });
                 }
             });
 
             const netClean = totalGross - (totalGross * (discPct / 100));
             const netResult = netClean - totalBossPayout;
 
-            return { win3Top, win2Top, discPct, totalGross, netClean, totalBossPayout, netResult, hitDetails };
+            return {
+                win3Top,
+                win2Top: win2Bottom,
+                discPct,
+                totalGross,
+                netClean,
+                totalBossPayout,
+                netResult,
+                hitDetails
+            };
         }
 
         function calculateWinnersAndProfit() {
@@ -1437,7 +1418,6 @@
                 }
             });
 
-            // ดึงยอดถูกรางวัลส่วนที่ส่งเจ้าใหญ่โดยตรงจากข้อมูลหน้าเจ้าใหญ่
             let bossCalc = (lastComputedBossPrize && lastComputedBossPrize.win3Top === win3Top && lastComputedBossPrize.win2Top === rawBottom2)
                 ? lastComputedBossPrize
                 : computeBigBossPayoutForNumbers(win3Top, rawBottom2);
@@ -1501,7 +1481,6 @@
 
             const { discPct, totalGross, netClean, totalBossPayout, netResult, hitDetails } = calc;
 
-            // เตรียมข้อความสำหรับปุ่มคัดลอก
             const copyLines = [
                 `🏛️ สรุปยอดส่งเจ้าใหญ่ (งวด ${formatThaiDate(lottoDate)})`,
                 `ผลรางวัล: 3ตัวบน ${win3Top} / 2ตัวล่าง ${win2Top}`,
