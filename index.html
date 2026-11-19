@@ -898,7 +898,7 @@
             window.setFirebaseData(null, null, null, null, rates, null, undefined, undefined);
         }
 
-        // ฟังก์ชันคำนวณความเสี่ยง (รวมยอดแทง + หักยอดส่งเจ้าใหญ่ + คำนวณเพดานสู้)
+        // ฟังก์ชันคำนวณความเสี่ยง (แยกคำนวณ autoExcess ป้องกันการดึงยอดส่งเจ้าใหญ่วิบัติซ้ำซ้อน)
         function computeRiskAggregates() {
             const { entries, maxLimits, bigBossItems } = window.getFirebaseData();
             const map = {};
@@ -932,7 +932,8 @@
                     total: item.grossTotal, 
                     limit, 
                     kept, 
-                    cutoff 
+                    cutoff,
+                    autoExcess
                 };
             }).sort((a, b) => b.total - a.total);
             return { rows, totalKept, totalCutoff };
@@ -973,7 +974,7 @@
             window.setFirebaseData(null, null, limits, null, null, null, undefined, undefined);
         }
 
-        // ฟังก์ชันตรวจรางวัล & คำนวณผลกำไรขาดทุน (ดึงข้อมูลจาก computeRiskAggregates ให้สอดคล้องกัน 100%)
+        // ฟังก์ชันตรวจรางวัล & คำนวณผลกำไรขาดทุน
         function calculateWinnersAndProfit() {
             const rawTop = document.getElementById('res-top3').value.trim();
             const rawBottom2 = document.getElementById('res-bottom2').value.trim();
@@ -1155,18 +1156,31 @@
             return bet3.split('').sort().join('') === win3.split('').sort().join('');
         }
 
+        // ฟังก์ชันดึงยอดเกินเพดานอัตโนมัติแบบป้องกันการดึงซ้ำ
         function autoImportCutoffToBigBoss() {
             const { rows } = computeRiskAggregates();
             const { bigBossItems } = window.getFirebaseData();
             let addedCount = 0;
+            
             rows.forEach(r => {
-                if (r.cutoff > 0) {
-                    bigBossItems.push({ id: Math.random().toString(36).substr(2, 9), number: r.number, type: r.type, amount: r.cutoff });
+                if (r.autoExcess > 0) {
+                    bigBossItems.push({ 
+                        id: Math.random().toString(36).substr(2, 9), 
+                        number: r.number, 
+                        type: r.type, 
+                        amount: r.autoExcess 
+                    });
                     addedCount++;
                 }
             });
+
+            if (addedCount === 0) {
+                showToast('ไม่มีรายการเกินเพดานใหม่ให้ดึง (ดึงครบแล้ว)', 'info');
+                return;
+            }
+
             window.setFirebaseData(null, null, null, null, null, bigBossItems, undefined, undefined);
-            showToast(`ดึงยอดส่งเจ้าใหญ่สำเร็จ ${addedCount} รายการ`, 'success');
+            showToast(`ดึงยอดเกินเพดานส่งเจ้าใหญ่สำเร็จ ${addedCount} รายการ`, 'success');
         }
 
         function addManualBigBossItemFromDealer() {
