@@ -919,7 +919,8 @@
             let totalKept = 0, totalCutoff = 0;
             const rows = Object.values(map).map(item => {
                 const remainingAfterManualSend = Math.max(0, item.grossTotal - item.sentBoss);
-                const limit = maxLimits[item.type] || 1000;
+                // จุดที่ 1: ใช้ ?? เพื่อให้รองรับเพดาน 0 บาทได้โดยไม่เด้งกลับไปเป็น 1000
+                const limit = maxLimits[item.type] ?? 1000;
                 
                 const kept = Math.min(remainingAfterManualSend, limit);
                 const autoExcess = Math.max(0, remainingAfterManualSend - limit);
@@ -1370,12 +1371,20 @@
         }
 
         function refreshAllViews() {
-            const { entries, isDealerClosed, bigBossItems, lottoDate, payoutRates, bossRates } = window.getFirebaseData();
+            // จุดที่ 2: ดึง maxLimits มาแสดงในช่อง input ทุกครั้งที่โหลดหรือรีเฟรชข้อมูล
+            const { entries, isDealerClosed, bigBossItems, lottoDate, maxLimits, payoutRates, bossRates } = window.getFirebaseData();
             const formattedDate = formatThaiDate(lottoDate);
 
             document.getElementById('lotto-date-picker').value = lottoDate;
             document.getElementById('banner-date-text').textContent = formattedDate;
             document.getElementById('table-date-text').textContent = formattedDate;
+
+            document.getElementById('limit-2up').value = maxLimits['2ตัวบน'] ?? 1000;
+            document.getElementById('limit-2down').value = maxLimits['2ตัวล่าง'] ?? 1000;
+            document.getElementById('limit-3straight').value = maxLimits['3ตัวตรง'] ?? 500;
+            document.getElementById('limit-3tod').value = maxLimits['3ตัวโต๊ด'] ?? 500;
+            document.getElementById('limit-runup').value = maxLimits['วิ่งบน'] ?? 5000;
+            document.getElementById('limit-rundown').value = maxLimits['วิ่งล่าง'] ?? 5000;
 
             document.getElementById('rate-3straight').value = payoutRates['3ตัวตรง'];
             document.getElementById('rate-3tod').value = payoutRates['3ตัวโต๊ด'];
